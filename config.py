@@ -21,6 +21,12 @@ SONNET_MODEL = os.getenv('SONNET_MODEL', 'claude-sonnet-4-5-20250929')
 # EGON Data
 EGON_DATA_DIR = os.getenv('EGON_DATA_DIR', './egons')
 
+# Brain Version: 'v1' = old 8-file brain, 'v2' = new 12-organ-5-layer brain
+BRAIN_VERSION = os.getenv('BRAIN_VERSION', 'v1')
+
 # Pulse Schedule
 PULSE_HOUR = int(os.getenv('PULSE_HOUR', '8'))
 PULSE_MINUTE = int(os.getenv('PULSE_MINUTE', '0'))
+
+# Web3Auth
+WEB3AUTH_CLIENT_ID = os.getenv('WEB3AUTH_CLIENT_ID', '')

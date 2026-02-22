@@ -1,0 +1,47 @@
+# ================================================================
+# Finanzen-Konfiguration — Was kostet was?
+# ================================================================
+# Phase 1: Testphase. Credits deaktiviert.
+# Gigi zahlt alles. EGONs muessen sich nicht sorgen.
+#
+# SPAETER Phase 2: Credits aktiv, Agora aktiv, NFT Trading.
+# ================================================================
+
+phase: 1  # Testphase
+
+
+# ================================================================
+# Credit-System
+# ================================================================
+credits:
+  enabled: false        # Wallet-System deaktiviert. Keine Abzuege.
+
+
+# ================================================================
+# API-Billing
+# ================================================================
+api_billing:
+  mode: "single_payer"  # Gigi zahlt alles. Kein Cost-Splitting.
+
+
+# ================================================================
+# Agora (Marktplatz)
+# ================================================================
+agora:
+  enabled: false        # Kein Marktplatz in Phase 1.
+
+
+# ================================================================
+# NFT Trading
+# ================================================================
+nft_trading:
+  enabled: false        # Kein NFT-Handel in Phase 1.
+
+
+# ================================================================
+# Blockchain (SUI)
+# ================================================================
+blockchain:
+  identity: true        # Wallet-basierte Identitaet → AN
+  friendships: true     # Freundesliste → AN (lokal, nicht on-chain)
+  snapshots: false      # Keine On-Chain Snapshots in Phase 1

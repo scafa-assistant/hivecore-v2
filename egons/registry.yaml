@@ -1,0 +1,26 @@
+# ================================================================
+# EGON Registry — Wer existiert und wem gehoert er
+# ================================================================
+# Wird bei First-Bind und Minting aktualisiert.
+# SPAETER: On-Chain auf SUI (EgonNFT Objekte).
+# ================================================================
+
+egons:
+  adam_001:
+    name: "Adam"
+    status: "alive"
+    generation: 0
+    bound_wallet: null
+    created: "2026-02-22"
+
+  eva_002:
+    name: "Eva"
+    status: "alive"
+    generation: 0
+    bound_wallet: null
+    created: "2026-02-22"
+
+
+# Wallet → EGON Mapping (gefuellt nach Bind)
+# Format: { "0xABC123...": "adam_001" }
+wallet_bindings: {}

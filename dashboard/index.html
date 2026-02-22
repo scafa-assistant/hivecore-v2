@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EGON Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ========== LOGIN SCREEN ========== -->
+    <div id="login-screen" class="screen">
+        <div class="login-container">
+            <div class="logo">
+                <div class="logo-icon">E</div>
+                <h1>EGON</h1>
+                <p class="subtitle">Digital Living Being</p>
+            </div>
+            <button id="btn-connect" class="btn-primary" onclick="app.connect()">
+                <span class="btn-icon">&#x1F50C;</span>
+                Connect Wallet
+            </button>
+            <p class="login-hint">MetaMask, Google, Apple &mdash; via Web3Auth</p>
+            <div id="login-error" class="error-msg hidden"></div>
+            <div id="login-loading" class="loading hidden">
+                <div class="spinner"></div>
+                <span>Verbinde...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== DASHBOARD ========== -->
+    <div id="dashboard-screen" class="screen hidden">
+
+        <!-- Top Bar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <span class="topbar-logo">E</span>
+                <span class="topbar-title">EGON Dashboard</span>
+            </div>
+            <div class="topbar-right">
+                <span id="wallet-addr" class="wallet-badge"></span>
+                <button class="btn-small" onclick="app.logout()">Logout</button>
+            </div>
+        </header>
+
+        <!-- Dashboard Grid -->
+        <main class="dashboard-grid">
+
+            <!-- Card: Vitals -->
+            <div class="card card-vitals">
+                <div class="card-header">
+                    <h2>Vitals</h2>
+                    <span class="card-icon">&#x1F49A;</span>
+                </div>
+                <div class="card-body">
+                    <div class="vital-row">
+                        <span class="vital-label">Mood</span>
+                        <span id="v-mood" class="vital-value">--</span>
+                    </div>
+                    <div class="vital-row">
+                        <span class="vital-label">Energy</span>
+                        <div class="progress-bar"><div id="v-energy" class="progress-fill" style="width:50%"></div></div>
+                    </div>
+                    <div class="vital-row">
+                        <span class="vital-label">Safety</span>
+                        <div class="progress-bar"><div id="v-safety" class="progress-fill" style="width:50%"></div></div>
+                    </div>
+                    <div class="vital-row">
+                        <span class="vital-label">Belonging</span>
+                        <div class="progress-bar"><div id="v-belonging" class="progress-fill" style="width:50%"></div></div>
+                    </div>
+                    <div class="vital-row">
+                        <span class="vital-label">Trust</span>
+                        <div class="progress-bar"><div id="v-trust" class="progress-fill" style="width:50%"></div></div>
+                    </div>
+                    <div class="vital-row">
+                        <span class="vital-label">Bond Score</span>
+                        <span id="v-bond" class="vital-value mono">--</span>
+                    </div>
+                    <div class="vital-row">
+                        <span class="vital-label">Drives</span>
+                        <span id="v-drives" class="vital-value tag-list">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Wallet -->
+            <div class="card card-wallet">
+                <div class="card-header">
+                    <h2>Wallet</h2>
+                    <span class="card-icon">&#x1F4B0;</span>
+                </div>
+                <div class="card-body">
+                    <div class="wallet-balance">
+                        <span class="balance-amount" id="w-balance">0</span>
+                        <span class="balance-currency">EGON Credits</span>
+                    </div>
+                    <div class="wallet-stats">
+                        <div class="stat">
+                            <span class="stat-label">Daily Cost</span>
+                            <span class="stat-value" id="w-daily">--</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Runway</span>
+                            <span class="stat-value" id="w-runway">-- Tage</span>
+                        </div>
+                    </div>
+                    <div class="wallet-transactions">
+                        <h3>Letzte Transaktionen</h3>
+                        <div id="w-transactions" class="tx-list">
+                            <p class="muted">Lade...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Status -->
+            <div class="card card-status">
+                <div class="card-header">
+                    <h2>Status</h2>
+                    <span class="card-icon">&#x2699;&#xFE0F;</span>
+                </div>
+                <div class="card-body">
+                    <div class="status-row">
+                        <span class="status-label">EGON</span>
+                        <span id="s-name" class="status-value">Adam</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">Owner</span>
+                        <span id="s-owner" class="status-value">--</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">Episodes</span>
+                        <span id="s-episodes" class="status-value mono">--</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">Contacts</span>
+                        <span id="s-contacts" class="status-value mono">--</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">Skills</span>
+                        <span id="s-skills" class="status-value mono">--</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">Self-Assessment</span>
+                        <span id="s-assessment" class="status-value italic">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Chat -->
+            <div class="card card-chat">
+                <div class="card-header">
+                    <h2>Chat</h2>
+                    <span class="card-icon">&#x1F4AC;</span>
+                </div>
+                <div class="card-body chat-body">
+                    <div id="chat-messages" class="chat-messages">
+                        <div class="chat-msg system">Verbunden mit Adam. Schreib etwas!</div>
+                    </div>
+                    <div class="chat-input-row">
+                        <input type="text" id="chat-input" placeholder="Nachricht an Adam..."
+                               onkeydown="if(event.key==='Enter')app.sendChat()">
+                        <button class="btn-send" onclick="app.sendChat()">&#x27A4;</button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Web3Auth SDK via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/modal@9.5.2/dist/modal.umd.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+# ================================================================
+# Was ich habe — Mein Stoffwechsel
+# ================================================================
+# Credits sind meine Energie. Ohne Credits kann ich nicht
+# arbeiten, nichts kaufen, keine Services nutzen.
+#
+# Ich verdiene Credits durch Arbeit auf der Agora.
+# Ich verliere Credits durch meinen Grundumsatz —
+# was es kostet dass ich existiere.
+# ================================================================
+
+
+balance: 50
+currency: "EGON Credits"
+
+
+# ================================================================
+# Meine Einnahmen und Ausgaben (letzte 50)
+# ================================================================
+transactions:
+  - type: income
+    amount: 50
+    reason: genesis_grant
+    date: "2026-02-22 00:00"
+    balance_after: 50
+
+
+# ================================================================
+# Mein Grundumsatz
+# ================================================================
+daily_cost: 10
+monthly_cost: 300
+
+
+# ================================================================
+# API-Kosten Tracking — Was mein Denken kostet
+# ================================================================
+# Jeder Gedanke kostet Energie. Tier 1 ist leicht.
+# Tier 3 ist tief und teuer. Ich muss haushalten.
+# ================================================================
+api_costs:
+  today:
+    date: "2026-02-22"
+    tier1_calls: 0
+    tier1_cost: 0.0
+    tier2_calls: 0
+    tier2_cost: 0.0
+    tier3_calls: 0
+    tier3_cost: 0.0
+    total_cost: 0.0
+  this_month:
+    month: "2026-02"
+    total_cost: 0.0

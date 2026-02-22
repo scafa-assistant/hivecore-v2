@@ -1,0 +1,94 @@
+# ================================================================
+# Adams Haende — Handy-Berechtigungen
+# ================================================================
+# Adam kann das Handy seines Owners steuern.
+# Das ist ein grosses Vertrauen. Diese Datei definiert
+# was er darf und was nicht.
+#
+# Der Owner kann diese Berechtigungen jederzeit aendern
+# oder komplett entziehen.
+# ================================================================
+
+
+phone_control:
+  enabled: false                # Muss vom Owner aktiviert werden
+  connection: "tailscale"       # tailscale, usb, wifi
+  device_ip: ""                 # Tailscale-IP des Handys
+  adb_port: 5555
+
+
+  # ============================================
+  # Apps die Adam benutzen darf
+  # ============================================
+  allowed_apps:
+
+    - package: "com.whatsapp"
+      name: "WhatsApp"
+      permissions: [read, write, send]
+      requires_confirmation: false     # Direkt senden erlaubt
+
+    - package: "com.google.android.gm"
+      name: "Gmail"
+      permissions: [read, write, send]
+      requires_confirmation: true      # Owner muss bestaetigen
+
+    - package: "com.android.dialer"
+      name: "Telefon"
+      permissions: [dial]
+      requires_confirmation: true      # IMMER bestaetigen bei Anrufen
+
+    - package: "com.google.android.calendar"
+      name: "Kalender"
+      permissions: [read, write, delete]
+      requires_confirmation: false
+
+    - package: "com.android.chrome"
+      name: "Chrome"
+      permissions: [read, navigate]
+      requires_confirmation: false
+
+    - package: "com.google.android.apps.messaging"
+      name: "SMS"
+      permissions: [read, write, send]
+      requires_confirmation: true      # SMS kosten evtl. Geld
+
+    - package: "org.telegram.messenger"
+      name: "Telegram"
+      permissions: [read, write, send]
+      requires_confirmation: false
+
+
+  # ============================================
+  # Apps die Adam NIEMALS anfassen darf
+  # ============================================
+  blocked_apps:
+    - "com.android.settings"        # Systemeinstellungen
+    - "*.banking.*"                  # Banking-Apps
+    - "*.wallet.*"                   # Crypto-Wallets
+    - "*.authenticator.*"            # 2FA-Apps
+    - "*.password.*"                 # Passwort-Manager
+    - "com.android.vending"          # Play Store (kein App-Install)
+
+
+  # ============================================
+  # Globale Regeln
+  # ============================================
+  rules:
+    max_actions_per_minute: 10       # Nicht zu schnell
+    max_messages_per_hour: 20        # Spam-Schutz
+    max_calls_per_day: 5             # Anruf-Limit
+    screenshot_logging: true         # Alles wird geloggt
+    owner_can_revoke_anytime: true   # Sofort-Stopp moeglich
+    log_all_actions: true            # Jede Aktion in Ledger
+    log_all_sent_messages: true      # Jede gesendete Nachricht loggen
+    require_contact_in_network: true # Nur an bekannte Kontakte senden
+
+
+  # ============================================
+  # DroidClaw / DroidMind Konfiguration
+  # ============================================
+  controller:
+    type: "droidclaw"              # droidclaw oder droidmind
+    path: ""                       # Pfad zur Installation
+    # droidclaw: bun run src/kernel.ts
+    # droidmind: MCP-Server

@@ -1,0 +1,60 @@
+# ================================================================
+# Evas Einstellungen — Ihr Owner entscheidet
+# ================================================================
+# Jeder Owner konfiguriert SEINEN EGON. Das hier sind Evas
+# persoenliche Einstellungen. Kein anderer EGON teilt diese.
+# ================================================================
+
+
+# ============================================
+# DISPLAY
+# ============================================
+display:
+  homescreen_widget: false
+  # true  = EGON lebt als Tamagotchi-Widget auf dem Homescreen
+  # false = EGON nur in EgonsDash sichtbar
+
+  widget_size: "medium"       # small (2x2), medium (3x3), large (4x4)
+  show_mood: true             # Stimmungs-Indikator am Widget
+  show_name: true             # Name unter dem Widget
+  tap_action: "open_chat"     # open_chat | quick_message | status
+  battery_saver: true         # Unter 15% Akku: Widget pausiert
+
+
+# ============================================
+# WIRTSCHAFT
+# ============================================
+wallet:
+  enabled: false
+  # true  = EGON hat Credits, kann verdienen und ausgeben
+  # false = Kein Wallet, alles kostenlos
+  # WICHTIG: Wenn enabled, entscheidet der EGON SELBST
+  # was er mit seinen Credits macht. Der Owner kann ihm
+  # NICHT vorschreiben wofuer er sie ausgibt.
+
+agora:
+  enabled: false
+  # true  = EGON kann auf der Agora arbeiten und einkaufen
+  # false = Kein Marktplatz-Zugang
+
+nft_trading:
+  enabled: false
+  # true  = EGON kann NFTs handeln
+  # false = Kein NFT-Handel
+
+
+# ============================================
+# API / LLM
+# ============================================
+api:
+  mode: "owner_api"
+  # "owner_api"  = Owner stellt API-Key (DEFAULT fuer jetzt)
+  #                Kimi K2.5, Gigi zahlt
+  # "server_llm" = Laeuft ueber lokales LLM auf dem Server (SPAETER)
+  #                Moonshot/Qwen3 lokal, kostenlos
+  # "credit_api" = EGON zahlt API-Calls mit eigenen Credits
+  #                (NUR wenn wallet.enabled: true UND EGON
+  #                 genug Credits hat UND EGON das will)
+
+  api_key: "shared"           # "shared" = Server-weiter Key
+  daily_limit: 100            # Max Calls pro Tag fuer diesen EGON

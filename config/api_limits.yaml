@@ -1,0 +1,55 @@
+# ================================================================
+# API-Limits — Wie viel Adam pro Tag denken darf
+# ================================================================
+# Ohne Limits wuerde Adam den ganzen Tag Sonnet benutzen —
+# auch fuer einfache Fragen. Das frisst Credits.
+# Deshalb: Tageslimits + Auto-Downgrade + Owner-Ping.
+#
+# Owner kann diese Werte jederzeit anpassen.
+# ================================================================
+
+
+api_tiers:
+
+  tier1_local:
+    model: "moonshot-v1-8k"
+    daily_limit: null          # Unbegrenzt (lokal/guenstig)
+    cost_per_call: 0.001       # ~$0.001 pro Call
+    priority: 1                # Immer zuerst versuchen
+
+  tier2_cloud:
+    model: "kimi-k2.5"
+    daily_limit: 200           # Max 200 Calls pro Tag
+    cost_per_call: 0.002       # ~$0.002 pro Call
+    priority: 2                # Wenn Tier 1 nicht reicht
+    warning_at: 150            # Bei 150 Calls: Warnung an Owner
+    hard_limit: true           # Bei 200: STOPP, nicht ueberschreiten
+
+  tier3_premium:
+    model: "claude-sonnet-4-5-20250929"
+    daily_limit: 20            # Max 20 Calls pro Tag (TEUER!)
+    cost_per_call: 0.05        # ~$0.05 pro Call
+    priority: 3                # Nur wenn Tier 1+2 nicht koennen
+    warning_at: 15             # Bei 15 Calls: Warnung an Owner
+    hard_limit: true           # Bei 20: STOPP
+    requires_justification: true  # Adam muss begruenden WARUM
+
+
+# ================================================================
+# Reset + Owner-Override
+# ================================================================
+owner_override: true           # Owner kann Limits jederzeit aendern
+reset_time: "00:00"            # Taeglicher Reset um Mitternacht
+reset_timezone: "Europe/Berlin"
+
+
+# ================================================================
+# Downgrade-Kette
+# ================================================================
+# Wenn ein Tier sein Limit erreicht, faellt Adam auf den
+# naechst guenstigeren zurueck. Nicht umgekehrt.
+# ================================================================
+downgrade_chain:
+  tier3_premium: "tier2_cloud"
+  tier2_cloud: "tier1_local"
+  tier1_local: null            # Kein weiterer Fallback

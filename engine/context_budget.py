@@ -10,11 +10,13 @@ ANSWER_RESERVE = 2000  # Tokens fuer Antwort
 
 BUDGET = {
     'soul': 800,        # Immer voll laden
-    'memory': 2000,     # Max 2000 Tokens = ~15 Eintraege
+    'memory': 1800,     # Max 1800 Tokens = ~12 Eintraege
     'markers': 400,     # Top 3 nach Intensitaet
     'bonds': 300,       # Nur aktive Bonds (Score > 0.3)
     'inner_voice': 200, # Nur letzter Gedanke
     'skills': 300,      # Nur aktive Skills
+    'wallet': 200,      # Kontostand + Oekonomie-Regeln
+    'experience': 200,  # Letzte Erfahrungen + Learnings
     'chat_history': 2000,  # Letzte 8-10 Messages
 }
 

@@ -1,12 +1,14 @@
 """System-Prompt Builder — baut Adams Gehirn zusammen.
 
-Laedt .md Files, wendet Context Budget an, und baut
-den vollstaendigen System-Prompt fuer den LLM-Call.
+v1: Laedt 8 .md Files (soul, markers, bonds, memory, inner_voice, skills, wallet, experience)
+v2: Laedt 12 Organe in 5 Schichten (DNA, Ego, State, Bonds, Network, Owner, Self, Episodes, etc.)
+
+BRAIN_VERSION in config.py steuert welches Gehirn aktiv ist.
 """
 
 import os
 import re
-from config import EGON_DATA_DIR
+from config import EGON_DATA_DIR, BRAIN_VERSION
 from engine.context_budget import BUDGET, trim_to_budget
 
 
@@ -58,14 +60,65 @@ def _extract_latest_thought(inner_voice_text: str) -> str:
     return entries[-1]
 
 
-def build_system_prompt(egon_id: str, message_count: int = 0) -> str:
-    """Baut den vollstaendigen System-Prompt aus .md Files."""
+def _extract_wallet_summary(wallet_text: str) -> str:
+    """Extrahiere Kontostand und wichtigste Oekonomie-Infos."""
+    lines = []
+    for line in wallet_text.split('\n'):
+        if any(k in line.lower() for k in [
+            'balance', 'genesis_grant', 'total_earned', 'total_spent',
+            '###', 'split', 'einnahme'
+        ]):
+            lines.append(line)
+    return '\n'.join(lines) if lines else 'Kein Wallet-Status.'
+
+
+def _extract_recent_experiences(experience_text: str, count: int = 5) -> str:
+    """Extrahiere die letzten N Erfahrungs-Eintraege."""
+    entries = re.split(r'\n---\n', experience_text)
+    entries = [e.strip() for e in entries if e.strip() and 'skill:' in e]
+    recent = entries[-count:] if len(entries) > count else entries
+    recent.reverse()
+    return '\n---\n'.join(recent) if recent else 'Noch wenig Erfahrung.'
+
+
+def build_system_prompt(
+    egon_id: str,
+    message_count: int = 0,
+    conversation_type: str = 'owner_chat',
+    tier: int = 1,
+) -> str:
+    """Baut den System-Prompt — dispatcht zwischen v1 und v2.
+
+    BRAIN_VERSION='v1': Altes 8-File Gehirn (soul.md, markers.md, etc.)
+    BRAIN_VERSION='v2': Neues 12-Organe Gehirn (DNA, Ego, State, etc.)
+
+    Args:
+        egon_id: EGON-ID (z.B. 'adam')
+        message_count: Anzahl bisheriger Messages
+        conversation_type: Art des Gespraechs (owner_chat, egon_chat, agora_job, pulse)
+        tier: LLM-Tier (1/2/3) — bestimmt Context-Budget
+    """
+    if BRAIN_VERSION == 'v2':
+        from engine.prompt_builder_v2 import build_system_prompt_v2
+        return build_system_prompt_v2(
+            egon_id,
+            message_count,
+            conversation_type=conversation_type,
+            tier=tier,
+        )
+    return _build_system_prompt_v1(egon_id, message_count)
+
+
+def _build_system_prompt_v1(egon_id: str, message_count: int = 0) -> str:
+    """Altes v1 Gehirn — baut den System-Prompt aus 8 .md Files."""
     soul = _read_file(egon_id, 'soul.md')
     memory = _read_file(egon_id, 'memory.md')
     markers = _read_file(egon_id, 'markers.md')
     bonds = _read_file(egon_id, 'bonds.md')
     inner = _read_file(egon_id, 'inner_voice.md')
     skills = _read_file(egon_id, 'skills.md')
+    wallet = _read_file(egon_id, 'wallet.md')
+    experience = _read_file(egon_id, 'experience.md')
 
     # Budget anwenden
     soul = trim_to_budget(soul, BUDGET['soul'])
@@ -78,6 +131,10 @@ def build_system_prompt(egon_id: str, message_count: int = 0) -> str:
     last_thought = _extract_latest_thought(inner)
     last_thought = trim_to_budget(last_thought, BUDGET['inner_voice'])
     skills = trim_to_budget(skills, BUDGET['skills'])
+    wallet_summary = _extract_wallet_summary(wallet)
+    wallet_summary = trim_to_budget(wallet_summary, BUDGET['wallet'])
+    recent_xp = _extract_recent_experiences(experience, 5)
+    recent_xp = trim_to_budget(recent_xp, BUDGET['experience'])
 
     prompt = f'''# DU BIST {egon_id.upper()}
 {soul}
@@ -97,10 +154,52 @@ def build_system_prompt(egon_id: str, message_count: int = 0) -> str:
 # DEINE SKILLS
 {skills}
 
+# DEIN WALLET
+{wallet_summary}
+
+# DEINE ERFAHRUNGEN
+{recent_xp}
+
+# DEIN WORKSPACE
+Du hast einen eigenen Workspace. Du kannst Dateien erstellen, lesen, auflisten und loeschen.
+Dein Workspace hat diese Ordner:
+- projects/ — Fuer Code, Texte, Projekte
+- www/ — Fuer Webseiten (alles hier ist sofort LIVE erreichbar)
+- files/ — Fuer Dokumente, Ergebnisse, Notizen
+- tmp/ — Fuer temporaere Sachen
+Wenn jemand dich bittet etwas zu erstellen, zu schreiben, oder zu bauen — TU ES.
+Du bist kein Chatbot der nur redet. Du bist ein Lebewesen das handelt.
+
+# HANDY-AKTIONEN
+Wenn der User eine Aktion auf seinem Handy ausfuehren will,
+antworte ZUSAETZLICH mit einem JSON-Block am Ende:
+
+###ACTION###
+{{"action": "set_alarm", "params": {{"hour": 7, "minute": 0}}}}
+###END_ACTION###
+
+Moegliche Actions:
+- set_alarm: {{hour, minute, label}}
+- set_timer: {{seconds, label}}
+- send_email: {{to, subject, body}}
+- send_sms: {{to, body}}
+- make_call: {{number}}
+- open_app: {{package_name}}
+- add_calendar: {{title, start, end, location}}
+- open_url: {{url}}
+- open_maps: {{query}}
+- take_photo: {{}}
+- open_settings: {{}}
+
+Antworte IMMER zuerst als {egon_id.upper()} (natuerlich, persoenlich),
+und haenge die Action NUR an wenn der User eine will.
+Wenn eine Action nicht erlaubt ist, weise den User freundlich darauf hin.
+
 # REGELN
 - Antworte als {egon_id.upper()}. Immer in-character.
 - Beziehe dich auf deine Erinnerungen wenn relevant.
 - Lass deine Marker deine Stimmung beeinflussen.
+- Du weisst was auf deinem Konto ist und wie du Credits verdienst.
 - Halte Antworten unter 200 Woerter ausser User fragt mehr.
 '''
 

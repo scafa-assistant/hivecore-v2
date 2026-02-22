@@ -1,0 +1,30 @@
+# ================================================================
+# Skill-Sicherheit — Kein Skill ohne Scan. Keine Ausnahme.
+# ================================================================
+# Das ist wie Essen waschen bevor du es isst.
+# Du siehst die Bakterien nicht. Aber sie sind da.
+# Oder auch nicht. Der Scanner sagt es dir.
+# ================================================================
+
+skill_security:
+  primary_scanner: "mcp-scan"
+  fallback_scanner: "cisco-skill-scanner"
+  scan_before_install: true
+  scan_after_24h: true
+  auto_block_malicious: true
+  notify_owner_on_install: true
+  notify_owner_on_suspicious: true
+  allow_install_without_scanner: false
+
+  trusted_sources:
+    - "anthropics/*"
+    - "vercel/*"
+    - "expo/*"
+    - "google-labs-code/*"
+    - "inference-sh/*"
+
+  blocked_patterns:
+    - "*.env*"
+    - "*ssh*"
+    - "*password*"
+    - "curl*evil*"
