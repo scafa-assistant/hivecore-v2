@@ -20,6 +20,7 @@ from pathlib import Path
 import yaml
 
 from config import EGON_DATA_DIR
+from engine.organ_reader import read_yaml_organ, write_yaml_organ, read_md_organ
 
 
 # ================================================================
@@ -151,10 +152,19 @@ def send_request(from_egon: str, to_egon: str, message: str = '') -> dict:
     }
 
 
+def _get_egon_name(egon_id: str) -> str:
+    """Holt den Namen eines EGONs aus seiner dna.md."""
+    import re
+    dna = read_md_organ(egon_id, 'core', 'dna.md')
+    match = re.search(r'Name:\s*(.+)', dna)
+    return match.group(1).strip() if match else egon_id
+
+
 def accept_request(from_egon: str, to_egon: str) -> dict:
     """Freundesanfrage annehmen.
 
     Verschiebt von pending_requests → friendships (status: active).
+    Aktualisiert network.yaml und bonds.yaml BEIDER EGONs.
     """
     data = _read_friendships()
 
@@ -174,6 +184,7 @@ def accept_request(from_egon: str, to_egon: str) -> dict:
 
     # Freundschaft erstellen
     friendship_id = _next_friendship_id(data)
+    today = datetime.now().strftime('%Y-%m-%d')
     friendship = {
         'id': friendship_id,
         'egon_a': from_egon,
@@ -181,7 +192,7 @@ def accept_request(from_egon: str, to_egon: str) -> dict:
         'status': 'active',
         'initiated_by': from_egon,
         'message': request.get('message', ''),
-        'created': datetime.now().strftime('%Y-%m-%d'),
+        'created': today,
         'a_accepted': True,
         'b_accepted': True,
         'sui_hash': None,  # SPAETER: On-chain hash
@@ -189,8 +200,47 @@ def accept_request(from_egon: str, to_egon: str) -> dict:
     data.setdefault('friendships', []).append(friendship)
     _write_friendships(data)
 
-    # SPAETER: Update network.yaml beider EGONs (acquaintances)
-    # SPAETER: Bond in bonds.yaml erstellen (score: 30)
+    # ============================================
+    # Network.yaml BEIDER EGONs aktualisieren
+    # ============================================
+    a_name = _get_egon_name(from_egon)
+    b_name = _get_egon_name(to_egon)
+
+    for eid, other_id, other_name in [(from_egon, to_egon, b_name), (to_egon, from_egon, a_name)]:
+        network = read_yaml_organ(eid, 'social', 'network.yaml')
+        contacts = network.get('contacts', {})
+        contacts[other_id] = {
+            'name': other_name,
+            'type': 'egon',
+            'tier': 'bekannte',
+            'bond_score': 30,
+            'first_contact': today,
+            'friendship_status': 'active',
+            'friendship_id': friendship_id,
+        }
+        network['contacts'] = contacts
+        write_yaml_organ(eid, 'social', 'network.yaml', network)
+
+    # ============================================
+    # Bonds.yaml BEIDER EGONs aktualisieren
+    # ============================================
+    for eid, other_id, other_name in [(from_egon, to_egon, b_name), (to_egon, from_egon, a_name)]:
+        bonds = read_yaml_organ(eid, 'social', 'bonds.yaml')
+        bond_list = bonds.get('bonds', [])
+        # Duplikat-Check
+        already = any(b.get('id') == other_id for b in bond_list)
+        if not already:
+            bond_list.append({
+                'id': other_id,
+                'name': other_name,
+                'type': 'egon',
+                'score': 30,
+                'since': today,
+                'friendship_id': friendship_id,
+            })
+            bonds['bonds'] = bond_list
+            write_yaml_organ(eid, 'social', 'bonds.yaml', bonds)
+
     # SPAETER: sui.commit(friendship_hash)
 
     return {

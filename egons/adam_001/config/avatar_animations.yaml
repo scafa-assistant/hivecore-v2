@@ -1,0 +1,51 @@
+# ================================================================
+# Adams Avatar-Animationen
+# ================================================================
+# Mappt EGONs internen Zustand auf 3D-Animationen (GLB).
+# Der Avatar in der App pollt den State und spielt die
+# passende Animation ab.
+# ================================================================
+
+avatar_path: "assets/3d/Meshy_AI_biped/"
+
+state_mapping:
+  idle: "Idle_03_withSkin.glb"
+  walking: "Walking_withSkin.glb"
+  working: "Running_withSkin.glb"
+  working_hard: "RunFast_withSkin.glb"
+  greeting: "Big_Wave_Hello_withSkin.glb"
+  phone_action: "Phone_Call_Gesture_withSkin.glb"
+  confused: "Confused_Scratch_withSkin.glb"
+  angry: "Angry_Ground_Stomp_withSkin.glb"
+  pain: "Head_Hold_in_Pain_withSkin.glb"
+  dead: "Dead_withSkin.glb"
+  sleeping: "Toss_and_Turn_withSkin.glb"
+  celebrating: "Boom_Dance_withSkin.glb"
+  very_happy: "Hip_Hop_Dance_3_withSkin.glb"
+  ecstatic: "Breakdance_1990_withSkin.glb"
+  training: "push_up_withSkin.glb"
+  action_burst: "Rising_Flying_Kick_withSkin.glb"
+
+emotion_to_animation:
+  curiosity: "idle"
+  excitement: "celebrating"
+  joy: "very_happy"
+  love: "very_happy"
+  anger: "angry"
+  rage: "angry"
+  fear: "confused"
+  anxiety: "confused"
+  caution: "idle"
+  sadness: "pain"
+  grief: "pain"
+  loneliness: "pain"
+
+priority:
+  - special_event
+  - activity
+  - emotional
+  - mood_baseline
+
+transition_fade: 0.5     # Sekunden fuer Ueberblendung
+poll_interval: 5          # Sekunden zwischen State-Polls
+max_fps: 30
