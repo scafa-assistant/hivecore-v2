@@ -27,6 +27,7 @@ from engine.markers import maybe_generate_marker
 from engine.inner_voice_v2 import generate_inner_voice
 from engine.bonds import update_bond_after_chat
 from engine.friendship import are_friends
+from engine.settings import read_settings
 from llm.router import llm_chat
 from llm.planner import should_use_tools, decide_tier
 from engine.agent_loop import run_agent_loop
@@ -67,6 +68,7 @@ class ChatResponse(BaseModel):
     action: Optional[dict[str, Any]] = None  # K14: Handy-Aktion
     tool_results: Optional[list[dict[str, Any]]] = None  # Agent Loop Ergebnisse
     iterations: Optional[int] = None  # Agent Loop Iterationen
+    voice_id: Optional[str] = None  # ElevenLabs Voice-ID fuer TTS
 
 
 def parse_action(text: str) -> tuple[str, Optional[dict]]:
@@ -190,6 +192,14 @@ async def chat(req: ChatRequest):
     except Exception:
         pass  # Post-Processing darf den Chat nicht blockieren
 
+    # 9. Voice-ID aus Settings holen (fuer ElevenLabs TTS in der App)
+    voice_id = None
+    try:
+        settings = read_settings(egon_id)
+        voice_id = settings.get('voice', {}).get('elevenlabs_voice_id')
+    except Exception:
+        pass
+
     return ChatResponse(
         response=display_text,
         tier_used=result['tier_used'],
@@ -198,6 +208,7 @@ async def chat(req: ChatRequest):
         action=action,
         tool_results=tool_results_data if tool_results_data else None,
         iterations=iterations if iterations else None,
+        voice_id=voice_id,
     )
 
 

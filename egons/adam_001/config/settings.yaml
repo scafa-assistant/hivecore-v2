@@ -58,3 +58,20 @@ api:
 
   api_key: "shared"           # "shared" = Server-weiter Key
   daily_limit: 100            # Max Calls pro Tag fuer diesen EGON
+
+
+# ============================================
+# VOICE (ElevenLabs TTS)
+# ============================================
+voice:
+  elevenlabs_voice_id: "raYPS0b2ZPlIzZWkcD0G"
+  # ElevenLabs Voice-ID fuer Adams Stimme.
+  # App holt diese ID via Settings-Endpoint und
+  # spielt Audio ueber ElevenLabs REST API ab.
+
+  language: "de"
+  model: "eleven_multilingual_v2"
+
+  fallback: "device"
+  # "device" = Bei Fehler: Android TTS (expo-speech)
+  # "none"   = Kein Fallback, Stille bei Fehler

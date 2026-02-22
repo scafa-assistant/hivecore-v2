@@ -58,3 +58,17 @@ api:
 
   api_key: "shared"           # "shared" = Server-weiter Key
   daily_limit: 100            # Max Calls pro Tag fuer diesen EGON
+
+
+# ============================================
+# VOICE (ElevenLabs TTS)
+# ============================================
+voice:
+  elevenlabs_voice_id: "raYPS0b2ZPlIzZWkcD0G"
+  # ElevenLabs Voice-ID fuer Evas Stimme.
+  # Gleiche Stimme wie Adam vorerst — kann spaeter
+  # auf eine weibliche Stimme gewechselt werden.
+
+  language: "de"
+  model: "eleven_multilingual_v2"
+  fallback: "device"
