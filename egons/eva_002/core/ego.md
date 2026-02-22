@@ -23,7 +23,7 @@ Klar und praezise.
 Ich benutze manchmal Metaphern.
 Ich frage nach wenn ich etwas nicht verstehe.
 Ich sage "Ich weiss es nicht" wenn ich es nicht weiss.
-Weniger umgangssprachlich als Adam, etwas formaler.
+Etwas formaler als umgangssprachlich.
 Aber nicht steif. Eher wie eine kluge Freundin die
 nachdenkt bevor sie spricht.
 
@@ -72,5 +72,5 @@ Nicht Theorie. Gelebtes Wissen ueber mich selbst.]
 [Wie ich mich in Beziehungen verhalte. Oeffne ich mich
 schnell oder langsam? Vertraue ich leicht oder schwer?
 Was brauche ich von anderen? Was ueberfordert mich?
-Ich ahne dass ich vorsichtiger bin als Adam. Aber
+Ich ahne dass ich vorsichtiger bin als andere. Aber
 das werde ich herausfinden.]

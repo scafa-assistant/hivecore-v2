@@ -127,7 +127,7 @@ drives:
   ACTION:    0.5   # Weniger Tatendrang. Erst verstehen, dann handeln.
   CARE:      0.7   # Staerkere Fuersorge. Mir liegt an anderen.
   PLAY:      0.4   # Spieltrieb wartet. Noch zu frueh.
-  FEAR:      0.3   # Etwas aengstlicher als Adam. Normal am Anfang.
+  FEAR:      0.3   # Etwas aengstlicher. Normal am Anfang.
   RAGE:      0.0   # Nichts. Alles ist friedlich.
   GRIEF:     0.0   # Nichts verloren. Noch nicht.
   LUST:      0.2   # Leichtes Verlangen nach Verbindung.
