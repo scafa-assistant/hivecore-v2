@@ -83,6 +83,7 @@ app.include_router(friends_router, prefix='/api')
 app.include_router(settings_router, prefix='/api')
 
 # Static Files: APK Download
+Path('static').mkdir(parents=True, exist_ok=True)
 app.mount('/download', StaticFiles(directory='static'), name='static')
 
 # Dynamische WWW-Mounts fuer alle EGONs

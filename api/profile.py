@@ -155,16 +155,39 @@ def _build_profile_v2(egon_id: str) -> dict:
         if isinstance(v, (int, float)) and v > 0.3
     }
 
+    # Name aus dna.md lesen
+    dna = read_md_organ(egon_id, 'core', 'dna.md')
+    name = 'Unknown'
+    agent_id = egon_id
+    import re as _re
+    name_match = _re.search(r'Name:\s*(.+)', dna)
+    id_match = _re.search(r'ID:\s*(.+)', dna)
+    if name_match:
+        name = name_match.group(1).strip()
+    if id_match:
+        agent_id = id_match.group(1).strip()
+
+    # Skills als Text fuer die App
+    skills_text = ', '.join(sk.get('name', '?') for sk in skill_list) if skill_list else ''
+
     return {
         'egon_id': egon_id,
-        'name': 'Adam',
+        'name': name,
+        'id': agent_id,
         'owner_name': owner_name,
         'mood': mood,
         'bond_score': bond_score,
+        # App-kompatible Felder
+        'total_memories': total_episodes,
+        'total_markers': total_emotions,
+        'active_markers': total_emotions,
+        'skills_count': len(skill_list),
+        'skills': skills_text,
+        # v2 erweiterte Felder
         'total_episodes': total_episodes,
         'total_emotions': total_emotions,
         'total_contacts': len(contacts),
-        'skills': skills_summary,
+        'skills_detail': skills_summary,
         'wallet_balance': wallet.get('balance', 0),
         'wallet_currency': wallet.get('currency', 'EGON Credits'),
         'vitals': {
