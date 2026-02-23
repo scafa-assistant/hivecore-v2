@@ -375,9 +375,9 @@ def _build_greeting_context(egon_id: str) -> str:
     context_parts = []
 
     try:
+        # v2: Versuche Bond + Episodes aus YAML-Organen zu lesen
         if BRAIN_VERSION == 'v2':
             from engine.organ_reader import read_yaml_organ
-            # Bond-Score + Tage seit letztem Kontakt
             bonds = read_yaml_organ(egon_id, 'social', 'bonds.yaml')
             if bonds:
                 owner_bond = None
@@ -391,7 +391,6 @@ def _build_greeting_context(egon_id: str) -> str:
                         f'Bond-Score: {owner_bond["score"]}. '
                         f'Letzter Kontakt: {last}.'
                     )
-            # Letzte Episodes fuer Themen-Referenz
             episodes = read_yaml_organ(egon_id, 'memory', 'episodes.yaml')
             if episodes:
                 recent = (episodes.get('episodes', []) or [])[-3:]
@@ -403,8 +402,10 @@ def _build_greeting_context(egon_id: str) -> str:
                     context_parts.append(
                         f'Letzte Themen: {"; ".join(topics)}'
                     )
-        else:
-            # v1: Bond aus bonds.md, Erinnerungen aus memory.md
+
+        # v1 Fallback: Wenn v2 nichts gefunden hat ODER BRAIN_VERSION==v1,
+        # versuche bonds.md + memory.md (fuer EGONs mit v1-Daten wie Adam)
+        if not context_parts:
             bonds_path = os.path.join(EGON_DATA_DIR, egon_id, 'bonds.md')
             if os.path.isfile(bonds_path):
                 with open(bonds_path, 'r', encoding='utf-8') as f:
