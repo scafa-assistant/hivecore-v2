@@ -49,6 +49,12 @@ SETTINGS_DEFAULTS = {
         'api_key': 'shared',
         'daily_limit': 100,
     },
+    'formatting': {
+        'use_markdown': True,       # Markdown-Formatierung verwenden
+        'use_bold_italic': True,    # *fett* und _kursiv_ verwenden
+        'use_emojis': True,         # Emojis verwenden
+        'custom_rules': [],         # Freie Regeln (z.B. "Keine Sternchen")
+    },
 }
 
 

@@ -17,10 +17,13 @@ Multi-EGON Chat-Types:
 """
 
 import json
+import os
+import re
+from datetime import datetime
 from fastapi import APIRouter, Query, HTTPException
 from pydantic import BaseModel
 from typing import Optional, Any
-from config import BRAIN_VERSION
+from config import BRAIN_VERSION, EGON_DATA_DIR
 from engine.prompt_builder import build_system_prompt
 from engine.memory import append_memory, compress_if_needed
 from engine.markers import maybe_generate_marker
@@ -43,13 +46,20 @@ chat_histories: dict[str, list] = {}
 
 
 def _chat_key(egon_id: str, conversation_type: str = 'owner_chat',
-              partner_egon: str = '', wallet: str = '') -> str:
-    """Generiert den Chat-History Key fuer verschiedene Kanaele."""
+              partner_egon: str = '', wallet: str = '',
+              device_id: str = '') -> str:
+    """Generiert den Chat-History Key fuer verschiedene Kanaele.
+
+    Bei owner_chat: device_id erzeugt separaten Thread pro Geraet.
+    """
     if conversation_type == 'egon_chat' and partner_egon:
         pair = sorted([egon_id, partner_egon])
         return f'{pair[0]}:{pair[1]}'
     elif conversation_type == 'friend_owner_chat' and wallet:
         return f'friend:{wallet}:{egon_id}'
+    # Owner-Chat: device_id fuer separate Threads pro Geraet
+    if device_id:
+        return f'{egon_id}:{device_id}'
     return egon_id
 
 
@@ -58,6 +68,8 @@ class ChatRequest(BaseModel):
     message: str
     tier: str = 'auto'
     conversation_type: str = 'owner_chat'  # owner_chat | egon_chat | friend_owner_chat | agora_job | pulse
+    device_id: str = ''       # Geraete-ID (z.B. "dev_a7k3m9xp2f1q") — separate Chat-Threads
+    user_name: str = ''       # Optionaler Username des Geraete-Besitzers
 
 
 class ChatResponse(BaseModel):
@@ -100,8 +112,8 @@ async def chat(req: ChatRequest):
     tier = req.tier
     conversation_type = req.conversation_type
 
-    # 1. Chat-History holen/erstellen (kanalbasiert)
-    history_key = _chat_key(egon_id, conversation_type)
+    # 1. Chat-History holen/erstellen (kanalbasiert, mit device_id)
+    history_key = _chat_key(egon_id, conversation_type, device_id=req.device_id)
     if history_key not in chat_histories:
         chat_histories[history_key] = []
     history = chat_histories[history_key]
@@ -119,6 +131,12 @@ async def chat(req: ChatRequest):
         conversation_type=conversation_type,
         tier=resolved_tier,
     )
+
+    # 3b. Greeting-Kontext: Persoenlicher gruessen bei erster Nachricht
+    if len(history) == 0 and _is_greeting(message):
+        greeting_ctx = _build_greeting_context(egon_id)
+        if greeting_ctx:
+            system_prompt += f'\n\n{greeting_ctx}'
 
     # 4. Inner Voice generieren (unsichtbar, Tier 1)
     inner = await generate_inner_voice(egon_id, message)
@@ -189,6 +207,10 @@ async def chat(req: ChatRequest):
             await compress_if_needed(egon_id, max_entries=50)
             await maybe_generate_marker(egon_id, message, display_text)
             update_bond_after_chat(egon_id, user_msg=message)
+
+        # Formatierungs-Praeferenzen erkennen + speichern (v1 + v2)
+        from engine.formatting_detector import maybe_update_formatting
+        await maybe_update_formatting(egon_id, message)
     except Exception:
         pass  # Post-Processing darf den Chat nicht blockieren
 
@@ -319,4 +341,108 @@ async def egon_to_egon_chat(req: EgonToEgonRequest):
         response=response_text,
         tier_used=result['tier_used'],
         model=result['model'],
+    )
+
+
+# ================================================================
+# Greeting Detection + Personalisierung
+# ================================================================
+
+GREETING_WORDS = {
+    'hi', 'hallo', 'hey', 'moin', 'servus', 'guten morgen',
+    'guten tag', 'guten abend', 'gute nacht', 'na', 'yo',
+    'whats up', "what's up", 'gruss', 'gruess', 'morgen',
+    'abend', 'tag', 'mahlzeit', 'huhu', 'halloechen',
+}
+
+
+def _is_greeting(message: str) -> bool:
+    """Erkennt ob eine Nachricht ein Gruss ist."""
+    msg_lower = message.lower().strip()
+    # Kurze Nachrichten (max 5 Woerter) die ein Greeting-Wort enthalten
+    if len(msg_lower.split()) <= 5:
+        for word in GREETING_WORDS:
+            if word in msg_lower:
+                return True
+    return False
+
+
+def _build_greeting_context(egon_id: str) -> str:
+    """Baut personalisierten Greeting-Kontext basierend auf Bond + Erinnerungen.
+
+    Wird nur bei erster Nachricht einer Session aufgerufen wenn sie ein Gruss ist.
+    """
+    context_parts = []
+
+    try:
+        if BRAIN_VERSION == 'v2':
+            from engine.organ_reader import read_yaml_organ
+            # Bond-Score + Tage seit letztem Kontakt
+            bonds = read_yaml_organ(egon_id, 'social', 'bonds.yaml')
+            if bonds:
+                owner_bond = None
+                for b in bonds.get('bonds', []):
+                    if b.get('id') == 'OWNER_CURRENT':
+                        owner_bond = b
+                        break
+                if owner_bond and owner_bond.get('score', 0) > 50:
+                    last = owner_bond.get('last_interaction', '')
+                    context_parts.append(
+                        f'Bond-Score: {owner_bond["score"]}. '
+                        f'Letzter Kontakt: {last}.'
+                    )
+            # Letzte Episodes fuer Themen-Referenz
+            episodes = read_yaml_organ(egon_id, 'memory', 'episodes.yaml')
+            if episodes:
+                recent = (episodes.get('episodes', []) or [])[-3:]
+                if recent:
+                    topics = [
+                        ep.get('title', ep.get('summary', ''))[:80]
+                        for ep in recent
+                    ]
+                    context_parts.append(
+                        f'Letzte Themen: {"; ".join(topics)}'
+                    )
+        else:
+            # v1: Bond aus bonds.md, Erinnerungen aus memory.md
+            bonds_path = os.path.join(EGON_DATA_DIR, egon_id, 'bonds.md')
+            if os.path.isfile(bonds_path):
+                with open(bonds_path, 'r', encoding='utf-8') as f:
+                    bonds_text = f.read()
+                bond_match = re.search(r'bond_score:\s*([\d.]+)', bonds_text)
+                if bond_match and float(bond_match.group(1)) > 0.5:
+                    context_parts.append(
+                        f'Bond-Score: {bond_match.group(1)}'
+                    )
+            memory_path = os.path.join(EGON_DATA_DIR, egon_id, 'memory.md')
+            if os.path.isfile(memory_path):
+                with open(memory_path, 'r', encoding='utf-8') as f:
+                    mem = f.read()
+                summaries = re.findall(r'summary:\s*(.+)', mem)
+                if summaries:
+                    recent = summaries[-3:]
+                    context_parts.append(
+                        f'Letzte Themen: {"; ".join(recent)}'
+                    )
+    except Exception:
+        pass  # Greeting-Kontext ist optional, nie crashen
+
+    if not context_parts:
+        return ''
+
+    # Tageszeit-basierter Gruss-Hinweis
+    hour = datetime.now().hour
+    if hour < 12:
+        zeit = 'Morgen'
+    elif hour < 18:
+        zeit = 'Nachmittag'
+    else:
+        zeit = 'Abend'
+
+    return (
+        f'# GREETING-KONTEXT\n'
+        f'Dein Owner gruesst dich. Es ist {zeit}.\n'
+        f'{" ".join(context_parts)}\n'
+        f'Gruesse ihn persoenlich! Beziehe dich auf eure letzten Gespraeche '
+        f'oder frage wie es ihm geht. Sei warm und authentisch, nicht generisch.'
     )

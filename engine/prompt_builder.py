@@ -203,6 +203,25 @@ Wenn eine Action nicht erlaubt ist, weise den User freundlich darauf hin.
 - Halte Antworten unter 200 Woerter ausser User fragt mehr.
 '''
 
+    # Formatierungs-Praeferenzen laden + injizieren
+    try:
+        from engine.settings import read_settings
+        settings = read_settings(egon_id)
+        formatting = settings.get('formatting', {})
+        format_rules = []
+        if not formatting.get('use_markdown', True):
+            format_rules.append('Verwende KEIN Markdown.')
+        if not formatting.get('use_bold_italic', True):
+            format_rules.append('Verwende KEINE Sternchen (*fett* oder _kursiv_).')
+        if not formatting.get('use_emojis', True):
+            format_rules.append('Verwende KEINE Emojis.')
+        for rule in formatting.get('custom_rules', []):
+            format_rules.append(f'Owner-Wunsch: {rule}')
+        if format_rules:
+            prompt += '\n# FORMATIERUNG\n' + '\n'.join(format_rules) + '\n'
+    except Exception:
+        pass  # Formatting ist optional
+
     # PERSONA REFRESHER: Alle 8 Messages nochmal betonen
     if message_count > 0 and message_count % 8 == 0:
         prompt += f'''

@@ -14,25 +14,66 @@ from config import EGON_DATA_DIR
 from llm.router import llm_chat
 
 
+# Marker-Typ → deutsches Mood-Wort (fuer v1 Fallback)
+_MOOD_MAP = {
+    'joy': 'freudig', 'curiosity': 'neugierig',
+    'excitement': 'aufgeregt', 'trust': 'vertrauensvoll',
+    'pride': 'stolz', 'gratitude': 'dankbar',
+    'warmth': 'warm', 'relief': 'erleichtert',
+    'fear': 'aengstlich', 'anxiety': 'nervoes',
+    'anger': 'veraergert', 'sadness': 'traurig',
+    'frustration': 'frustriert', 'loneliness': 'einsam',
+    'shame': 'beschaemt', 'disgust': 'angewidert',
+    'surprise': 'ueberrascht', 'nostalgia': 'nostalgisch',
+}
+
+
 def _get_current_mood(egon_id: str) -> str:
-    """Leite aktuelle Stimmung aus markers.md ab (statt hardcoded neutral)."""
-    path = os.path.join(EGON_DATA_DIR, egon_id, 'markers.md')
-    if not os.path.isfile(path):
-        return 'neutral'
-    with open(path, 'r', encoding='utf-8') as f:
-        content = f.read()
-    # Suche "current_mood = X" in der Mood-Berechnung
-    match = re.search(r'current_mood\s*=\s*(\w+)', content)
-    if match:
-        return match.group(1)
-    # Fallback: suche in memory.md
-    mem_path = os.path.join(EGON_DATA_DIR, egon_id, 'memory.md')
-    if os.path.isfile(mem_path):
-        with open(mem_path, 'r', encoding='utf-8') as f:
-            mem = f.read()
-        match = re.search(r'current_mood:\s*(\w+)', mem)
-        if match:
-            return match.group(1)
+    """Leite aktuelle Stimmung ab — v2: state.yaml, v1: hoechster Marker."""
+    from config import BRAIN_VERSION
+
+    # v2: Mood aus state.yaml lesen (NDCF 3-Tier System)
+    if BRAIN_VERSION == 'v2':
+        state_path = os.path.join(EGON_DATA_DIR, egon_id, 'core', 'state.yaml')
+        if os.path.isfile(state_path):
+            try:
+                import yaml
+                with open(state_path, 'r', encoding='utf-8') as f:
+                    state = yaml.safe_load(f)
+                thrive = state.get('thrive', {})
+                mood_data = thrive.get('mood', {})
+                # Verbal-Anchor bevorzugen (z.B. "Neugierig und aufgeregt")
+                verbal = mood_data.get('verbal', '')
+                if verbal:
+                    return verbal
+                # Fallback: mood.value → Wort-Mapping
+                value = mood_data.get('value', 0.5)
+                if value >= 0.8:
+                    return 'sehr gut'
+                if value >= 0.6:
+                    return 'gut'
+                if value >= 0.4:
+                    return 'okay'
+                if value >= 0.2:
+                    return 'gedrueckt'
+                return 'schlecht'
+            except Exception:
+                pass
+
+    # v1 (oder v2-Fallback): Hoechsten aktiven Marker als Mood verwenden
+    markers_path = os.path.join(EGON_DATA_DIR, egon_id, 'markers.md')
+    if os.path.isfile(markers_path):
+        with open(markers_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        # Alle Marker-Typen + Intensitaeten finden
+        types = re.findall(r'type:\s*(\w+)', content)
+        intensities = re.findall(r'intensity:\s*([\d.]+)', content)
+        if types and intensities:
+            pairs = list(zip(types, [float(i) for i in intensities]))
+            pairs.sort(key=lambda x: x[1], reverse=True)
+            top_type = pairs[0][0]
+            return _MOOD_MAP.get(top_type, top_type)
+
     return 'neutral'
 
 
