@@ -335,7 +335,12 @@ def get_recent_episodes(egon_id: str, max_count: int = 8) -> list[dict]:
 
     episodes = episodes_data.get('episodes', [])
     try:
-        episodes = sorted(episodes, key=lambda e: e.get('date', ''), reverse=True)
+        # Bei gleichem Datum: hoehere ID = neuere Episode (E0085 vor E0002)
+        episodes = sorted(
+            episodes,
+            key=lambda e: (e.get('date', ''), e.get('id', '')),
+            reverse=True,
+        )
     except (TypeError, KeyError):
         pass
 
