@@ -80,6 +80,16 @@ async def detect_and_process_mentions(
     if not mentions:
         return []
 
+    # EGON-eigenen Namen rausfiltern (Eva soll sich nicht selbst als Kontakt eintragen)
+    egon_name_lower = egon_id.replace('_', ' ').split()[0].lower()
+    mentions = [
+        m for m in mentions
+        if m.get('name', '').lower() != egon_name_lower
+        and m.get('name', '').strip('<>').lower() != egon_name_lower
+    ]
+    if not mentions:
+        return []
+
     # Kontaktkarten aktualisieren
     updates = []
     for mention in mentions:
@@ -93,7 +103,7 @@ async def detect_and_process_mentions(
     return updates
 
 
-# Woerter die keine Eigennamen sind (haeufige deutsche Satzanfaenge)
+# Woerter die keine Eigennamen sind (haeufige deutsche Satzanfaenge + EGON-Namen)
 _SKIP_WORDS = {
     'Ich', 'Du', 'Er', 'Sie', 'Es', 'Wir', 'Ihr', 'Die', 'Der', 'Das',
     'Ein', 'Eine', 'Mein', 'Dein', 'Sein', 'Ihr', 'Unser', 'Euer',
@@ -102,6 +112,8 @@ _SKIP_WORDS = {
     'Gestern', 'Morgen', 'Adam', 'Gerade', 'Danke', 'Bitte',
     'Klar', 'Gut', 'Super', 'Nice', 'Cool', 'Was', 'Wie', 'Wo',
     'Warum', 'Wann', 'Wer', 'Ach', 'Oh', 'Na', 'Hmm',
+    # EGON-eigene Namen (sollen sich nicht selbst als Kontakt eintragen)
+    'Eva', 'Eve', 'EGON', 'Egon',
 }
 
 

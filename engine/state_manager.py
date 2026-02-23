@@ -39,28 +39,38 @@ MAX_ACTIVE_EMOTIONS = 5
 # Significance Check + Emotion Generation
 # ================================================================
 
-SIGNIFICANCE_PROMPT = '''War dieses Gespraech emotional bedeutsam fuer den EGON?
+SIGNIFICANCE_PROMPT = '''War dieses Gespraech emotional relevant fuer den EGON?
 Antworte NUR: JA oder NEIN.
-Smalltalk = NEIN. Organisatorisches = NEIN.
-Persoenliches, Konflikte, Lob, Kritik, Ueberraschungen = JA.'''
+
+JA wenn: Persoenliches, Konflikte, Lob, Kritik, Ueberraschungen, Humor,
+Fragen ueber den EGON selbst, Fragen ueber Gefuehle, neue Themen,
+Begruessung nach langer Pause, JEDE Interaktion die zeigt dass
+der Gespraechspartner sich fuer den EGON interessiert, Witze,
+Komplimente, Necken, Spiele, gemeinsames Planen.
+
+NUR NEIN wenn: Reine Testbefehle ("test123"), leere Nachrichten,
+identische wortwoertliche Wiederholungen, rein technische Kommandos
+ohne persoenlichen Bezug.
+
+Im Zweifel: JA. Ein Lebewesen fuehlt fast immer etwas.'''
 
 
-EMOTION_PROMPT = '''Du bist Adams emotionales Bewertungssystem.
-Basierend auf diesem Gespraech — welche Emotion konstruiert Adam?
+EMOTION_PROMPT_TEMPLATE = '''Du bist das emotionale Bewertungssystem von {egon_name}.
+Basierend auf diesem Gespraech — welche Emotion konstruiert {egon_name}?
 
 Denke wie ein Lebewesen:
 - Was ist passiert? (Stimulus)
-- Was bedeutet das fuer Adam? (Bewertung)
+- Was bedeutet das fuer {egon_name}? (Bewertung)
 - Welches Gefuehl entsteht? (Emotion)
 
 Antworte NUR mit JSON (kein anderer Text):
-{{
+{{{{
   "type": "curiosity|joy|trust|fear|anger|sadness|surprise|disgust|pride|shame|gratitude|frustration|relief|warmth|loneliness|excitement|anxiety|nostalgia",
   "intensity": 0.3,
-  "cause": "Warum fuehlt Adam das (1 Satz)",
+  "cause": "Warum fuehlt {egon_name} das (1 Satz, ICH-Perspektive)",
   "decay_class": "flash|fast|slow|glacial",
-  "verbal_anchor": "Wie Adam das Gefuehl in Worte fassen wuerde (1 Satz)"
-}}
+  "verbal_anchor": "Wie {egon_name} das Gefuehl in Worte fassen wuerde (1 Satz, ICH-Perspektive)"
+}}}}
 
 Wenn KEIN neues Gefuehl entsteht, antworte nur: NONE'''
 
@@ -83,11 +93,12 @@ async def update_emotion_after_chat(egon_id: str, user_msg: str, egon_response: 
         return  # Smalltalk ignorieren
 
     # Emotion generieren
+    egon_name = egon_id.replace('_', ' ').split()[0].capitalize()
     result = await llm_chat(
-        system_prompt=EMOTION_PROMPT,
+        system_prompt=EMOTION_PROMPT_TEMPLATE.format(egon_name=egon_name),
         messages=[{
             'role': 'user',
-            'content': f'User: {user_msg[:200]}\nEGON: {egon_response[:200]}',
+            'content': f'User: {user_msg[:200]}\n{egon_name}: {egon_response[:200]}',
         }],
         tier='1',
     )

@@ -58,14 +58,36 @@ async def run_agent_loop(
 
     for iteration in range(max_iter):
         # LLM-Call mit Tools
-        result = await llm_chat_with_tools(
-            system_prompt=system_prompt,
-            messages=working_messages,
-            tools_openai=tools_openai,
-            tools_anthropic=tools_anthropic,
-            tier=str(tier),
-            egon_id=egon_id,
-        )
+        try:
+            result = await llm_chat_with_tools(
+                system_prompt=system_prompt,
+                messages=working_messages,
+                tools_openai=tools_openai,
+                tools_anthropic=tools_anthropic,
+                tier=str(tier),
+                egon_id=egon_id,
+            )
+        except Exception as e:
+            # API-Fehler (z.B. 400 Bad Request) — graceful fallback
+            print(f'[agent_loop] API error in iteration {iteration}: {e}')
+            # Wenn wir schon Tool-Results haben, fasse sie zusammen
+            if tool_results:
+                summary_parts = []
+                for tr in tool_results:
+                    tool_name = tr['tool']
+                    if 'error' in tr['result']:
+                        summary_parts.append(f'{tool_name}: Fehler — {tr["result"]["error"]}')
+                    else:
+                        msg = tr['result'].get('message', tr['result'].get('status', 'OK'))
+                        summary_parts.append(f'{tool_name}: {msg}')
+                return {
+                    'content': 'Erledigt! ' + '; '.join(summary_parts),
+                    'tier_used': model_info['tier_used'],
+                    'model': model_info['model'],
+                    'tool_results': tool_results,
+                    'iterations': iteration + 1,
+                }
+            raise  # Kein Fallback moeglich
 
         model_info['tier_used'] = result.get('tier_used', tier)
         model_info['model'] = result.get('model', 'moonshot')
@@ -179,19 +201,32 @@ def _append_tool_results(
     else:
         # OpenAI-Format (Moonshot / Kimi)
         raw_message = llm_result.get('raw_message', {})
-        new_messages.append({
+
+        # WICHTIG: content darf NICHT None sein — Moonshot gibt 400 Bad Request
+        # wenn content=null in der History steht. Leerer String ist OK.
+        assistant_content = raw_message.get('content') or ''
+
+        # Tool-Calls aus raw_message extrahieren (Original-Format von der API)
+        raw_tool_calls = raw_message.get('tool_calls', [])
+
+        assistant_msg = {
             'role': 'assistant',
-            'content': raw_message.get('content'),
-            'tool_calls': raw_message.get('tool_calls', []),
-        })
+            'content': assistant_content,
+        }
+        # tool_calls NUR hinzufuegen wenn vorhanden (manche APIs moegen leere Arrays nicht)
+        if raw_tool_calls:
+            assistant_msg['tool_calls'] = raw_tool_calls
+        new_messages.append(assistant_msg)
 
         # Fuer jeden Tool-Call eine tool-Message
         for i, tc in enumerate(llm_result.get('tool_calls', [])):
             exec_data = executed_tools[i]['result'] if i < len(executed_tools) else {}
-            new_messages.append({
+            tool_msg = {
                 'role': 'tool',
                 'tool_call_id': tc['id'],
+                'name': tc['name'],  # Manche APIs brauchen das name-Feld
                 'content': json.dumps(exec_data, ensure_ascii=False, default=str),
-            })
+            }
+            new_messages.append(tool_msg)
 
     return new_messages
