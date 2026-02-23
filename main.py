@@ -20,6 +20,7 @@ from api.friends import router as friends_router
 from api.settings import router as settings_router
 from api.avatar import router as avatar_router
 from api.actions import router as actions_router
+from api.voice import router as voice_router
 from scheduler import scheduler
 from config import EGON_DATA_DIR, WEB3AUTH_CLIENT_ID
 
@@ -85,6 +86,7 @@ app.include_router(friends_router, prefix='/api')
 app.include_router(settings_router, prefix='/api')
 app.include_router(avatar_router, prefix='/api')
 app.include_router(actions_router, prefix='/api')
+app.include_router(voice_router, prefix='/api')
 
 # Static Files: APK Download
 Path('static').mkdir(parents=True, exist_ok=True)
