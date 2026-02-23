@@ -177,9 +177,14 @@ def episodes_to_prompt(episodes_data: dict, max_count: int = 10) -> str:
     if not episodes:
         return 'Noch keine bedeutsamen Erinnerungen.'
 
-    # Sortiere nach Datum (neueste zuerst), nimm max_count
+    # Sortiere nach Datum + Episode-ID (neueste zuerst)
+    # Bei gleichem Datum: E0085 vor E0002 (hoehere ID = neuere Episode)
     try:
-        episodes = sorted(episodes, key=lambda e: e.get('date', ''), reverse=True)
+        episodes = sorted(
+            episodes,
+            key=lambda e: (e.get('date', ''), e.get('id', '')),
+            reverse=True,
+        )
     except (TypeError, KeyError):
         pass
 
