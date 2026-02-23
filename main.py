@@ -31,15 +31,36 @@ from config import EGON_DATA_DIR, WEB3AUTH_CLIENT_ID
 def _discover_egons() -> list[str]:
     """Findet alle EGON-IDs im egons/ Verzeichnis.
 
-    Ein Ordner ist ein EGON wenn er ein core/ Unterverzeichnis hat.
+    v2-EGONs haben ein core/ Unterverzeichnis.
+    v1-EGONs haben eine soul.md Datei.
+    Symlinks werden bevorzugt (adam_001 -> adam → nur adam_001 listen).
     """
     base = Path(EGON_DATA_DIR)
     if not base.exists():
         return []
-    return sorted([
-        d.name for d in base.iterdir()
-        if d.is_dir() and (d / 'core').exists()
-    ])
+
+    # Symlink-Targets sammeln (z.B. 'adam' wenn 'adam_001 -> adam' existiert)
+    symlink_targets = set()
+    for d in base.iterdir():
+        if d.is_symlink() and d.is_dir():
+            try:
+                symlink_targets.add(d.resolve().name)
+            except OSError:
+                pass
+
+    found = set()
+    for d in base.iterdir():
+        if not d.is_dir() or d.name in ('shared',):
+            continue
+        # Reale Ordner ueberspringen wenn ein Symlink auf sie zeigt
+        # (z.B. 'adam' ueberspringen weil 'adam_001 -> adam' existiert)
+        if not d.is_symlink() and d.name in symlink_targets:
+            continue
+        # v2: core/ vorhanden ODER v1: soul.md vorhanden
+        if (d / 'core').exists() or (d / 'soul.md').exists():
+            found.add(d.name)
+
+    return sorted(found)
 
 
 def _ensure_workspace(egon_id: str):

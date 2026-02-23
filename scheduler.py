@@ -12,14 +12,33 @@ scheduler = AsyncIOScheduler()
 
 
 def _discover_egon_ids() -> list[str]:
-    """Findet alle EGON-IDs im egons/ Verzeichnis."""
+    """Findet alle EGON-IDs im egons/ Verzeichnis.
+
+    v2: core/ vorhanden, v1: soul.md vorhanden.
+    Symlinks werden bevorzugt (adam_001 -> adam → nur adam_001).
+    """
     base = Path(EGON_DATA_DIR)
     if not base.exists():
         return []
-    return sorted([
-        d.name for d in base.iterdir()
-        if d.is_dir() and (d / 'core').exists()
-    ])
+
+    symlink_targets = set()
+    for d in base.iterdir():
+        if d.is_symlink() and d.is_dir():
+            try:
+                symlink_targets.add(d.resolve().name)
+            except OSError:
+                pass
+
+    found = set()
+    for d in base.iterdir():
+        if not d.is_dir() or d.name in ('shared',):
+            continue
+        if not d.is_symlink() and d.name in symlink_targets:
+            continue
+        if (d / 'core').exists() or (d / 'soul.md').exists():
+            found.add(d.name)
+
+    return sorted(found)
 
 
 @scheduler.scheduled_job('cron', hour=PULSE_HOUR, minute=PULSE_MINUTE)
