@@ -19,17 +19,18 @@ ANSWER_RESERVE = 2000      # Tokens fuer Antwort
 # TIER 1 Budget (Moonshot 8K) — Eng, jedes Token zaehlt
 # ================================================================
 BUDGET_TIER1 = {
-    'dna_compressed': 600,     # DNA komprimiert: Identitaet + Drives + Ethik-Kern
+    'dna_compressed': 1500,    # DNA ist WER ICH BIN — Persoenlichkeit, Sprechstil,
+                               # Werte, Regeln. Wie Adams soul.md. MUSS gross sein.
     'ego': 200,                # Dynamische Persoenlichkeit (klein)
-    'egon_self_short': 200,    # Selbstbild: Nur erste 2 Abschnitte
-    'state': 400,              # yaml_to_prompt Output (~15-20 Saetze)
-    'inner_voice': 500,        # Letzte 5-7 Eintraege
-    'owner': 200,              # Owner-Portrait (kompakt)
-    'bonds_owner': 150,        # Nur Owner-Bond
-    'episodes': 800,           # Letzte 8 + Thread-Episoden
-    'experience': 150,         # Top 3 relevante Erkenntnisse
-    'skills': 150,             # Kompakte Skill-Liste
-    'wallet': 100,             # Nur Kontostand
+    'egon_self_short': 150,    # Selbstbild: Nur erste 2 Abschnitte (gekuerzt)
+    'state': 300,              # yaml_to_prompt Output (gekuerzt)
+    'inner_voice': 300,        # Letzte 3-5 Eintraege (gekuerzt)
+    'owner': 150,              # Owner-Portrait (kompakt)
+    'bonds_owner': 100,        # Nur Owner-Bond (gekuerzt)
+    'episodes': 500,           # Letzte 5-8 Episoden (gekuerzt)
+    'experience': 100,         # Top 3 relevante Erkenntnisse (gekuerzt)
+    'skills': 100,             # Kompakte Skill-Liste (gekuerzt)
+    'wallet': 80,              # Nur Kontostand (gekuerzt)
     'ecr_instruction': 150,    # ECR-Chain Anweisung
     'workspace_rules': 200,    # Workspace + Action Regeln
     'persona_rules': 100,      # Persona Refresher (alle 8 Messages)

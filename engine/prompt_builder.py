@@ -12,6 +12,25 @@ from config import EGON_DATA_DIR, BRAIN_VERSION
 from engine.context_budget import BUDGET, trim_to_budget
 
 
+def _detect_brain_version(egon_id: str) -> str:
+    """Auto-detect brain version for a specific EGON.
+
+    Returns 'v2' if the egon has the new 12-organ structure (core/dna.md).
+    Returns 'v1' if the egon has the old flat structure (soul.md).
+    Falls back to global BRAIN_VERSION if neither is found.
+    """
+    v2_path = os.path.join(EGON_DATA_DIR, egon_id, 'core', 'dna.md')
+    v1_path = os.path.join(EGON_DATA_DIR, egon_id, 'soul.md')
+
+    if os.path.isfile(v2_path):
+        return 'v2'
+    elif os.path.isfile(v1_path):
+        return 'v1'
+    else:
+        # Fallback to global config
+        return BRAIN_VERSION
+
+
 def _read_file(egon_id: str, filename: str) -> str:
     path = os.path.join(EGON_DATA_DIR, egon_id, filename)
     if not os.path.isfile(path):
@@ -98,7 +117,13 @@ def build_system_prompt(
         conversation_type: Art des Gespraechs (owner_chat, egon_chat, agora_job, pulse)
         tier: LLM-Tier (1/2/3) — bestimmt Context-Budget
     """
-    if BRAIN_VERSION == 'v2':
+    # Auto-detect brain version PER EGON:
+    # If egon has core/dna.md → v2 brain
+    # If egon has soul.md but no core/dna.md → v1 brain
+    # Otherwise: use global BRAIN_VERSION
+    egon_brain_version = _detect_brain_version(egon_id)
+
+    if egon_brain_version == 'v2':
         from engine.prompt_builder_v2 import build_system_prompt_v2
         return build_system_prompt_v2(
             egon_id,

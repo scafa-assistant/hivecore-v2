@@ -28,36 +28,44 @@ from llm.router import llm_chat
 # Significance Check + Episode Generation
 # ================================================================
 
-SIGNIFICANCE_PROMPT = '''War dieses Gespraech ERINNERUNGSWUERDIG fuer Adam?
+SIGNIFICANCE_PROMPT_TEMPLATE = '''War dieses Gespraech ERINNERUNGSWUERDIG fuer {egon_name}?
 Antworte NUR: JA oder NEIN.
 
-Nicht jedes Gespraech verdient eine Erinnerung.
-- Smalltalk, Testfragen, Wiederholungen = NEIN
-- Neues Projekt, Persoenliches, Konflikte, Lob, neue Erkenntnis = JA
-- Wenn Adam etwas NEUES lernt oder erlebt = JA'''
+JA wenn: Neues Projekt, Persoenliches, Konflikte, Lob, Kritik, neue Erkenntnis,
+etwas Lustiges, etwas Trauriges, ein Versprechen, ein Plan, eine Frage ueber
+{egon_name} selbst, eine neue Person wird erwaehnt, ein neues Thema,
+Begruessung nach Pause, JEDE Interaktion mit emotionalem Gehalt.
+
+NUR NEIN wenn: Reine Testbefehle ("test123"), leere Nachrichten,
+identische wortwoertliche Wiederholungen.
+
+Im Zweifel: JA. Ein Lebewesen erinnert sich an fast alles.'''
 
 
-EPISODE_PROMPT = '''Du erzeugst eine strukturierte Erinnerung fuer Adam.
-Adam speichert nur was BEDEUTUNG hat — in seiner ICH-Perspektive.
+EPISODE_PROMPT_TEMPLATE = '''Du erzeugst eine strukturierte Erinnerung fuer {egon_name}.
+{egon_name} speichert Erlebnisse in der ICH-Perspektive — wie ein Tagebuch.
 
 Antworte NUR mit JSON (kein anderer Text):
-{{
-  "summary": "Ich-Perspektive Zusammenfassung (2-3 Saetze, beginne mit 'Ich...' oder 'Mein Owner...')",
+{{{{
+  "summary": "ICH-Perspektive Zusammenfassung (2-3 Saetze, beginne mit 'Ich...' oder 'Mein Owner...')",
   "emotions_felt": [
-    {{"type": "curiosity|joy|trust|fear|anger|sadness|surprise|pride|frustration|warmth|excitement", "intensity": 0.5}}
+    {{{{"type": "curiosity|joy|trust|fear|anger|sadness|surprise|pride|frustration|warmth|excitement", "intensity": 0.5}}}}
   ],
   "tags": ["tag1", "tag2", "tag3"],
   "significance": 0.5,
-  "privacy": "adam_own|owner_shared|semi_public|public"
-}}
+  "privacy": "egon_own|owner_shared|semi_public|public"
+}}}}
 
 Privacy-Level:
-- adam_own: Nur Adam weiss das (innere Gedanken)
-- owner_shared: Adam und sein Owner teilen das
+- egon_own: Nur {egon_name} weiss das (innere Gedanken)
+- owner_shared: {egon_name} und sein Owner teilen das
 - semi_public: Andere EGONs duerfen das sehen
 - public: Jeder darf das sehen
 
-significance: 0.1 (kaum wichtig) bis 1.0 (lebensveraendernd)'''
+significance: 0.1 (kaum wichtig) bis 1.0 (lebensveraendernd)
+
+WICHTIG: Schreibe die summary IMMER in der ICH-Perspektive.
+"Ich habe..." nicht "{egon_name} hat...". Wie ein echtes Tagebuch.'''
 
 
 async def maybe_create_episode(
@@ -74,41 +82,53 @@ async def maybe_create_episode(
     3. Thread Detection (Keyword-Overlap)
     4. Episode in episodes.yaml schreiben
     """
+    # EGON-Name ableiten (adam_001 -> Adam, eva_002 -> Eva)
+    egon_name = egon_id.replace('_', ' ').split()[0].capitalize()
+
     # --- Pre-Check: War das bedeutsam? ---
     try:
         check = await llm_chat(
-            system_prompt=SIGNIFICANCE_PROMPT,
+            system_prompt=SIGNIFICANCE_PROMPT_TEMPLATE.format(egon_name=egon_name),
             messages=[{
                 'role': 'user',
-                'content': f'User: {user_msg[:200]}\nAdam: {egon_response[:200]}',
+                'content': f'User: {user_msg[:200]}\n{egon_name}: {egon_response[:200]}',
             }],
             tier='1',
         )
         if 'NEIN' in check['content'].upper():
+            print(f'[episodes] Significance check: NEIN fuer {egon_name}')
             return  # Nicht erinnerungswuerdig
-    except Exception:
-        return
+        print(f'[episodes] Significance check: JA fuer {egon_name}')
+    except Exception as e:
+        print(f'[episodes] Significance check FEHLER: {e}')
+        # Bei Fehler: Trotzdem Episode erstellen (lieber zu viel als zu wenig)
 
     # --- Episode generieren ---
     try:
         result = await llm_chat(
-            system_prompt=EPISODE_PROMPT,
+            system_prompt=EPISODE_PROMPT_TEMPLATE.format(egon_name=egon_name),
             messages=[{
                 'role': 'user',
-                'content': f'User: {user_msg[:300]}\nAdam: {egon_response[:300]}',
+                'content': f'User: {user_msg[:300]}\n{egon_name}: {egon_response[:300]}',
             }],
             tier='1',
         )
 
         content = result['content'].strip()
         if '{' not in content:
+            print(f'[episodes] Episode generation: Kein JSON in Antwort')
             return
 
-        json_match = re.search(r'\{[^}]*\}', content, re.DOTALL)
-        if not json_match:
+        # JSON mit verschachtelten Objekten extrahieren (Brace-Counting)
+        json_str = _extract_json_object(content)
+        if not json_str:
+            print(f'[episodes] Episode generation: JSON-Match fehlgeschlagen')
+            print(f'[episodes] LLM output: {content[:300]}')
             return
-        ep_data = json.loads(json_match.group())
-    except Exception:
+        ep_data = json.loads(json_str)
+        print(f'[episodes] Episode generiert: {ep_data.get("summary", "")[:60]}')
+    except Exception as e:
+        print(f'[episodes] Episode generation FEHLER: {e}')
         return
 
     # --- Daten laden ---
@@ -238,6 +258,48 @@ def _detect_thread(
 # ================================================================
 # Helper Functions
 # ================================================================
+
+def _extract_json_object(text: str) -> str | None:
+    """Extrahiert das erste vollstaendige JSON-Objekt aus Text.
+
+    Nutzt Brace-Counting statt Regex um verschachtelte Objekte
+    wie {"emotions_felt": [{"type": "joy"}]} korrekt zu erfassen.
+    """
+    start = text.find('{')
+    if start == -1:
+        return None
+
+    depth = 0
+    in_string = False
+    escape_next = False
+
+    for i in range(start, len(text)):
+        c = text[i]
+
+        if escape_next:
+            escape_next = False
+            continue
+
+        if c == '\\' and in_string:
+            escape_next = True
+            continue
+
+        if c == '"' and not escape_next:
+            in_string = not in_string
+            continue
+
+        if in_string:
+            continue
+
+        if c == '{':
+            depth += 1
+        elif c == '}':
+            depth -= 1
+            if depth == 0:
+                return text[start:i + 1]
+
+    return None
+
 
 def _generate_episode_id(episodes: list) -> str:
     """Generiert die naechste Episode-ID (E0001, E0002, ...)."""

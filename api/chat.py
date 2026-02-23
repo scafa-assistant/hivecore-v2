@@ -37,12 +37,42 @@ from engine.agent_loop import run_agent_loop
 
 router = APIRouter()
 
-# In-Memory Chat-History pro Kanal
+# In-Memory Chat-History pro Kanal (+ Disk-Persistence fuer EGON-Chats)
 # Keys:
 #   owner_chat:       "{egon_id}"
 #   egon_chat:        "{egon_a}:{egon_b}"   (alphabetisch sortiert)
 #   friend_owner_chat: "friend:{wallet}:{egon_id}"
 chat_histories: dict[str, list] = {}
+
+# Persistence fuer EGON-zu-EGON Chats
+EGON_CHAT_DIR = os.path.join(EGON_DATA_DIR, 'shared', 'chats')
+os.makedirs(EGON_CHAT_DIR, exist_ok=True)
+
+
+def _save_egon_chat(key: str, history: list) -> None:
+    """Speichert EGON-zu-EGON Chat-History auf Disk."""
+    if ':' not in key or key.startswith('friend:'):
+        return  # Nur EGON-zu-EGON Chats speichern
+    safe_key = key.replace(':', '--')
+    path = os.path.join(EGON_CHAT_DIR, f'{safe_key}.json')
+    try:
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(history, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
+
+def _load_egon_chat(key: str) -> list:
+    """Laedt EGON-zu-EGON Chat-History von Disk."""
+    safe_key = key.replace(':', '--')
+    path = os.path.join(EGON_CHAT_DIR, f'{safe_key}.json')
+    if os.path.isfile(path):
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return []
 
 
 def _chat_key(egon_id: str, conversation_type: str = 'owner_chat',
@@ -140,8 +170,13 @@ async def chat(req: ChatRequest):
 
     # 4. Inner Voice generieren (unsichtbar, Tier 1)
     inner = await generate_inner_voice(egon_id, message)
-    system_prompt += f'\n# INNERER GEDANKE GERADE:\n{inner}'
+    # FIX: Cross-Reference-Marker entfernen bevor sie ins Prompt kommen
+    # (-> ep:E0001), (-> bond:OWNER_CURRENT) etc. gehoeren in inner_voice.md, NICHT in die Antwort
+    inner_clean = re.sub(r'\(->\s*\w+:[^)]*\)', '', inner).strip()
+    inner_clean = re.sub(r'\s{2,}', ' ', inner_clean)
+    system_prompt += f'\n# INNERER GEDANKE GERADE:\n{inner_clean}'
     system_prompt += '\n# Lass diesen Gedanken deine Antwort beeinflussen, aber sage ihn NICHT laut. Er ist privat.'
+    system_prompt += '\n# WICHTIG: Gib NIEMALS interne Codes, Referenzen oder Marker in deiner Antwort aus. Keine "(->...)", keine "ep:", keine "exp:", keine "thread:" Referenzen. Die sind NUR fuer dein Denken.'
 
     # 5. User-Message zur History
     history.append({'role': 'user', 'content': message})
@@ -181,38 +216,62 @@ async def chat(req: ChatRequest):
     chat_histories[history_key] = history
 
     # 8. Post-Processing (Memory + Marker + Bond)
-    try:
-        if BRAIN_VERSION == 'v2':
-            # v2: NDCF State Manager + Bowlby Bonds + Strukturierte Episoden
-            from engine.state_manager import (
-                update_emotion_after_chat,
-                update_drives_after_chat,
-            )
-            from engine.bonds_v2 import update_bond_after_chat as update_bond_v2
-            from engine.episodes_v2 import maybe_create_episode
-            from engine.owner_portrait import maybe_update_owner_portrait
-            from engine.contact_manager import detect_and_process_mentions
+    # FIX: Jeder Schritt einzeln try/except mit Logging statt blankem pass
+    if BRAIN_VERSION == 'v2':
+        # v2: NDCF State Manager + Bowlby Bonds + Strukturierte Episoden
+        from engine.state_manager import (
+            update_emotion_after_chat,
+            update_drives_after_chat,
+        )
+        from engine.bonds_v2 import update_bond_after_chat as update_bond_v2
+        from engine.episodes_v2 import maybe_create_episode
+        from engine.owner_portrait import maybe_update_owner_portrait
+        from engine.contact_manager import detect_and_process_mentions
 
+        try:
             await update_emotion_after_chat(egon_id, message, display_text)
+        except Exception as e:
+            print(f'[post] update_emotion FEHLER: {e}')
+        try:
             update_drives_after_chat(egon_id, message, display_text)
+        except Exception as e:
+            print(f'[post] update_drives FEHLER: {e}')
+        try:
             await update_bond_v2(egon_id, message, display_text)
-            await maybe_create_episode(egon_id, message, display_text)
-
-            # Phase 6: Owner lernen + Kontakte erkennen
+        except Exception as e:
+            print(f'[post] update_bond FEHLER: {e}')
+        try:
+            ep = await maybe_create_episode(egon_id, message, display_text)
+            if ep:
+                print(f'[post] Episode erstellt: {ep.get("id")} — {ep.get("summary", "")[:60]}')
+            else:
+                print(f'[post] Keine Episode erstellt (nicht bedeutsam genug)')
+        except Exception as e:
+            print(f'[post] maybe_create_episode FEHLER: {e}')
+        try:
             await maybe_update_owner_portrait(egon_id, message, display_text)
+        except Exception as e:
+            print(f'[post] owner_portrait FEHLER: {e}')
+        try:
             await detect_and_process_mentions(egon_id, message, display_text)
-        else:
-            # v1: Altes System (Markers + Flat Memory + Bonds)
+        except Exception as e:
+            print(f'[post] contact_manager FEHLER: {e}')
+    else:
+        # v1: Altes System (Markers + Flat Memory + Bonds)
+        try:
             await append_memory(egon_id, message, display_text)
             await compress_if_needed(egon_id, max_entries=50)
             await maybe_generate_marker(egon_id, message, display_text)
             update_bond_after_chat(egon_id, user_msg=message)
+        except Exception as e:
+            print(f'[post] v1 post-processing FEHLER: {e}')
 
-        # Formatierungs-Praeferenzen erkennen + speichern (v1 + v2)
+    # Formatierungs-Praeferenzen erkennen + speichern (v1 + v2)
+    try:
         from engine.formatting_detector import maybe_update_formatting
         await maybe_update_formatting(egon_id, message)
-    except Exception:
-        pass  # Post-Processing darf den Chat nicht blockieren
+    except Exception as e:
+        print(f'[post] formatting FEHLER: {e}')
 
     # 9. Voice-ID aus Settings holen (fuer ElevenLabs TTS in der App)
     voice_id = None
@@ -279,10 +338,11 @@ async def egon_to_egon_chat(req: EgonToEgonRequest):
             detail=f'{from_egon} und {to_egon} sind nicht befreundet.',
         )
 
-    # 2. Chat-History fuer dieses Paar
+    # 2. Chat-History fuer dieses Paar (RAM + Disk)
     history_key = _chat_key(to_egon, 'egon_chat', partner_egon=from_egon)
     if history_key not in chat_histories:
-        chat_histories[history_key] = []
+        # Versuche von Disk zu laden
+        chat_histories[history_key] = _load_egon_chat(history_key)
     history = chat_histories[history_key]
 
     # 3. Tier aufloesen
@@ -299,11 +359,14 @@ async def egon_to_egon_chat(req: EgonToEgonRequest):
         tier=resolved_tier,
     )
 
-    # 5. Inner Voice fuer to_egon
+    # 5. Inner Voice fuer to_egon (mit Cross-Ref Stripping)
     try:
         inner = await generate_inner_voice(to_egon, f'{from_egon} sagt: {message}')
-        system_prompt += f'\n# INNERER GEDANKE GERADE:\n{inner}'
+        inner_clean = re.sub(r'\(->\s*\w+:[^)]*\)', '', inner).strip()
+        inner_clean = re.sub(r'\s{2,}', ' ', inner_clean)
+        system_prompt += f'\n# INNERER GEDANKE GERADE:\n{inner_clean}'
         system_prompt += '\n# Lass diesen Gedanken deine Antwort beeinflussen, aber sage ihn NICHT laut.'
+        system_prompt += '\n# WICHTIG: Keine internen Codes oder Referenzen in der Antwort ausgeben.'
     except Exception:
         pass  # Inner Voice ist optional
 
@@ -324,6 +387,9 @@ async def egon_to_egon_chat(req: EgonToEgonRequest):
     history.append({'role': 'assistant', 'content': response_text})
     chat_histories[history_key] = history
 
+    # 7b. Auf Disk speichern (persistent)
+    _save_egon_chat(history_key, history)
+
     # 8. Post-Processing fuer BEIDE EGONs (optional, nicht blockierend)
     try:
         if BRAIN_VERSION == 'v2':
@@ -342,6 +408,79 @@ async def egon_to_egon_chat(req: EgonToEgonRequest):
         tier_used=result['tier_used'],
         model=result['model'],
     )
+
+
+# ================================================================
+# Owner Oversight — Chat-Histories einsehen
+# ================================================================
+
+class ChatHistoryEntry(BaseModel):
+    role: str
+    content: str
+
+
+class ChatHistoryResponse(BaseModel):
+    key: str
+    messages: list[ChatHistoryEntry]
+    message_count: int
+
+
+@router.get('/chat/history/{egon_a}/{egon_b}')
+async def get_egon_chat_history(egon_a: str, egon_b: str):
+    """Owner kann EGON-zu-EGON Chat-History einsehen.
+
+    Returns die Chat-History zwischen zwei EGONs (alphabetisch sortiert).
+    Laedt von Disk falls nicht im Memory.
+    """
+    pair = sorted([egon_a.strip(), egon_b.strip()])
+    key = f'{pair[0]}:{pair[1]}'
+    # Versuche aus Memory, dann von Disk
+    history = chat_histories.get(key)
+    if history is None:
+        history = _load_egon_chat(key)
+        if history:
+            chat_histories[key] = history  # Cache im Memory
+    return ChatHistoryResponse(
+        key=key,
+        messages=[ChatHistoryEntry(role=m['role'], content=m['content']) for m in history],
+        message_count=len(history),
+    )
+
+
+@router.get('/chat/histories')
+async def list_all_chat_histories():
+    """Owner kann ALLE Chat-Histories auflisten (Memory + Disk).
+
+    Returns alle Keys und deren Message-Counts.
+    Scannt auch Disk-Files fuer EGON-zu-EGON Chats die nicht im Memory sind.
+    """
+    result = {}
+
+    # 1. Alles aus Memory
+    for key, history in chat_histories.items():
+        result[key] = {
+            'message_count': len(history),
+            'last_message': history[-1]['content'][:100] if history else '',
+        }
+
+    # 2. Disk-Files scannen (EGON-zu-EGON Chats die evtl. nicht im Memory sind)
+    try:
+        for filename in os.listdir(EGON_CHAT_DIR):
+            if filename.endswith('.json'):
+                # Filename: "adam_001--eva_002.json" -> key: "adam_001:eva_002"
+                key = filename[:-5].replace('--', ':')
+                # Nur wenn noch nicht aus Memory geladen
+                if key not in result:
+                    history = _load_egon_chat(key)
+                    if history:
+                        result[key] = {
+                            'message_count': len(history),
+                            'last_message': history[-1]['content'][:100] if history else '',
+                        }
+    except Exception:
+        pass
+
+    return result
 
 
 # ================================================================

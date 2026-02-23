@@ -26,22 +26,48 @@ IMMER WEGLASSEN im Prompt:
 import re
 
 
-# Sektionen die IMMER geladen werden
+# Sektionen die IMMER geladen werden — diese formen wer ich BIN.
+# REIHENFOLGE WICHTIG: Kommt zuerst ins Budget. Was hinten steht
+# wird bei Tier 1 evtl. abgeschnitten (6000 Zeichen Limit).
+# Darum: Persoenlichkeit + Sprechstil + Werte + Regeln ZUERST.
 ESSENTIAL_SECTIONS = [
+    'Identitaet',
     'Identität',
-    'Was du bist',
-    'Was dich antreibt',
-    'Tu es. Denk nicht nur drüber nach.',
-    'Wie du mit anderen umgehst',
-    'Was Vertrauen für dich bedeutet',
-    'Hintergrund',
+    'Kern-Persoenlichkeit',       # WER ich bin — Persoenlichkeits-Archetyp
+    'Kern-Persönlichkeit',
+    'Wie ich rede',               # WIE ich rede — KRITISCH fuer Moonshot!
+    'Sprechstil',                 # Fallback fuer v1
+    'Meine Werte',                # WARUM ich so handle
+    'Werte',                      # Fallback fuer v1
+    'Meine Regeln',               # Identitaets-Schutz — NIEMALS als KI etc.
+    'Regeln',                     # Fallback fuer v1
+    'Was ich bin',                # Meine Natur
+    'Was du bist',                # Fallback
+    'Mein Owner ist mein Mensch', # Owner-Loyalitaet
+    'Hintergrund',                # Wer ich bin in der Welt
+    'Was mir bei meiner Geburt mitgegeben wurde',
     'Was dein Schöpfer dir mitgibt',
+    'Was mich antreibt',          # 8 Antriebe (lang — wird bei Tier 1 getrimmt)
+    'Was dich antreibt',          # Fallback
 ]
 
-# Sektionen die nur bei Tier 2+ geladen werden
+# Sektionen die nur bei Tier 2+ geladen werden (mehr Budget vorhanden)
 EXTENDED_SECTIONS = [
+    'Tu es. Denk nicht nur drueber nach.',  # Motivations-Text (44 Zeilen!)
+    'Tu es. Denk nicht nur drüber nach.',
+    'Wie ich mit anderen umgehe',
+    'Wie du mit anderen umgehst',
+    'Was Vertrauen fuer mich bedeutet',
+    'Was Vertrauen für dich bedeutet',
+    'Wie ich trauere',
     'Wie du trauerst',
+    'Was mich sozial macht',
     'Was dich sozial macht',
+    'Mein Pass',
+    'EGON Passport',
+    'Sterblichkeitsbewusstsein',
+    'Meine Philosophie',
+    'Meine Philosophie — Wurzeln meiner Ethik',
     'Deine Philosophie',
 ]
 

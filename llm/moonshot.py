@@ -1,5 +1,26 @@
 import httpx
+import json as _json
 from config import MOONSHOT_API_KEY, MOONSHOT_BASE_URL, MOONSHOT_MODEL
+
+
+def _clean_messages(messages: list[dict]) -> list[dict]:
+    """Bereinige Messages fuer Moonshot API.
+
+    Moonshot (OpenAI-kompatibel) crasht bei:
+    - content: null (muss String sein oder fehlen)
+    - Unbekannte Felder in Messages
+    """
+    cleaned = []
+    for msg in messages:
+        m = dict(msg)
+        # content darf nicht None sein
+        if m.get('content') is None:
+            m['content'] = ''
+        # tool_calls: leere Arrays entfernen
+        if 'tool_calls' in m and not m['tool_calls']:
+            del m['tool_calls']
+        cleaned.append(m)
+    return cleaned
 
 
 async def moonshot_chat(
@@ -7,6 +28,7 @@ async def moonshot_chat(
     messages: list[dict],
     max_tokens: int = 2048,
 ) -> str:
+    clean_msgs = _clean_messages(messages)
     async with httpx.AsyncClient(timeout=60) as client:
         resp = await client.post(
             f'{MOONSHOT_BASE_URL}/chat/completions',
@@ -19,7 +41,7 @@ async def moonshot_chat(
                 'max_tokens': max_tokens,
                 'messages': [
                     {'role': 'system', 'content': system_prompt},
-                ] + messages,
+                ] + clean_msgs,
             },
         )
         resp.raise_for_status()
@@ -42,12 +64,13 @@ async def moonshot_chat_with_tools(
             'raw_message': dict,       # Originale Message fuer History
         }
     """
+    clean_msgs = _clean_messages(messages)
     payload = {
         'model': MOONSHOT_MODEL,
         'max_tokens': max_tokens,
         'messages': [
             {'role': 'system', 'content': system_prompt},
-        ] + messages,
+        ] + clean_msgs,
         'tools': tools,
     }
 
@@ -60,7 +83,10 @@ async def moonshot_chat_with_tools(
             },
             json=payload,
         )
-        resp.raise_for_status()
+        if resp.status_code != 200:
+            body = resp.text
+            print(f'[moonshot] API error {resp.status_code}: {body[:500]}')
+            resp.raise_for_status()
         data = resp.json()
 
     msg = data['choices'][0]['message']
@@ -74,10 +100,9 @@ async def moonshot_chat_with_tools(
             fn = tc.get('function', {})
             args = fn.get('arguments', '{}')
             if isinstance(args, str):
-                import json
                 try:
-                    args = json.loads(args)
-                except json.JSONDecodeError:
+                    args = _json.loads(args)
+                except _json.JSONDecodeError:
                     args = {}
             tool_calls.append({
                 'id': tc.get('id', ''),
