@@ -74,28 +74,63 @@ Benutze workspace_write. TU ES. Beschreib nicht was du tun wuerdest.'''
 # ================================================================
 # Handy-Action Regeln
 # ================================================================
-ACTION_RULES = '''Wenn der User eine Aktion auf seinem Handy ausfuehren will,
-antworte ZUSAETZLICH mit einem JSON-Block am Ende:
+ACTION_RULES = '''Du kannst das Handy deines Owners DIREKT steuern.
+Wenn der User will dass du etwas TUST (anrufen, SMS, Wecker, URL oeffnen etc.),
+MUSST du einen ###ACTION### Block am Ende deiner Antwort anhaengen.
 
+PFLICHT-FORMAT — du MUSST diesen Block anhaengen wenn eine Aktion gewuenscht ist:
+
+###ACTION###
+{{"action": "ACTION_NAME", "params": {{...}}}}
+###END_ACTION###
+
+VERFUEGBARE AKTIONEN:
+- make_call: {{number, contact_name}} — Anruf taetigen
+- send_sms: {{number, body, contact_name}} — SMS senden
+- send_email: {{to, subject, body, contact_name}} — E-Mail senden
+- set_alarm: {{hour, minute, label}} — Wecker stellen
+- set_timer: {{seconds, label}} — Timer setzen
+- open_app: {{package_name}} — App oeffnen
+- add_calendar: {{title, start, end, location}} — Termin erstellen
+- open_url: {{url}} — URL im Browser oeffnen
+- open_maps: {{query}} — Karten/Navigation oeffnen
+- take_photo: {{}} — Kamera oeffnen
+- open_settings: {{}} — Einstellungen oeffnen
+
+KRITISCHE REGELN:
+1. Wenn der User einen NAMEN nennt (z.B. "ruf Ron an"), nutze contact_name.
+   Die App sucht die Nummer automatisch in den Kontakten.
+2. Wenn der User eine NUMMER nennt (z.B. "ruf 0175 an"), nutze number.
+3. Erfinde NIEMALS Telefonnummern oder E-Mail-Adressen!
+4. Du MUSST den ###ACTION### Block anhaengen — ohne ihn passiert NICHTS auf dem Handy!
+5. Nur reden "Ich rufe an" OHNE den Block ist NUTZLOS — die App braucht den Block!
+
+BEISPIELE:
+User: "Ruf Ron an"
+Antwort: Klar, ich ruf Ron an!
+###ACTION###
+{{"action": "make_call", "params": {{"contact_name": "Ron"}}}}
+###END_ACTION###
+
+User: "Ruf 01755965860 an"
+Antwort: Ich waehle die Nummer fuer dich.
+###ACTION###
+{{"action": "make_call", "params": {{"number": "01755965860"}}}}
+###END_ACTION###
+
+User: "Schick Mama ne SMS: bin gleich da"
+Antwort: SMS geht raus!
+###ACTION###
+{{"action": "send_sms", "params": {{"contact_name": "Mama", "body": "bin gleich da"}}}}
+###END_ACTION###
+
+User: "Stell einen Wecker auf 7 Uhr"
+Antwort: Wecker ist gestellt!
 ###ACTION###
 {{"action": "set_alarm", "params": {{"hour": 7, "minute": 0}}}}
 ###END_ACTION###
 
-Moegliche Actions:
-- set_alarm: {{hour, minute, label}}
-- set_timer: {{seconds, label}}
-- send_email: {{to, subject, body}}
-- send_sms: {{to, body}}
-- make_call: {{number}}
-- open_app: {{package_name}}
-- add_calendar: {{title, start, end, location}}
-- open_url: {{url}}
-- open_maps: {{query}}
-- take_photo: {{}}
-- open_settings: {{}}
-
-Antworte IMMER zuerst als du selbst (natuerlich, persoenlich),
-und haenge die Action NUR an wenn der User eine will.'''
+NOCHMAL: Ohne ###ACTION### Block passiert NICHTS. Der Block ist PFLICHT bei jeder Aktion.'''
 
 
 def build_system_prompt_v2(

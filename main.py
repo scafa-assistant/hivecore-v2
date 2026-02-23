@@ -113,6 +113,11 @@ app.include_router(voice_router, prefix='/api')
 Path('static').mkdir(parents=True, exist_ok=True)
 app.mount('/download', StaticFiles(directory='static'), name='static')
 
+# Static Files: Audio (Voice-Messages)
+_audio_dir = Path('/opt/hivecore-v2/audio')
+_audio_dir.mkdir(parents=True, exist_ok=True)
+app.mount('/api/audio', StaticFiles(directory=str(_audio_dir)), name='audio')
+
 # Dynamische WWW-Mounts fuer alle EGONs
 for _eid in _discover_egons():
     _www = Path(EGON_DATA_DIR) / _eid / 'workspace' / 'www'

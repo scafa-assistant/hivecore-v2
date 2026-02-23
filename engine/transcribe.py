@@ -53,9 +53,26 @@ def transcribe(audio_path: str, language: str = 'de') -> str:
     Returns:
         Transkribierter Text oder leerer String bei Fehler
     """
+    import shutil
+
+    # Audio-Datei Info loggen
+    try:
+        file_size = os.path.getsize(audio_path)
+        logger.info(f'Transkription starten: {audio_path} ({file_size} bytes)')
+        if file_size < 100:
+            logger.warning(f'Audio-Datei sehr klein ({file_size} bytes) — vermutlich leer')
+    except OSError as e:
+        logger.error(f'Audio-Datei nicht lesbar: {e}')
+        return ''
+
+    # ffmpeg pruefen (benoetigt von faster-whisper)
+    if not shutil.which('ffmpeg'):
+        logger.error('ffmpeg nicht installiert — benoetigt fuer Audio-Konvertierung!')
+        return ''
+
     model = _load_model()
     if model is None:
-        logger.error('Kein Whisper-Modell verfuegbar')
+        logger.error('Kein Whisper-Modell verfuegbar — faster-whisper installiert?')
         return ''
 
     try:
@@ -67,10 +84,19 @@ def transcribe(audio_path: str, language: str = 'de') -> str:
         )
 
         # Segmente zu Text zusammenfuegen
-        transcript = ' '.join(seg.text.strip() for seg in segments)
-        logger.info(f'Transkription: "{transcript[:100]}..." (Sprache: {info.language}, Dauer: {info.duration:.1f}s)')
+        seg_list = list(segments)
+        transcript = ' '.join(seg.text.strip() for seg in seg_list)
+        logger.info(
+            f'Transkription: "{transcript[:100]}" '
+            f'(Segmente: {len(seg_list)}, Sprache: {info.language}, '
+            f'Dauer: {info.duration:.1f}s, Wahrsch.: {info.language_probability:.2f})'
+        )
+
+        if not transcript.strip():
+            logger.warning(f'Transkription leer trotz {len(seg_list)} Segmenten — Audio evtl. nur Stille/Rauschen')
+
         return transcript.strip()
 
     except Exception as e:
-        logger.error(f'Transkription fehlgeschlagen: {e}')
+        logger.error(f'Transkription fehlgeschlagen: {type(e).__name__}: {e}')
         return ''

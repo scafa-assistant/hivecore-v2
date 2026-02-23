@@ -2,15 +2,18 @@
 
 Ablauf:
 1. Audio-Datei per Multipart-Upload empfangen
-2. Mit faster-whisper transkribieren
-3. Transkript an den normalen Chat-Flow weiterleiten
-4. Antwort + Transkript zurueckgeben
+2. Permanent speichern in /opt/hivecore-v2/audio/
+3. Mit faster-whisper transkribieren
+4. Transkript an den normalen Chat-Flow weiterleiten
+5. Antwort + Transkript + audio_url zurueckgeben
 """
 
 import os
+import shutil
 import tempfile
 import logging
 from datetime import datetime
+from pathlib import Path
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from typing import Optional, Any
 from pydantic import BaseModel
@@ -18,6 +21,10 @@ from engine.transcribe import transcribe
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+
+# Permanentes Audio-Verzeichnis
+AUDIO_DIR = Path('/opt/hivecore-v2/audio')
+AUDIO_DIR.mkdir(parents=True, exist_ok=True)
 
 
 class VoiceResponse(BaseModel):
@@ -28,6 +35,7 @@ class VoiceResponse(BaseModel):
     transcript: str
     action: Optional[dict[str, Any]] = None
     voice_id: Optional[str] = None
+    audio_url: Optional[str] = None  # URL zur gespeicherten Audio-Datei
 
 
 @router.post('/chat/voice', response_model=VoiceResponse)
@@ -48,19 +56,34 @@ async def chat_voice(
 
     logger.info(f'Voice-Upload: {audio.filename} ({len(content)} bytes) von {device_id or "unknown"}')
 
+    audio_url = None
     try:
-        # 2. Transkribieren
+        # 2. Permanent speichern
+        ts = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
+        filename = f'{ts}_{egon_id}{suffix}'
+        permanent_path = AUDIO_DIR / filename
+        shutil.copy2(tmp_path, permanent_path)
+        audio_url = f'/api/audio/{filename}'
+        logger.info(f'Audio gespeichert: {permanent_path}')
+
+        # 3. Transkribieren
         transcript = transcribe(tmp_path, language='de')
+
         if not transcript:
-            raise HTTPException(
-                status_code=422,
-                detail='Transkription fehlgeschlagen — kein Text erkannt'
+            # Audio gespeichert aber kein Text erkannt — trotzdem 200 mit audio_url
+            logger.warning(f'Transkription leer fuer {filename} — sende Default-Antwort')
+            return VoiceResponse(
+                response='Ich konnte deine Sprachnachricht leider nicht verstehen. Versuch es nochmal — sprich deutlich und nah ans Mikrofon.',
+                tier_used=0,
+                model='whisper-fallback',
+                egon_id=egon_id,
+                transcript='',
+                audio_url=audio_url,
             )
 
         logger.info(f'Transkript: "{transcript[:100]}"')
 
-        # 3. An normalen Chat-Flow weiterleiten
-        # Import hier um zirkulaere Imports zu vermeiden
+        # 4. An normalen Chat-Flow weiterleiten
         from api.chat import chat, ChatRequest
 
         chat_req = ChatRequest(
@@ -72,7 +95,7 @@ async def chat_voice(
         )
         chat_result = await chat(chat_req)
 
-        # 4. Response zusammenbauen
+        # 5. Response zusammenbauen
         return VoiceResponse(
             response=chat_result.response,
             tier_used=chat_result.tier_used,
@@ -81,10 +104,11 @@ async def chat_voice(
             transcript=transcript,
             action=chat_result.action,
             voice_id=chat_result.voice_id,
+            audio_url=audio_url,
         )
 
     finally:
-        # Temp-Datei aufraeumen
+        # Temp-Datei aufraeumen (Permanent-Kopie bleibt)
         try:
             os.unlink(tmp_path)
         except OSError:

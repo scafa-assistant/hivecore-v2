@@ -34,6 +34,7 @@ from engine.settings import read_settings
 from llm.router import llm_chat
 from llm.planner import should_use_tools, decide_tier
 from engine.agent_loop import run_agent_loop
+from engine.action_detector import detect_action
 
 router = APIRouter()
 
@@ -210,6 +211,15 @@ async def chat(req: ChatRequest):
 
     # 6. Action Detection — parse ###ACTION### Block
     display_text, action = parse_action(result['content'])
+
+    # 6b. Fallback: Server-seitige Action-Erkennung aus User-Nachricht
+    # Wenn das LLM keinen ###ACTION### Block generiert hat,
+    # erkennen wir die Aktion direkt aus der User-Nachricht (wie Siri).
+    if action is None:
+        detected = detect_action(message)
+        if detected:
+            action = detected
+            print(f'[chat] Server-side action detected: {json.dumps(detected)}')
 
     # 7. Antwort in History (ohne Action-Block)
     history.append({'role': 'assistant', 'content': display_text})
