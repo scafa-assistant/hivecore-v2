@@ -50,9 +50,11 @@ We explicitly do **not** claim:
 - Statistical significance (N=2 agents, no control group)
 - Reproducibility of specific LLM outputs (proprietary APIs)
 
+**Scope**: This paper addresses the **cognitive substrate** — file-persistent organs, prompt compilation, cyclical internal processing, and memory distillation. The EGON client application includes a 3D avatar component for visual embodiment, but the embodiment layer is not evaluated here. We discuss embodiment as planned future work (Section 7.6), ensuring that the cognitive architecture is validated independently before extending to embodied interaction.
+
 ### 1.4 Paper Organization
 
-Section 2 surveys related work. Section 3 describes the architecture. Section 4 details the experimental setup and observations. Section 5 presents results. Section 6 discusses findings and limitations. Section 7 outlines future work. Appendices contain prompt templates, raw data references, and the full limitations analysis.
+Section 2 surveys related work. Section 3 describes the architecture. Section 4 details the experimental setup and observations. Section 5 presents results. Section 6 discusses findings and limitations. Section 7 outlines future work, including an ablation study (7.1) and embodiment research (7.6). Appendices contain prompt templates, raw data references, and the full limitations analysis.
 
 ---
 
@@ -201,9 +203,9 @@ An observational comparison (N=3 question pairs, not statistically significant) 
 
 ### 4.5 Client Interface
 
-Agents are accessed through EgonsDash, a React Native/Expo mobile application featuring real-time chat, 3D avatar embodiment (ReadyPlayerMe), and state visualization.
+Agents are accessed through EgonsDash, a React Native/Expo mobile application featuring real-time chat and cognitive state visualization. The client displays conversation history, active emotional markers, bond status, and inner voice entries — providing a direct window into the agent's organ-based state. A 3D avatar component (ReadyPlayerMe) is integrated for visual embodiment but is not part of the cognitive architecture evaluated in this paper (see Section 7.6).
 
-> **[Figure 2]**: *EgonsDash mobile interface. Replace with screenshot showing: (a) chat conversation with an EGON agent, (b) 3D avatar responding to emotional state, (c) agent state dashboard. Use actual screenshots from device/emulator.*
+> **[Figure 2]**: *EgonsDash mobile interface. Replace with screenshot showing: (a) chat conversation with an EGON agent, (b) agent state visualization (emotions, bonds), (c) cognitive state dashboard. Use actual screenshots from device/emulator.*
 
 ### 4.6 Infrastructure
 
@@ -349,6 +351,22 @@ The current system isolates agents. A planned extension enables direct EGON-to-E
 ### 7.5 Open-Source LLM Replication
 
 Replicate observations using versionable open-source models (LLaMA, Mistral) to address the API nondeterminism limitation and enable exact reproduction.
+
+### 7.6 Embodiment and Proprioception
+
+The present work demonstrates cognitive and affective persistence at the architectural level — the agent's internal state (memories, emotions, bonds, reflections) survives across sessions and evolves over time. This is deliberately scoped to the **cognitive substrate**: file-persistent organs, prompt compilation, and cyclical internal processing.
+
+The immediate next development phase focuses on **embodiment**: coupling the cognitive architecture to a procedurally animated 3D body. The EgonsDash client already integrates a ReadyPlayerMe avatar, but the current connection is cosmetic — the avatar does not yet respond to the agent's cognitive state in a semantically meaningful way.
+
+Future research will investigate:
+
+1. **Affect-to-Animation Mapping**: Translating somatic marker states (emotion type, intensity, decay phase) into procedural animation parameters (posture, gesture speed, facial blend shapes). The research question is whether continuous affect-driven kinematics produce more coherent embodied behavior than discrete emotion-to-animation lookup tables.
+
+2. **Functional Proprioception**: Enabling the agent to perceive and reference its own physical state — body position, gesture history, spatial context — as an additional organ in the cognitive architecture. This would close the perception-action loop: the agent's cognitive state drives the body, and the body's state feeds back into cognition.
+
+3. **Embodied Social Signaling**: In multi-agent scenarios, investigating whether agents develop consistent non-verbal communication patterns when their bodies are coupled to their bond and emotional systems.
+
+This two-phase approach (Paper 1: cognition, Paper 2: embodiment) ensures that each contribution can be evaluated independently. The cognitive architecture must demonstrate coherence without embodiment before embodied extensions can be meaningfully studied.
 
 ---
 
