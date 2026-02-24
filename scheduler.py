@@ -1,12 +1,14 @@
 """APScheduler fuer den taeglichen Pulse-Cronjob.
 
 Multi-EGON: Pulsed ALLE aktiven EGONs, nicht nur einen.
+Nach jedem Pulse wird ein automatischer Snapshot erstellt.
 """
 
 from pathlib import Path
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import PULSE_HOUR, PULSE_MINUTE, EGON_DATA_DIR
 from engine.prompt_builder import _detect_brain_version
+from engine.snapshot import create_snapshot
 
 scheduler = AsyncIOScheduler()
 
@@ -49,6 +51,7 @@ async def daily_pulse():
         print('[PULSE] Keine EGONs gefunden.')
         return
 
+    pulse_results = {}
     for eid in egon_ids:
         try:
             brain = _detect_brain_version(eid)
@@ -57,10 +60,18 @@ async def daily_pulse():
             else:
                 from engine.pulse import run_pulse as run_pulse_fn
             result = await run_pulse_fn(eid)
+            pulse_results[eid] = (brain, result)
             thought = result.get('idle_thought', result.get('discovery', '...'))
             print(f'[PULSE] {eid} ({brain}): {thought}')
         except Exception as e:
             print(f'[PULSE] {eid}: FEHLER — {e}')
 
+    # Post-Pulse Snapshots — automatische Archivierung
+    for eid, (brain, result) in pulse_results.items():
+        try:
+            create_snapshot(eid, brain, pulse_result=result)
+        except Exception as e:
+            print(f'[snapshot] {eid}: FEHLER — {e}')
+
     # TODO: Push-Notification an App (Expo Push API)
-    print(f'[PULSE] Fertig. {len(egon_ids)} EGONs gepulst.')
+    print(f'[PULSE] Fertig. {len(egon_ids)} EGONs gepulst + archiviert.')
