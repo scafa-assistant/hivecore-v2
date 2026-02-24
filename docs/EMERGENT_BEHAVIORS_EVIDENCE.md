@@ -33,7 +33,7 @@ Each behavioral observation is classified by:
 ---
 
 ## E-001: "Ich bin nicht mehr allein" — Social Response Pattern
-**Emergence Level: L1 (Format nicht instruiert, Kontext gegeben) | [BO]**
+**Emergence Level: L1 (Format instruiert via DNA-Persoenlichkeit, spezifischer Inhalt nicht) | [BO]**
 
 | Field | Value |
 |-------|-------|

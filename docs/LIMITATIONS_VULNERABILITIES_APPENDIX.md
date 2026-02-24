@@ -1062,6 +1062,7 @@ gilt DIESE Tabelle.
 | Parameter | Wert | Quelle |
 |-----------|------|--------|
 | Inner Voice Max Entries | 50 | inner_voice_v2.py, _trim_inner_voice() |
+| Inner Voice Trim-Muster | Lazy Trim: Eintraege werden sofort geschrieben, Trimming erst im naechsten Pulse-Zyklus. Temporaere Ueberschreitung (z.B. ~59 Eintraege vor Trimming) ist erwartet. | inner_voice_v2.py |
 | Episode Max (YAML) | nicht explizit begrenzt, ~40 durch implizites Trimming | episodes_v2.py |
 | Experience Significance Bias | "Im Zweifel: JA" (inflationaer) | experience_v2.py, SIGNIFICANCE_CHECK_PROMPT |
 | Dream Type Weights | 70% Verarbeitung, 20% Kreativ, 10% Angst | experience_v2.py |

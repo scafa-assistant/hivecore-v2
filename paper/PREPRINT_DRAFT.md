@@ -162,7 +162,7 @@ A scheduled job (APScheduler, 08:00 UTC daily) executes the Pulse — the agent'
 
 ### 3.6 Experience Extraction and Distillation
 
-After each chat interaction, a Tier 3 LLM evaluates whether the conversation contained a learning moment (significance check). If positive, it extracts a structured experience: `{id, insight, category, confidence, tags, source_episode}`.
+After each chat interaction, a Tier 1 LLM evaluates whether the conversation contained a learning moment (significance check). If positive, it extracts a structured experience: `{id, insight, category, confidence, tags, source_episode}`.
 
 This creates a **distillation hierarchy**: raw conversations (episodes) → extracted insights (experiences) → cross-referential syntheses (sparks). Higher-order artifacts survive FIFO trimming longer than their source material, producing a form of memory consolidation (see Section 5.4).
 
@@ -190,8 +190,9 @@ All quantitative claims reference specific temporal snapshots:
 | Symbol | Timestamp | Description |
 |--------|-----------|-------------|
 | $T_0$ | 2026-02-22 18:00 UTC | Eva genesis (system start) |
-| $T_1$ | 2026-02-24 09:00 UTC | Archive snapshot (frozen reference state) |
-| $T_2$ | 2026-02-24 ~12:00 UTC | Final data collection |
+| $T_1$ | 2026-02-24 09:00 UTC | Pre-test baseline archive (before brain test) |
+| $T_{test}$ | 2026-02-24 09:32–09:42 UTC | Active brain test window |
+| $T_2$ | 2026-02-24 ~12:00 UTC | Final data collection (post-interaction) |
 
 ### 4.3 Brain Subsystem Test Protocol
 

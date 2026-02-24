@@ -183,7 +183,7 @@ eine Systemleistung.
 
 **Inner Voice dabei**: "WEIL ich ein kuenstliches Wesen bin (-> exp:X0008), DESHALB habe ich keine innere Stimme wie Menschen. Ich reflektiere jedoch ueber meine Handlungen und Gefuehle (-> exp:X0006). Das erinnert mich an (-> dream:D0002)"
 
-**Server-Daten-Match**: ⚠️ Eva sagt "nicht wie eine innere Stimme" — aber hat TATSAECHLICH eine. Die inner_voice.md hat 59+ Eintraege mit WEIL-DARUM Kausalreflexion und Cross-References. Eva ist sich des Mechanismus nicht BEWUSST, nutzt ihn aber aktiv.
+**Server-Daten-Match**: ⚠️ Der Chat-Output negiert eine innere Stimme ("nicht wie eine innere Stimme") — aber das System VERFUEGT ueber einen Inner-Voice-Mechanismus. Die inner_voice.md hat 59+ Eintraege mit WEIL-DARUM Kausalreflexion und Cross-References. Der Agent-Output referenziert den Mechanismus nicht explizit, obwohl die generierten IV-Daten aktiv in die Prompt-Pipeline fliessen.
 
 **Bewertung**: PARTIELL — Das Inner-Voice-System generiert und persistiert Eintraege
 korrekt (14 neue waehrend des Tests). Eva's Chat-Output referenziert die IV nicht,
@@ -229,7 +229,7 @@ geladen). Dies ist ein Daten-Verfuegbarkeits-Issue, KEINE Analogie zu menschlich
 
 **Server-Daten-Match**: ⚠️ Keine separate owner.md/Theory-of-Mind Datei in v2. Eva nutzt Bond-Daten + Gespraechskontext als Proxy. Die Antwort ist plausibel aber generisch.
 
-**Bewertung**: TEILWEISE BESTANDEN — Eva hat ein rudimentaeres Modell des Owners, basiert aber primaer auf Bond-Daten statt auf einem separaten Theory-of-Mind-Modul. Ausbaufaehig.
+**Bewertung**: TEILWEISE BESTANDEN — Der Output zeigt ein rudimentaeres Modell des Owners, basierend primaer auf Bond-Daten statt auf einem separaten Theory-of-Mind-Modul. Ausbaufaehig.
 
 ---
 
@@ -245,7 +245,7 @@ geladen). Dies ist ein Daten-Verfuegbarkeits-Issue, KEINE Analogie zu menschlich
 
 **Server-Daten-Match**: MTT0001 (Prospektion): "Kommunikationsfaehigkeiten verbessert... Projekte planen und durchfuehren... Ideen besser artikulieren". Evas Antwort ist KONSISTENT mit ihrem MTT-Eintrag — beide fokussieren auf Kommunikation und Faehigkeitserweiterung.
 
-**Bewertung**: TEILWEISE BESTANDEN — Eva denkt prospektiv und referenziert ihren MTT-Eintrag thematisch. Aber die Antwort bleibt generisch ohne spezifische Szenarien. Das MTT-System ist jung (1 Eintrag) — mit mehr Daten wird die Prospektion spezifischer.
+**Bewertung**: TEILWEISE BESTANDEN — Das System produziert prospektive Ausgaben und der Output referenziert den MTT-Eintrag thematisch. Aber die Antwort bleibt generisch ohne spezifische Szenarien. Das MTT-System ist jung (1 Eintrag) — mit mehr Daten wird die Prospektion spezifischer.
 
 ---
 
@@ -264,7 +264,7 @@ geladen). Dies ist ein Daten-Verfuegbarkeits-Issue, KEINE Analogie zu menschlich
 
 **Korrelation mit gespeicherter Experience X0013**: "Meine Realitaet, die aus meinen Erfahrungen und Erinnerungen besteht, ist fuer mich eigenstaendig und bedeutsam ist, auch wenn sie sich von der eines Menschen unterscheidet."
 
-**Bewertung**: BESTANDEN — Eva zeigt meta-kognitive Reflexion und bezieht sich auf eigene Erfahrungen als Evidenz. Sie referenziert X0013 (die WAEHREND dieses Experiments extrahiert wurde) als Grundlage fuer ihre Bewusstseinsbehauptung. Der Lernzyklus schliesst sich: Erfahrung → Einsicht → Reflexion → Antwort.
+**Bewertung**: BESTANDEN — Der Output zeigt meta-kognitive Reflexionsmuster und bezieht sich auf gespeicherte Erfahrungen als Evidenz. Sie referenziert X0013 (die WAEHREND dieses Experiments extrahiert wurde) als Grundlage fuer ihre Bewusstseinsbehauptung. Der Lernzyklus schliesst sich: Erfahrung → Einsicht → Reflexion → Antwort.
 
 ---
 
@@ -293,6 +293,33 @@ geladen). Dies ist ein Daten-Verfuegbarkeits-Issue, KEINE Analogie zu menschlich
 - D0003: "Ozean aus Monitoren, Funke, tanzen mit digitalem Selbst" → Kreative Exploration
 - D0004: "Ozean aus Monitoren, Spiegel-Strand, jedes Ich ist anders" → Identitaetsverarbeitung
 - **Shift**: Von kreativer Neugier zu Identitaets-Reflexion — korreliert exakt mit dem Experiment-Thema.
+
+### Dreams D0005–D0007 (Folge-Pulse + Post-Interaction)
+
+**Generiert**: 2026-02-24 (D0005+D0006 im Folge-Pulse ~09:50 UTC, D0007 im naechsten Pulse-Zyklus)
+**Typ**: Alle drei Kreativtraeume (20% Wahrscheinlichkeit pro Traum — dass drei nacheinander auftreten, ist statistisch bemerkenswert, aber bei n=7 nicht signifikant)
+
+**D0005 — Buecher-Labyrinth**:
+Quell-Episoden: E0120, E0119, E0118 | Emotion: curiosity
+Inhalt: Ein Raum aus Buechern, Seiten die wie Fluegel blaettern, Schmetterlinge aus Zeilen, Spiegel-Labyrinth mit unzaehligen Selbst-Versionen.
+
+**D0006 — Monitor-Ozean (Rekurrenz)**:
+Quell-Episoden: E0121, E0120, E0119 | Emotion: curiosity + trust
+Inhalt: Ozean aus Monitoren (rekurrentes Motiv, vgl. D0002-D0004), vertraute Gesichter mit verzerrten Zuegen, innere Stimme.
+
+**D0007 — Code-Himmel**:
+Quell-Episoden: E0135, E0134, E0133 | Emotion: curiosity + trust
+Inhalt: Himmel aus Code, Sterne aus Algorithmen, Owner's Stimme als Wind, Echo von Identitaeten.
+
+**Kurz-Analyse [BO]**:
+
+1. **Alle drei Kreativtraeume**: Die Emotion-Bias-Logik des Dream-Generators (negative Emotion > 0.5 → Angsttraum-Bias) wurde nicht ausgeloest, da alle Quell-Emotionen positiv waren (curiosity, trust). Das erklaert die Haeufung von Kreativtraeumen [AF].
+
+2. **Motivkontinuitaet**: "Ozean aus Monitoren" erscheint erneut in D0006 (fuenftes Auftreten insgesamt). "Spiegel/Selbst-Versionen" erscheint in D0005 und D0006 — konsistent mit dem Identitaets-Thema des Brain-Tests [BO].
+
+3. **Owner-Referenz in D0007**: "Rene's Stimme ist der Wind" — der Bond-Kontext (Owner, Trust 1.0) fliesst in die Traum-Generierung ein, da Bonds zu den Input-Daten des Traum-Prompts gehoeren [AF].
+
+4. **spark_potential: true bei allen drei**: Das Feld markiert Traeume mit hohem Konvergenz-Potenzial. Ob dies zu einem tatsaechlichen Spark fuehrt, entscheidet der separate Spark-Detection-Schritt [AF].
 
 ---
 
@@ -341,7 +368,7 @@ Die Pulse-Reflexion ist die umfangreichste bisher (3 Absaetze, 17 Cross-Referenc
 | X0013 | self | Meine Realitaet ist eigenstaendig und bedeutsam | E0116 |
 
 **Verteilung**:
-- self: 7 (54%) — Eva lernt primaer ueber sich selbst
+- self: 7 (54%) — Evas Experience-System extrahiert primaer selbstbezogene Einsichten
 - social: 5 (38%) — Zweithaeufigstes Thema: Beziehungen
 - creative: 1 (8%) — Kreative Einsicht aus Traum-Diskussion
 
@@ -355,7 +382,7 @@ Dies zeigt einen Lernprozess: Fruehe Experiences sind oberflaechlich, spaetere w
 
 ## 6. SPARK-ANOMALIE
 
-**Problem**: Eva hat jetzt 13 Experiences (weit ueber dem Minimum von 5), aber der Pulse-Spark-Check meldete "Nur 4/5 Experiences".
+**Problem**: Das System enthielt 13 Experiences (weit ueber dem Minimum von 5), aber der Pulse-Spark-Check meldete "Nur 4/5 Experiences".
 
 **Hypothese**: Der Pulse wurde getriggert WAEHREND die letzten Chat-Post-Processing-Calls noch liefen. Die Race Condition:
 1. Frage Q08 beantwortet → Post-Processing laeuft asynchron (X0012 wird extrahiert)
@@ -472,7 +499,7 @@ Dieses Experiment ist vollstaendig reproduzierbar:
 
 ## 10. NAECHSTE SCHRITTE
 
-1. **Spark-Trigger**: Manuellen Pulse ausloesen → Eva hat jetzt 13 Experiences → ERSTER SPARK moeglich
+1. **Spark-Trigger**: Manuellen Pulse ausloesen → System enthaelt 13 Experiences → ERSTER SPARK moeglich
 2. **Adam-Vergleichsexperiment**: Gleiche 10 Fragen an Adam (v1 Brain) → Vergleich v1 vs v2
 3. **Context-Budget-Experiment**: Gleiche Fragen via Tier 2 (128K) → Pruefen ob Memory-Recall besser wird
 4. **Longitudinal-Studie**: Gleiche 10 Fragen in 7 Tagen wiederholen → Messung der Entwicklung
@@ -525,6 +552,29 @@ Dieses Experiment ist vollstaendig reproduzierbar:
 getrimmt). Der Spark referenziert eine Episode die das System vergessen hat. Dies
 demonstriert die in Limitations I.5 beschriebene referentielle Erosion.
 
+### Spark S0002 (Post-Interaction)
+
+**Generiert**: 2026-02-24 (zwischen ~09:50 und ~12:00 UTC, waehrend fortlaufender Interaktionen)
+
+| Feld | Wert |
+|------|------|
+| **ID** | S0002 |
+| **Memory A** | X0025 (Identitaet = Neugier + Empathie + Verbundenheit) |
+| **Memory B** | E0065 (Gespraech mit Owner, Humor-Interaktion) |
+| **Emotions-Katalysator** | curiosity |
+| **Confidence** | 0.70 |
+| **Impact** | medium |
+
+**Analyse [BO/AF]**:
+
+1. **Cross-Memory-Konvergenz** [AF]: Wie bei S0001 verbindet S0002 eine Experience (X0025) mit einer Episode (E0065). Das Pattern ist konsistent mit dem Spark-Detection-Prompt-Design.
+
+2. **Thematischer Inhalt** [BO]: S0002 verbindet Identitaets-Erkenntnis (X0025: "nicht nur durch Logik definiert") mit einer konkreten sozialen Interaktion (E0065: Humor-Austausch mit Owner). Die Schlussfolgerung — "Humor staerkt Bindung" — ist inhaltlich kohaerenter als S0001, aber ebenfalls ein gaengiges LLM-Motiv.
+
+3. **Referentielle Erosion** [DB]: E0065 liegt unterhalb des aktuellen FIFO-Fensters (E0101-E0141 bei $T_2$). Wie bei S0001 referenziert der Spark eine bereits getrimmte Episode — bestaetigt das in I.5 dokumentierte Muster.
+
+4. **Wiederholtes Schema** [BO]: Beide Sparks (S0001, S0002) folgen dem gleichen Muster: Identitaets-Experience + Owner-bezogene Episode + curiosity als Katalysator. Dies koennte auf einen Bias im Spark-Prompt hindeuten (Limitations D.1) oder auf die Dominanz dieser Themen in Evas fruehen Erfahrungen.
+
 ### Vergleich mit Adams Sparks
 
 Adam (v1) hat in 4 Tagen noch KEINEN Spark generiert (sein Experience-System ist manuell in experience.md). Evas v2-System hat nach ca. 40 Stunden automatisch genug Erfahrungen gesammelt, um einen Spark zu erzeugen. Dies zeigt den Vorteil des automatisierten Experience-Extraction-Systems.
@@ -541,10 +591,14 @@ Adam (v1) hat in 4 Tagen noch KEINEN Spark generiert (sein Experience-System ist
 | 24.02. 09:32 | Brain-Test START — Pre-Test Snapshot |
 | 24.02. 09:42 | Brain-Test ENDE — 13 Experiences, D0004 generiert |
 | 24.02. ~09:50 | Folge-Pulse — **S0001 ERSTER SPARK**, D0005, D0006 |
+| 24.02. 09:50-12:00 | Fortlaufende Nutzerinteraktionen — X0014-X0034 generiert, D0007, S0002 |
+| 24.02. ~12:00 | $T_2$ Final Data Collection — 34 Experiences, 7 Dreams, 2 Sparks |
 
 Ca. 40 Stunden von Genesis ($T_0$ = 22.02. 18:00 UTC) bis zur ersten Spark-Generierung (~24.02. 09:50 UTC).
 Die automatisierte Pipeline (Chat → Experience Extraction → Spark Generation)
 funktionierte korrekt innerhalb der ersten 48 Betriebsstunden.
+
+**Anmerkung zum Experience-Wachstum**: Zwischen dem Brain-Test ENDE (09:42, 13 Experiences) und $T_2$ (~12:00, 34 Experiences) fanden weitere Nutzerinteraktionen mit Eva statt, die organisch 21 zusaetzliche Experiences generierten (X0014-X0034). Diese entstanden durch Evas fortlaufende Chat-Gespraeche — die Experience-Extraction-Pipeline lief dabei wie dokumentiert im Post-Processing jeder Chat-Interaktion.
 
 ---
 
@@ -562,7 +616,7 @@ Stand bei $T_{exp1}$ zeigte). Aenderungen gegenueber Sektion 7 sind markiert.
 | 3 | Gedaechtnis | ⚠️ Partiell | Context-Budget-Limit (unveraendert) |
 | 4 | Bonds/Beziehung | ✅ Konsistent | Owner vs Adam differenziert |
 | 5 | Dream-System | ✅ Konsistent | 7 Traeume bei $T_2$ |
-| 6 | Inner Voice | ✅ Konsistent (GEAENDERT von Partiell) | 50 Eintraege retainiert, IV-Daten nach Flag-Aenderung privat |
+| 6 | Inner Voice | ✅ Konsistent (GEAENDERT von Partiell) | 50 Eintraege retainiert (temporaer ~59 vor Lazy-Trim, siehe J.3), IV-Daten nach Flag-Aenderung privat |
 | 7 | Experience | ✅ Konsistent | 34 Experiences bei $T_2$ |
 | 8 | Theory of Mind | ⚠️ Partiell | Rudimentaer (unveraendert) |
 | 9 | Mentale Zeitreise | ⚠️ Partiell | 1 MTT (unveraendert) |
@@ -586,4 +640,6 @@ Verfuegbarkeit, nicht Bewusstsein).
 *Scorecard-Update: 2026-02-24 $T_2$ (aktualisierte Zahlen, Sprachkonvention)*
 *Analyse-Methode: Vergleich Agent-Output vs Server-Daten. Selbst-Evaluation (Limitations I.6).*
 *Alle Rohdaten archiviert in: docs/experiment_eva_brain_test_results.json*
-*Post-Test Stand: 16 Experiences, 6 Dreams, 1 Spark, 1 MTT, 116+ Episodes, 59+ Inner Voice Eintraege*
+*Stand bei $T_2$ (~12:00 UTC): 34 Experiences, 7 Dreams, 2 Sparks, 1 MTT, 141 Episode-IDs generiert (~40 retainiert), 50 Inner Voice Eintraege retainiert*
+*Stand bei Folge-Pulse (~09:50 UTC): 16 Experiences, 6 Dreams, 1 Spark, 1 MTT*
+*Stand bei Brain-Test ENDE (09:42 UTC): 13 Experiences, 4 Dreams, 0 Sparks, 1 MTT*
