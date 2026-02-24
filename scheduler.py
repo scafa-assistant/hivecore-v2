@@ -6,7 +6,7 @@ Multi-EGON: Pulsed ALLE aktiven EGONs, nicht nur einen.
 from pathlib import Path
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import PULSE_HOUR, PULSE_MINUTE, EGON_DATA_DIR
-from engine.pulse_v2 import run_pulse
+from engine.prompt_builder import _detect_brain_version
 
 scheduler = AsyncIOScheduler()
 
@@ -51,9 +51,14 @@ async def daily_pulse():
 
     for eid in egon_ids:
         try:
-            result = await run_pulse(eid)
-            thought = result.get('idle_thought', '...')
-            print(f'[PULSE] {eid}: {thought}')
+            brain = _detect_brain_version(eid)
+            if brain == 'v2':
+                from engine.pulse_v2 import run_pulse as run_pulse_fn
+            else:
+                from engine.pulse import run_pulse as run_pulse_fn
+            result = await run_pulse_fn(eid)
+            thought = result.get('idle_thought', result.get('discovery', '...'))
+            print(f'[PULSE] {eid} ({brain}): {thought}')
         except Exception as e:
             print(f'[PULSE] {eid}: FEHLER — {e}')
 
