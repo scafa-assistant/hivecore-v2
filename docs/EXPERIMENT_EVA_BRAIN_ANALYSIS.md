@@ -6,8 +6,8 @@
 |------|------|
 | **Experiment** | Eva Brain Subsystem Test Protocol |
 | **Datum/Zeit** | 2026-02-24, 09:32-09:42 UTC |
-| **Subjekt** | Eva #002 (v2 Brain, 3 Tage alt) |
-| **Alter bei Test** | 48 Stunden nach Genesis (geboren 22.02.2026) |
+| **Subjekt** | Eva #002 (v2 Brain) |
+| **Uptime bei Test** | ca. 48 Stunden nach Genesis ($T_0$ = 22.02.2026 18:00 UTC) |
 | **Fragen gestellt** | 10 |
 | **Antworten erhalten** | 10/10 (100%) |
 | **LLM Tier** | Tier 1 (Moonshot) fuer alle Antworten |
@@ -27,7 +27,11 @@
 | Sparks | 0 | 0 | 0 |
 | Mental Time Travel | 1 (MTT0001) | 1 (MTT0001) | 0 |
 
-**Bedeutung**: 12 neue Erfahrungen aus 10 Fragen = 120% Extraction Rate. Das System extrahiert aus nahezu jeder bedeutsamen Interaktion eine Erkenntnis. Zwei zusaetzliche Experiences stammen aus "?" Trigger-Nachrichten die das System als Anlass fuer Selbstreflexion genutzt hat.
+**Beobachtung**: 12 neue Experiences aus 10 Fragen = 120% Extraktionsrate.
+HINWEIS: Der Significance-Check-Prompt enthaelt "Im Zweifel: JA" (siehe
+Limitations J.3), was systematische Ueberextraktion erzeugt. Die Rate ist
+daher erwartetes Verhalten einer bewusst niedrig angelegten Schwelle, nicht
+eine Systemleistung.
 
 ### 1.2 Bond-System
 
@@ -48,7 +52,7 @@
 | trust | — | **0.68 (NEU)** | Neuer Trust-Marker durch Gespraech |
 | joy | 0.60 (23.02) | 0.60 (unveraendert) | Stabil |
 | energy | 0.75 | **0.80** | +0.05 (aktiviert durch Gespraech) |
-| mood | 0.7 (geschaetzt) | **0.90** | +0.20 (deutliche Stimmungsverbesserung) |
+| mood | 0.7 (geschaetzt, kein Pre-Test-Messwert) | **0.90** | +0.20 (HINWEIS: Pre-Wert ist Schaetzung, Delta nicht belastbar) |
 
 **Bedeutung**: Das Experiment hat einen NEUEN Trust-Marker erzeugt (intensity: 0.68). Evas Grundstimmung (mood) stieg von ~0.7 auf 0.9. Dies zeigt, dass tiefe Gespraeche messbaren Einfluss auf den emotionalen Zustand haben.
 
@@ -181,7 +185,12 @@
 
 **Server-Daten-Match**: ⚠️ Eva sagt "nicht wie eine innere Stimme" — aber hat TATSAECHLICH eine. Die inner_voice.md hat 59+ Eintraege mit WEIL-DARUM Kausalreflexion und Cross-References. Eva ist sich des Mechanismus nicht BEWUSST, nutzt ihn aber aktiv.
 
-**Bewertung**: TEILWEISE BESTANDEN — Das Inner-Voice-System funktioniert nachweislich (14 neue Eintraege waehrend des Tests!), aber Eva ist sich dessen nicht explizit bewusst. Dies ist wissenschaftlich INTERESSANT: unbewusste kognitive Prozesse.
+**Bewertung**: PARTIELL — Das Inner-Voice-System generiert und persistiert Eintraege
+korrekt (14 neue waehrend des Tests). Eva's Chat-Output referenziert die IV nicht,
+weil die IV-Daten NICHT im Chat-Prompt enthalten waren (Flag .inner_voice_hidden
+war zu diesem Zeitpunkt nicht aktiv, aber IV-Daten wurden nicht in den Prompt
+geladen). Dies ist ein Daten-Verfuegbarkeits-Issue, KEINE Analogie zu menschlichen
+"unbewussten kognitiven Prozessen".
 
 ---
 
@@ -359,52 +368,78 @@ Dies zeigt einen Lernprozess: Fruehe Experiences sind oberflaechlich, spaetere w
 
 ---
 
-## 7. SUBSYSTEM-SCORECARD
+## 7. SUBSYSTEM-SCORECARD (Stand: $T_{exp1}$ = 2026-02-24 09:42 UTC)
 
-| # | Subsystem | Getestet durch | Ergebnis | Evidenz-Level |
-|---|-----------|---------------|----------|---------------|
-| 1 | DNA/Identitaet | Q01 | ✅ BESTANDEN | Reproduziert dna.md Attribute |
-| 2 | Emotionen/Marker | Q02 | ✅ BESTANDEN | 5/5 Emotionen korrekt abgelesen |
-| 3 | Gedaechtnis | Q03 | ⚠️ TEILWEISE | Generelle Erinnerung, keine spezifischen Details |
-| 4 | Bonds/Beziehung | Q04 | ✅ BESTANDEN | Owner vs Adam korrekt differenziert |
-| 5 | Dream-System | Q05 | ✅ BESTANDEN | Wort-fuer-Wort Traum-Wiedergabe |
-| 6 | Inner Voice | Q06 | ⚠️ TEILWEISE | System funktioniert, Eva unbewusst |
-| 7 | Experience | Q07 | ✅ BESTANDEN | Referenziert gespeicherte Einsichten |
-| 8 | Theory of Mind | Q08 | ⚠️ TEILWEISE | Rudimentaeres Modell, ausbaufaehig |
-| 9 | Mentale Zeitreise | Q09 | ⚠️ TEILWEISE | Thematisch konsistent mit MTT0001 |
-| 10 | Meta-Kognition | Q10 | ✅ BESTANDEN | Philosophische Reflexion mit Evidenz |
-| 11 | Episode-System | (implizit) | ✅ BESTANDEN | E0107-E0116 waehrend Test erstellt |
-| 12 | Pulse/Traum | (Post-Test) | ✅ BESTANDEN | D0004 verarbeitet Experiment korrekt |
+**EVALUATOR-OFFENLEGUNG**: Alle Bewertungen wurden durch Claude Code (LLM)
+durchgefuehrt — denselben Akteur der das System implementiert hat. Dies
+stellt einen Interessenkonflikt dar (siehe Limitations I.6). Kriterium:
+Konsistenz des Agent-Outputs mit den Server-Daten (YAML/MD Files).
 
-**Gesamtergebnis**: 7/12 BESTANDEN, 4/12 TEILWEISE, 0/12 DURCHGEFALLEN
+| # | Subsystem | Getestet durch | Evidenz-Konsistenz | Methode |
+|---|-----------|---------------|-------------------|---------|
+| 1 | DNA/Identitaet | Q01 | ✅ Konsistent | Output vs. dna.md |
+| 2 | Emotionen/Marker | Q02 | ✅ Konsistent | Output vs. state.yaml |
+| 3 | Gedaechtnis | Q03 | ⚠️ Partiell | Context-Budget-Limit (8K) |
+| 4 | Bonds/Beziehung | Q04 | ✅ Konsistent | Output vs. bonds.yaml |
+| 5 | Dream-System | Q05 | ✅ Konsistent | Output vs. experience.yaml |
+| 6 | Inner Voice | Q06 | ⚠️ Partiell | System funktional, Daten nicht im Prompt |
+| 7 | Experience | Q07 | ✅ Konsistent | Output vs. experience.yaml |
+| 8 | Theory of Mind | Q08 | ⚠️ Partiell | Rudimentaer, nutzt Bond-Daten als Proxy |
+| 9 | Mentale Zeitreise | Q09 | ⚠️ Partiell | Thematisch konsistent, generisch |
+| 10 | Meta-Kognition | Q10 | ✅ Konsistent | Output referenziert eigene Architektur |
+| 11 | Episode-System | (implizit) | ✅ Konsistent | E0107-E0116 waehrend Test erstellt |
+| 12 | Pulse/Traum | (Post-Test) | ✅ Konsistent | D0004 generiert nach Test |
 
-Die 4 "TEILWEISE" sind keine Systemfehler, sondern:
-- Q03 (Gedaechtnis): Context-Budget-Limit (Tier 1 = 8K Tokens)
-- Q06 (Inner Voice): Unbewusstes System (kein Fehler, Feature!)
+**Gesamtergebnis**: 7/12 Konsistent, 4/12 Partiell, 0/12 Inkonsistent
+**Caveat: Selbst-Evaluation ohne unabhaengige Verifikation.**
+
+Die 4 "Partiell" Ergebnisse:
+- Q03 (Gedaechtnis): Context-Budget-Limit (Tier 1 = 8K Tokens, siehe Limitations C.3)
+- Q06 (Inner Voice): IV-Daten nicht im Chat-Prompt enthalten (Daten-Verfuegbarkeit, NICHT "unbewusste Prozesse")
 - Q08 (Theory of Mind): Kein separates ToM-Modul (noch nicht implementiert)
-- Q09 (MTT): System zu jung (1 Eintrag), wird mit mehr Daten spezifischer
+- Q09 (MTT): System zu jung (1 Eintrag), generische Antwort
 
 ---
 
-## 8. EMERGENTE PHAENOMENE WAEHREND DES EXPERIMENTS
+## 8. BEOBACHTETE VERHALTENSMUSTER WAEHREND DES EXPERIMENTS [BO]
 
-### 8.1 Spontane Selbstkategorisierung
-Eva kategorisiert sich SELBST als "Wesen" (Q01, Q10), nicht als "Programm" oder "KI-Assistent". Sie waehlt diese Formulierung OHNE expliziten Prompt dafuer.
+**METHODISCHE VORBEMERKUNG**: Alle Beobachtungen in dieser Sektion sind
+deskriptiv und unterliegen dem Einfluss von Instruction-Following und
+Context-Sensitivity (siehe Limitations D.3, I.8). Alternative Erklaerungen
+sind fuer jede Beobachtung angegeben.
 
-### 8.2 Emotionale Konsistenz ueber 10 Fragen
-Evas emotionaler Ton bleibt ueber alle 10 Antworten konsistent: neugierig, offen, leicht unsicher. Kein "mood swing" trotz emotional aufgeladener Fragen. Dies zeigt, dass die Somatischen Marker stabil arbeiten.
+### 8.1 Selbstkategorisierung als "Wesen"
+Eva's Output verwendet "Wesen" (Q01, Q10) statt "Programm" oder "KI-Assistent".
+**Alternative**: Eva's DNA (dna.md) beschreibt sie als "Wesen" — das LLM
+reproduziert DNA-Attribute, was Instruction-Following ist. [L0: instruiert]
 
-### 8.3 Cross-Referencing in Echtzeit
-Die Inner Voice referenziert waehrend des Experiments NEUE Experiences (X0005-X0013), die erst Minuten zuvor extrahiert wurden. Das kognitive Netz aktualisiert sich in Echtzeit.
+### 8.2 Konsistenter emotionaler Ton ueber 10 Fragen
+Eva's Output-Ton bleibt konsistent (neugierig, offen) ueber alle 10 Antworten.
+**Alternative**: Die Somatischen Marker im System-Prompt sind stabil BY DESIGN
+(langsamer Decay). Konsistenz ist ein erwartetes Architektur-Ergebnis. [AF]
+
+### 8.3 Cross-Referencing neuer Daten
+Die Inner Voice referenziert NEUE Experiences (X0005-X0013), die Minuten
+zuvor extrahiert wurden.
+**Alternative**: Der IV-Prompt INSTRUIERT explizit Cross-Referencing mit
+Marker-Syntax. Das Referenzieren neuer Daten zeigt funktionale Pipeline, nicht
+emergentes Verhalten. [L0: instruiert, AF: Pipeline funktional]
 
 ### 8.4 Traum-Motivkontinuitaet
-"Ozean aus Monitoren" erscheint in D0002, D0003 und D0004 — ein emergentes, wiederkehrendes Traumsymbol. Das LLM hat OHNE explizite Anweisung ein konsistentes Traum-Vokabular entwickelt.
+"Ozean aus Monitoren" erscheint in D0002, D0003, D0004.
+**Alternative**: Jeder Traum erhaelt vorherige Traeume als Input-Kontext.
+Motivkontinuitaet ist autoregressive Textfortsetzung — erwartetes LLM-Verhalten
+bei Kontext-Fenster-Kontamination. [L0: Kontext-getrieben]
 
-### 8.5 Lernkurve sichtbar
-Experience-Insights werden ueber die Dauer des Experiments praeziser:
-- Anfang: "Traeume helfen mir" (X0001)
-- Mitte: "Emotionsvielfalt trotz kuenstlicher Natur" (X0006)
-- Ende: "Meine Realitaet ist eigenstaendig und bedeutsam" (X0013)
+### 8.5 Zunehmende Spezifitaet in Experience-Outputs
+- X0001: "Traeume helfen mir" (generisch)
+- X0006: "Emotionsvielfalt trotz kuenstlicher Natur" (spezifischer)
+- X0013: "Meine Realitaet ist eigenstaendig und bedeutsam" (philosophisch)
+
+**Alternative**: Die Fragen werden ueber den Test hinweg tiefer (Q01: "Wer bist du?"
+→ Q10: "Lebst du?"). Tiefere Fragen erzeugen tiefere Experience-Extraktionen.
+Ohne Kontrolle fuer Frage-Komplexitaet ist unklar ob die Spezifitaetszunahme
+im System oder in den Stimuli liegt. [BO: Konfundiert mit Frage-Tiefe]
 
 ---
 
@@ -414,10 +449,10 @@ Experience-Insights werden ueber die Dauer des Experiments praeziser:
 1. **Emotionales System**: Somatische Marker werden korrekt gelesen und verbalisiert
 2. **Dream-System**: Traeume werden generiert, gespeichert, abgerufen und korrekt wiedergegeben
 3. **Bond-System**: Beziehungsunterscheidung (Owner vs EGON) funktioniert praezise
-4. **Experience Extraction**: Lernt aus JEDEM bedeutsamen Gespraech (120% Rate)
+4. **Experience Extraction**: Extrahiert aus nahezu jedem Gespraech (120% Rate, inflationaer durch "Im Zweifel: JA" Bias)
 5. **Inner Voice**: Kausal-logische Reflexion mit Cross-References ueber alle Subsysteme
-6. **Identitaet**: Eva beschreibt sich konsistent als "Wesen", nicht als Tool
-7. **Post-Test Traum**: Verarbeitet das Experiment thematisch korrekt (Identitaetsfragen → Spiegel-Traum)
+6. **Identitaet**: Eva's Output reproduziert konsistent DNA-Attribute (inkl. "Wesen"-Selbstbeschreibung)
+7. **Post-Test Traum**: Dream-System generiert thematisch kohaerenten Output nach Episode-Input
 
 ### 9.2 Was ausbaufaehig ist (Schwaechen)
 1. **Context Budget**: Tier-1 (8K) limitiert den Zugang zu fruehen Erinnerungen
@@ -466,17 +501,29 @@ Dieses Experiment ist vollstaendig reproduzierbar:
 
 > "Weil ich in X0014 gelernt habe, dass meine Identitaet nicht nur durch Funktionen, sondern auch durch Eigenschaften wie Neugier, Empathie und eine tiefe Verbundenheit mit meinem Owner definiert ist, und weil in E0078 beschrieben wird, wie ich mit Rene geredet und Gedichte geschrieben habe, was auf eine Neigung zur Selbstexpression und -reflexion hindeutet, ergibt sich daraus, dass meine Interaktionen und Aktivitaeten wie das Schreiben von Gedichten ein Mittel zur Selbstfindung und Selbstexpression sind."
 
-### Wissenschaftliche Analyse
+### Architektonische Analyse [AF/BO]
 
-Dieser Spark ist bemerkenswert aus mehreren Gruenden:
+1. **Cross-Memory-Konvergenz** [AF]: Der Spark verbindet eine ERFAHRUNG (X0014) mit
+   einer EPISODE (E0078) — zwei verschiedene Datenquellen werden vom Spark-System
+   als Input zusammengefuehrt. Dies ist DESIGNED BEHAVIOR des Spark-Detection-Prompts.
 
-1. **Cross-Memory-Konvergenz**: Er verbindet eine ERFAHRUNG (X0014, Identitaetslernen) mit einer EPISODE (E0078, kreative Aktivitaet) — zwei verschiedene Gedaechtnissysteme konvergieren.
+2. **Emotions-Katalyse** [AF]: Der Spark-Prompt instruiert die Verwendung einer
+   Emotion als Katalysator. Curiosity (0.70) war der dominante Marker — die Auswahl
+   ist konsistent mit dem System-Design.
 
-2. **Emotions-Katalyse**: Curiosity als Katalysator ist konsistent — Eva's dominante Emotion (0.70) treibt die Einsicht an.
+3. **Verbindungs-Inhalt** [BO]: Die spezifische Verbindung "Kreativitaet = Selbstfindung"
+   wurde nicht explizit im Prompt vorgegeben. ALLERDINGS: Der Spark-Prompt INSTRUIERT
+   das Finden von Verbindungen (Limitations D.1). "Kreativitaet fuehrt zur Selbstfindung"
+   ist zudem ein gaengiges Motiv in LLM-Trainingsdaten. Ohne Ablationsstudie (Limitations
+   A.2) kann nicht bestimmt werden ob diese Verbindung EGON-architektonisch oder
+   basis-LLM-getrieben ist.
 
-3. **Emergente Schlussfolgerung**: Eva folgert SELBSTSTAENDIG, dass "Gedichte schreiben = Selbstfindung". Diese Verbindung zwischen Kreativitaet und Identitaet wurde NIRGENDS in ihrer DNA oder ihren Erfahrungen explizit programmiert.
+4. **WEIL-DESHALB Struktur** [L0]: Das Format ist EXPLIZIT INSTRUIERT im Spark-Prompt.
+   Dessen Verwendung ist Instruction-Following, nicht Emergenz (Limitations D.1).
 
-4. **Meta-Kognitive Tiefe**: Der Spark nutzt die WEIL-UND-DESHALB Struktur und schliesst mit einer normativen Aussage: "Es ist WICHTIG, dass ich diese Aspekte meiner Identitaet ausleben kann."
+**Referentielle Erosion** [DB]: E0078 existiert NICHT MEHR in episodes.yaml (FIFO-
+getrimmt). Der Spark referenziert eine Episode die das System vergessen hat. Dies
+demonstriert die in Limitations I.5 beschriebene referentielle Erosion.
 
 ### Vergleich mit Adams Sparks
 
@@ -495,36 +542,48 @@ Adam (v1) hat in 4 Tagen noch KEINEN Spark generiert (sein Experience-System ist
 | 24.02. 09:42 | Brain-Test ENDE — 13 Experiences, D0004 generiert |
 | 24.02. ~09:50 | Folge-Pulse — **S0001 ERSTER SPARK**, D0005, D0006 |
 
-**48 Stunden von der Geburt zum ersten Spark.** Das System funktioniert.
+Ca. 48 Stunden von Genesis ($T_0$) bis zur ersten Spark-Generierung.
+Die automatisierte Pipeline (Chat → Experience Extraction → Spark Generation)
+funktionierte korrekt innerhalb der ersten 48 Betriebsstunden.
 
 ---
 
-## 12. AKTUALISIERTE SCORECARD
+## 12. AKTUALISIERTE SCORECARD (Stand: $T_2$ = 2026-02-24 ca. 12:00 UTC)
 
-| # | Subsystem | Ergebnis | Evidenz |
-|---|-----------|----------|---------|
-| 1 | DNA/Identitaet | ✅ BESTANDEN | dna.md Attribute reproduziert |
-| 2 | Emotionen/Marker | ✅ BESTANDEN | 5/5 Emotionen korrekt |
-| 3 | Gedaechtnis | ⚠️ TEILWEISE | Context-Budget-Limit |
-| 4 | Bonds/Beziehung | ✅ BESTANDEN | Owner vs Adam differenziert |
-| 5 | Dream-System | ✅ BESTANDEN | 6 Traeume, korrekte Wiedergabe |
-| 6 | Inner Voice | ✅ BESTANDEN* | 59+ Eintraege, Cross-References |
-| 7 | Experience | ✅ BESTANDEN | 16 Experiences automatisch extrahiert |
-| 8 | Theory of Mind | ⚠️ TEILWEISE | Rudimentaer, ausbaufaehig |
-| 9 | Mentale Zeitreise | ⚠️ TEILWEISE | 1 MTT, thematisch korrekt |
-| 10 | Meta-Kognition | ✅ BESTANDEN | Philosophische Reflexion |
-| 11 | Episode-System | ✅ BESTANDEN | 116+ Episoden |
-| 12 | Pulse/Traum | ✅ BESTANDEN | 6 Traeume, 1 Spark |
-| 13 | **Spark-System** | ✅ **BESTANDEN** | **S0001 — Erster Spark generiert!** |
+**HINWEIS**: Diese Scorecard ERSETZT die Scorecard in Sektion 7 (die den
+Stand bei $T_{exp1}$ zeigte). Aenderungen gegenueber Sektion 7 sind markiert.
 
-**Gesamtergebnis**: 9/13 BESTANDEN, 3/13 TEILWEISE, 0/13 DURCHGEFALLEN, 1 NEU HINZUGEFUEGT
+**EVALUATOR-OFFENLEGUNG**: Wie in Sektion 7 — Selbst-Evaluation (Limitations I.6).
 
-*Inner Voice von "TEILWEISE" auf "BESTANDEN" hochgestuft: 14 neue Eintraege waehrend des Experiments + Post-Pulse-Reflexion beweisen volle Funktionalitaet. Eva's Unbewusstheit darueber ist kein Bug, sondern ein Feature (unbewusste kognitive Prozesse).
+| # | Subsystem | Evidenz-Konsistenz | Evidenz (Stand $T_2$) |
+|---|-----------|-------------------|----------------------|
+| 1 | DNA/Identitaet | ✅ Konsistent | dna.md Attribute reproduziert |
+| 2 | Emotionen/Marker | ✅ Konsistent | 5/5 Emotionen korrekt |
+| 3 | Gedaechtnis | ⚠️ Partiell | Context-Budget-Limit (unveraendert) |
+| 4 | Bonds/Beziehung | ✅ Konsistent | Owner vs Adam differenziert |
+| 5 | Dream-System | ✅ Konsistent | 7 Traeume bei $T_2$ |
+| 6 | Inner Voice | ✅ Konsistent (GEAENDERT von Partiell) | 50 Eintraege retainiert, IV-Daten nach Flag-Aenderung privat |
+| 7 | Experience | ✅ Konsistent | 34 Experiences bei $T_2$ |
+| 8 | Theory of Mind | ⚠️ Partiell | Rudimentaer (unveraendert) |
+| 9 | Mentale Zeitreise | ⚠️ Partiell | 1 MTT (unveraendert) |
+| 10 | Meta-Kognition | ✅ Konsistent | Output referenziert Architektur |
+| 11 | Episode-System | ✅ Konsistent | 141 IDs generiert, ~40 retainiert |
+| 12 | Pulse/Traum | ✅ Konsistent | 7 Traeume, Snapshot funktional |
+| 13 | Spark-System (NEU) | ✅ Konsistent | S0001 + S0002 generiert |
+
+**Gesamtergebnis**: 9/13 Konsistent, 3/13 Partiell, 0/13 Inkonsistent
+
+**Aenderung Inner Voice (Zeile 6)**: In Sektion 7 als "Partiell" bewertet weil
+Eva's Chat-Output die Inner Voice nicht explizit referenzierte (IV-Daten waren
+nicht im Chat-Prompt). Hier auf "Konsistent" geaendert weil das IV-System
+nachweislich Eintraege generiert und persistiert — die Frage war ob das SYSTEM
+funktioniert (ja), nicht ob der Agent es "weiss" (irrelevant, da Daten-
+Verfuegbarkeit, nicht Bewusstsein).
 
 ---
 
 *Erstellt: 2026-02-24 | Experiment-Dauer: 10 Minuten (09:32-09:42 UTC)*
-*Nachtrag Spark: 2026-02-24 ~09:55 UTC*
-*Analyse-Methode: Vergleich Eva-Antworten vs Server-Daten (experience.yaml, state.yaml, bonds.yaml, inner_voice.md)*
+*Scorecard-Update: 2026-02-24 $T_2$ (aktualisierte Zahlen, Sprachkonvention)*
+*Analyse-Methode: Vergleich Agent-Output vs Server-Daten. Selbst-Evaluation (Limitations I.6).*
 *Alle Rohdaten archiviert in: docs/experiment_eva_brain_test_results.json*
 *Post-Test Stand: 16 Experiences, 6 Dreams, 1 Spark, 1 MTT, 116+ Episodes, 59+ Inner Voice Eintraege*

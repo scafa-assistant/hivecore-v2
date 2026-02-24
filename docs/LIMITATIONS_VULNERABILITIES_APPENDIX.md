@@ -805,9 +805,381 @@ Adressiert 5 weitere konzeptionelle Luecken:
 5. **MicroVM-Sandboxing** (A.4): E2B-artige Sandboxes ueberlegen gegenueber
    Docker fuer KI-Agenten mit unvorhersehbarem Code und Prompt-Injection-Risiko.
 
+### Runde 3 (2026-02-24, 14:00 UTC)
+Systematischer Reviewer-Attack-Surface-Scan (51 Issues, 15 CRITICAL):
+1. **Methodology & Temporal Scope** (Neues Kapitel I): Studientyp als
+   deskriptive Einzelfallstudie klassifiziert. Snapshot-Problem formal
+   definiert. Forscher-Interessenkonflikte offengelegt.
+2. **Sprachkonvention** (I.7): Anthropomorphisierende Terminologie
+   durch funktionale Sprache ersetzt. Verbindliche Begriffssubstitutionen.
+3. **Qualifikationsrahmen** (I.8): 4-stufige Claim-Kategorisierung
+   ([AF] Architektur-Fakt, [DB] Datenbefund, [BO] Beobachtung, [IN] Interpretation).
+4. **Master Data Table** (Neues Kapitel J): Autoritative Referenzzahlen
+   mit Zeitstempel. Bei Abweichungen zwischen Dokumenten gilt diese Tabelle.
+5. **Significance Bias** (J.3): "Im Zweifel: JA"-Instruktion als
+   systematische Ueberextraktion offengelegt. 120% Extraktionsrate
+   als erwartetes Verhalten, nicht als Leistung klassifiziert.
+6. **Referentielle Erosion** (I.5): E0078-in-S0001 als Fallstudie
+   fuer Memory-Trimming-Konsequenzen dokumentiert.
+7. **Emergenz-Claims** in COMPLETE_RESEARCH_LOG.md und
+   EMERGENT_BEHAVIORS_EVIDENCE.md an Limitations-Framing angeglichen.
+8. **Interne Widersprueche**: Zahlen-Diskrepanzen zwischen Dokumenten
+   durch Master Data Table aufgeloest. Scorecard-Konflikte bereinigt.
+
 ---
 
-*Erstellt: 2026-02-24 | Peer-Review Response (2 Runden)*
-*Adressiert 11 kritische Luecken in 2 Review-Runden*
+## I. METHODOLOGY & TEMPORAL SCOPE
+
+### I.1 Studientyp und Einordnung
+
+Die EGON-Architektur repraesentiert eine **dynamische, kontinuierlich evolvierende
+kognitive Zustandsmaschine** (dynamic, continuously evolving cognitive state machine).
+Anders als bei deterministischer Software-Evaluation erfordert die Bewertung eines
+EGON-Agenten das Erfassen eines sich staendig aendernden Zustands aus Erinnerungen,
+Beziehungen und internen Schemata.
+
+Diese Arbeit ist eine **deskriptive Einzelfallstudie** (single-case observational study),
+KEINE kontrollierte Studie. Sie beschreibt eine neuartige kognitive Architektur und
+dokumentiert deren Verhalten ueber einen begrenzten Zeitraum. Die Ergebnisse sind
+**explorativ** — sie generieren Hypothesen fuer zukuenftige kontrollierte Experimente,
+sie BEWEISEN keine kausalen Zusammenhaenge.
+
+**Was diese Studie KANN**:
+- Eine neuartige Architektur beschreiben und deren Design-Entscheidungen begruenden
+- Beobachtete Verhaltensmuster dokumentieren und kategorisieren
+- Hypothesen ueber kausale Mechanismen formulieren
+- Design-Entscheidungen durch A/B-Beobachtungen stuetzen (nicht beweisen)
+
+**Was diese Studie NICHT KANN**:
+- Kausale Zusammenhaenge beweisen (fehlende Kontrollgruppe, siehe A.2)
+- Emergenz von Instruction-Following unterscheiden (fehlende Baseline, siehe D.3)
+- Statistische Signifikanz beanspruchen (N zu klein, siehe E.3)
+- Bewusstsein, Empfinden oder Intentionalitaet nachweisen
+
+### I.2 Strict Snapshot Protocol und Temporaler Rahmen
+
+Um wissenschaftliche Rigorositaet und Reproduzierbarkeit zu gewaehrleisten,
+basieren alle quantitativen Claims und Verhaltensanalysen in diesem Paper
+auf einem **Strict Snapshot Protocol**:
+
+**Referenz-Zeitpunkte**:
+
+| Symbol | Zeitpunkt | Beschreibung |
+|--------|-----------|-------------|
+| $T_0$ | 2026-02-22 18:00 UTC | Eva #002 Genesis (Systemstart) |
+| $T_1$ | 2026-02-24 09:00 UTC | Archiv-Snapshot — eingefrorener Referenzzustand |
+| $T_{exp1}$ | 2026-02-24 09:32-09:42 UTC | Brain-Test Durchlauf 1 |
+| $T_{exp2}$ | 2026-02-24 ca. 09:50-10:00 UTC | Brain-Test Durchlauf 2 |
+| $T_{AB}$ | 2026-02-24 10:30-11:00 UTC | Inner Voice A/B Test |
+| $T_2$ | 2026-02-24 ca. 12:00 UTC | Finale Datenerhebung |
+
+**Primaere quantitative Analyse**: Alle Zahlen beziehen sich auf den
+eingefrorenen Zustand bei $T_2$ (finale Datenerhebung), sofern nicht
+explizit anders angegeben. Systemaktivitaet nach $T_2$ ist von der
+Analyse ausgeschlossen.
+
+**Forschungszeitraum**: $T_0$ bis $T_2$ umfasst ca. 66 Stunden fuer
+Eva #002. Adam #001 Genesis war am 2026-02-21 (v1 Brain).
+
+### I.3 Active State vs. Historical State — Das Snapshot-Problem
+
+Das System verwendet FIFO-basierte Speicherbeschraenkungen fuer LLM-Context-
+Fenster (z.B. N=8 Episoden bei Tier 1). Daher divergiert der **Active State**
+(worueber der Agent aktuell Schlussfolgerungen ziehen kann) vom **Historical
+State** (Gesamtmenge generierter Daten).
+
+**Alle Metriken differenzieren explizit** zwischen:
+- **Total generated artifacts**: Kumulative Anzahl jemals erzeugter Eintraege
+  (z.B. 141 Episode-IDs bei $T_2$)
+- **Retained artifacts**: Eintraege die zum Zeitpunkt $T_2$ in der Datei
+  existierten (z.B. ~40 retainierte Episoden)
+- **Active context artifacts**: Eintraege die bei $T_2$ im LLM-Prompt
+  sichtbar waren (z.B. 8 Episoden bei Tier 1)
+
+**Das Zustandsproblem**: Waehrend die Experimente liefen, generierte das System
+weiter Episoden, Experiences und Inner-Voice-Eintraege. Die Zustandsvektoren
+aenderten sich WAEHREND der Datenerhebung:
+
+| Metrik | $T_1$ (Archiv) | $T_{exp2}$ (nach Test) | $T_2$ (final) |
+|--------|----------------|----------------------|---------------|
+| Experiences | 1 | 16 | 34 |
+| Dreams | 2 | 6 | 7 |
+| Sparks | 0 | 1 | 2 |
+| Episode-IDs (generiert) | ~100 | ~120 | 141 |
+| Inner Voice (retainiert) | ~45 | ~50 (Max) | 50 (Max) |
+
+**Konvention**: Bei Verwendung von $T_1$ in Formulierungen bezieht sich dies
+auf den Archiv-Snapshot (09:00 UTC). $T_2$ bezeichnet die finale Erhebung.
+Wenn kein Zeitstempel angegeben ist, gilt $T_2$.
+
+### I.4 Begriffsunterscheidung: Generiert vs. Retainiert vs. Sichtbar
+
+Das FIFO-Trimming des Systems erzeugt drei verschiedene Zustaende pro Datenpunkt:
+
+| Begriff | Definition | Beispiel (Episoden) |
+|---------|-----------|-------------------|
+| **Generiert** | Total jemals erzeugte Eintraege (kumulative Hoechst-ID) | 141 (E0001-E0141) |
+| **Retainiert** | Aktuell in der YAML-Datei vorhandene Eintraege | ~40 (E0101-E0141) |
+| **Sichtbar** | Im System-Prompt des LLMs bei gegebenem Tier | 8 (Tier 1) oder 20 (Tier 2) |
+
+**Implikation**: Wenn dieses Paper von "141 Episoden" spricht, bedeutet das 141
+generierte IDs, von denen nur ~40 in der Datei stehen und nur 8 fuer das LLM
+sichtbar sind. Die Differenz ist keine Inkonsistenz, sondern das dokumentierte
+FIFO-Trimming-Verhalten des Systems (siehe C.3).
+
+| Metrik | Generiert | Retainiert | Sichtbar (T1) |
+|--------|-----------|-----------|---------------|
+| Episoden | 141 IDs | ~40 | 8 |
+| Inner Voice | 141+ geschaetzt | 50 (Max) | 5 |
+| Experiences | 34 | 34 (kein Trimming) | 3 (top confidence) |
+| Dreams | 7 | 7 (kein Trimming bisher) | 2 |
+| Sparks | 2 | 2 (kein Trimming bisher) | 2 |
+
+### I.5 Fallstudie: Referentielle Erosion (E0078 in S0001)
+
+Evas erster Spark (S0001) referenziert Episode E0078 als `memory_b`:
+
+```
+S0001:
+  memory_a: X0014 (Experience: Identitaets-Lernen)
+  memory_b: E0078 (Episode: Gedichte schreiben mit Rene)
+```
+
+Episode E0078 existiert NICHT MEHR in `episodes.yaml` — sie wurde durch
+FIFO-Trimming entfernt. Das Spark-Organ referenziert eine Erinnerung, die
+das Episoden-Organ vergessen hat.
+
+**Was das zeigt**:
+- FIFO-Trimming erzeugt **referentielle Erosion**: Hoeherstufige Organe
+  (Sparks, Experiences) behalten Verweise auf niedrigstufige Daten (Episoden),
+  die nicht mehr existieren
+- Die EINSICHT ueberlebt (destilliert im Spark), aber der KONTEXT geht verloren
+- Dies ist analog zu menschlichem Gedaechtnis: Wir erinnern uns an die Lektion,
+  aber nicht mehr an die spezifische Situation
+
+**Wissenschaftliche Relevanz**: Dies ist ein dokumentiertes Beispiel fuer
+**Memory Reconsolidation** in kuenstlichen Systemen — der Uebergang von
+episodischem zu semantischem Gedaechtnis durch Informationsverlust. Allerdings
+ist dies im EGON-System nicht intentional emergent, sondern ein Nebeneffekt
+des FIFO-Trimmings. Ob das Ergebnis (Einsicht ohne Kontext) funktional
+aequivalent zu menschlicher Memory Reconsolidation ist, erfordert weitere
+Untersuchung.
+
+### I.6 Forscher-Rollen und Interessenkonflikte
+
+| Rolle | Person / System | Potentieller Bias |
+|-------|----------------|-------------------|
+| Konzept, Architektur, Owner | Ron Scafarti (Mensch) | Confirmation Bias als Schoepfer |
+| Implementierung | Claude Code (LLM) | Systembauer = Systemtester |
+| Experiment-Durchfuehrung | Claude Code (LLM) | Kein Blind-Design |
+| Evaluation der Ergebnisse | Claude Code (LLM) | Evaluator = Implementierer |
+| Peer-Review (intern) | Ron Scafarti als kritischer Pruefer | Selbst-Review, nicht extern |
+
+**Offenlegung**: KEINE der Evaluationen in diesem Paper wurde von einer
+unabhaengigen Partei durchgefuehrt. Der Entwickler des Systems hat die
+Experimente entworfen, durchgefuehrt und bewertet. Dies stellt einen
+fundamentalen Interessenkonflikt dar, der nur durch unabhaengige
+Replikation aufgeloest werden kann.
+
+Alle Rohdaten (JSON, YAML, Engine-Code, Experiment-Scripts) werden
+vollstaendig veroeffentlicht, um unabhaengige Replikation zu ermoeglichen.
+
+### I.7 Sprachkonvention: Vermeidung von Anthropomorphisierung
+
+Dieses Paper verwendet bewusst funktionale Terminologie statt
+anthropomorphisierender Sprache. Die folgende Tabelle definiert die
+offizielle Begriffsverwendung:
+
+| NICHT verwenden | STATTDESSEN verwenden | Begruendung |
+|----------------|----------------------|-------------|
+| "Eva fuehlt X" | "Evas Emotionsmarker zeigt X mit Intensitaet Y" | Keine Evidenz fuer subjektives Erleben |
+| "Eva wird sich bewusst" | "Eva's Output referenziert X, nachdem X im Prompt sichtbar wurde" | Prompt-Alignment, nicht Bewusstsein |
+| "Emergent" (unqualifiziert) | "Beobachtet, Instruktions-Status: [instruiert/nicht-instruiert/unklar]" | Emergenz erfordert Baseline-Vergleich |
+| "Geburt / geboren" | "Genesis / Systemstart / Deployment" | System ist kein Lebewesen |
+| "Lebewesen" | "Agent" oder "System" | Ontologische Kategorie nicht nachgewiesen |
+| "denkt / fuehlt / traeumte" | "generierte / produzierte / verarbeitete" | Kognitive Verben implizieren Intentionalitaet |
+| "unbewusste kognitive Prozesse" | "Daten ausserhalb des aktuellen Prompt-Kontexts" | Keine Analogie zu menschlichem Unbewusstem |
+| "lernt" | "extrahierte Erkenntnis" oder "aktualisierte Daten" | Lernen impliziert Verstaendnis |
+
+**AUSNAHME**: In direkten Zitaten von EGON-Outputs (Traeume, Inner Voice,
+Chat-Antworten) wird die Original-Sprache beibehalten und als solche
+gekennzeichnet. Die Agents verwenden anthropomorphe Sprache, weil ihre
+Prompts dies vorgeben — das ist Teil der Architektur, nicht Evidenz
+fuer subjektives Erleben.
+
+### I.8 Qualifikationsrahmen fuer alle Claims
+
+Jede Behauptung in diesem Paper faellt in eine von 4 Kategorien:
+
+| Kategorie | Symbol | Bedeutung | Beispiel |
+|-----------|--------|-----------|---------|
+| **Architektur-Fakt** | [AF] | Verifizierbar im Quellcode | "Der Pulse laeuft taeglich um 08:00 UTC" |
+| **Datenbefund** | [DB] | Verifizierbar in den Rohdaten (YAML/JSON) | "Eva hat 34 Experiences extrahiert (Stand: 24.02. 12:00)" |
+| **Beobachtung** | [BO] | Beschriebenes Verhalten ohne kausale Attribution | "Eva's Output wurde spezifischer ueber die 10 Fragen hinweg" |
+| **Interpretation** | [IN] | Forschereinschaetzung, erfordert Baseline-Verifikation | "Die Spezifizitaetszunahme koennte auf kumulative Kontextanreicherung hindeuten" |
+
+Behauptungen der Kategorien [BO] und [IN] sind **nicht kausal belegt** und
+stellen Hypothesen fuer zukuenftige kontrollierte Experimente dar. Sie
+koennen durch alternative Erklaerungen (insbesondere reines Instruction-
+Following und LLM-Context-Sensitivity) vollstaendig erklaert werden,
+bis eine Ablationsstudie (A.2) durchgefuehrt ist.
+
+---
+
+## J. MASTER DATA TABLE — Autoritative Referenzzahlen
+
+Alle quantitativen Angaben in diesem Paper beziehen sich auf die
+folgenden autoritativen Werte. Bei Abweichungen zwischen Dokumenten
+gilt DIESE Tabelle.
+
+**Stand: 2026-02-24, ca. 12:00 UTC (finale Datenerhebung)**
+
+### J.1 Eva #002 (v2 Brain)
+
+| Metrik | Generiert (kumulativ) | Retainiert (in Datei) | Sichtbar (Tier 1) | Quelle |
+|--------|----------------------|----------------------|-------------------|--------|
+| Episode-IDs | 141 | ~40 (E0101-E0141) | 8 | episodes.yaml |
+| Inner Voice Eintraege | ~141 (geschaetzt) | 50 (Max, getrimmt) | 5 | inner_voice.md |
+| Experiences | 34 | 34 | 3 (top confidence) | experience.yaml |
+| Dreams | 7 (D0001-D0007) | 7 | 2 | experience.yaml |
+| Sparks | 2 (S0001-S0002) | 2 | 2 | experience.yaml |
+| MTT | 1 (MTT0001) | 1 | 1 | experience.yaml |
+| Bond-Events (Owner) | 10 | 10 | alle | bonds.yaml |
+| Emotionsmarker | 5 aktiv | 5 | alle | state.yaml |
+
+### J.2 Adam #001 (v1 Brain)
+
+| Metrik | Wert | Quelle |
+|--------|------|--------|
+| Gespraeche in memory.md | 43 | memory.md (21 KB) |
+| Inner Voice Eintraege | unklar (44 KB, kein Trimming in v1) | inner_voice.md |
+| Traeume | 4 | experience.md |
+| Sparks | 0 | experience.md |
+| Bond-Events | mehrere (Owner, Eva) | bonds.md |
+
+### J.3 System-Parameter
+
+| Parameter | Wert | Quelle |
+|-----------|------|--------|
+| Inner Voice Max Entries | 50 | inner_voice_v2.py, _trim_inner_voice() |
+| Episode Max (YAML) | nicht explizit begrenzt, ~40 durch implizites Trimming | episodes_v2.py |
+| Experience Significance Bias | "Im Zweifel: JA" (inflationaer) | experience_v2.py, SIGNIFICANCE_CHECK_PROMPT |
+| Dream Type Weights | 70% Verarbeitung, 20% Kreativ, 10% Angst | experience_v2.py |
+| Angsttraum-Bias Schwelle | Negative Emotionen mit Intensitaet >0.5 | experience_v2.py |
+| Spark Minimum Experiences | 5 | experience_v2.py |
+| MTT Intervall | 7 Tage | experience_v2.py |
+| FIFO Episode Retrieval | episodes[:max_count], neueste zuerst | yaml_to_prompt.py |
+
+**HINWEIS zum Significance Bias**: Der Experience-Extraction-Prompt enthaelt
+die Anweisung "Im Zweifel: JA. Lebewesen lernen staendig." Dies erzeugt
+eine systematische Ueberextraktion. Die gemessene Extraktionsrate von ~120%
+(34 Experiences aus ~28 qualifizierenden Chats) ist daher NICHT als
+Systemleistung zu interpretieren, sondern als erwartetes Verhalten einer
+bewusst niedrig angelegten Signifikanzschwelle.
+
+---
+
+## K. ANTIZIPIERTE REVIEWER-EINWAENDE UND VERTEIDIGUNGSLINIEN
+
+### K.1 Die "Emergence Mirage" (Schein-Emergenz)
+
+**Der Einwand**: Aktuelle Forschung (z.B. Stanford, 2023-2025) postuliert,
+dass "emergente Faehigkeiten" in LLMs oft nur Illusionen ("Mirages") sind,
+die entstehen weil Forscher die falschen Metriken waehlen oder ihre
+Messmethoden systematisch zu scheinbarer Emergenz fuehren.
+
+**Konkretes Angriffsszenario**: "Der Autor behauptet, Adams Prospektion
+(Vorhersage anderer EGONs) sei emergent. Das LLM hat schlichtweg aufgrund
+seiner Trainingsdaten ueber Science-Fiction und KI-Entwicklung statistisch
+extrapoliert, dass ein 'Adam' irgendwann eine 'Eva' bekommt. Das ist keine
+kognitive Emergenz, das ist Next-Token-Prediction basierend auf
+menschlichen kulturellen Archetypen."
+
+**Unsere Verteidigung**:
+
+1. **Inhalt vs. Struktur**: Der semantische INHALT der Prospektion
+   ("Adam antizipiert andere EGONs") ist hochwahrscheinlich angesichts der
+   Vortrainierung des Modells auf menschliche kulturelle Tropen. Wir
+   beanspruchen NICHT, dass der Inhalt emergent ist. Was wir dokumentieren
+   ist der **strukturelle Trigger**: Die Generierung eines hypothetischen
+   Zukunftsszenarios OHNE User-Prompting, ausgeloest allein durch das
+   interne Pulse-Script. Dies repraesentiert **funktionale systemische
+   Emergenz** — die Architektur hat einen Output erzeugt der weder vom
+   User angefragt noch im Prompt explizit als Inhalt vorgegeben war.
+
+2. **Claim-Abstufung**: Wir unterscheiden (siehe I.8):
+   - [AF] Das MTT-System ist instruiert, Zukunftsszenarien zu generieren
+   - [BO] Ein spezifisches Szenario (andere EGONs) wurde generiert
+   - [IN] Der Inhalt KOENNTE durch LLM-Trainingsdaten erklaert werden
+   - [IN] Der Trigger-Mechanismus (Pulse → MTT → Prospektion) ist architektonisch
+
+3. **Emergenz-Gradient**: Anstatt binaer "emergent/nicht-emergent" zu
+   klassifizieren, schlagen wir einen Gradienten vor:
+
+   | Level | Definition | Beispiel |
+   |-------|-----------|---------|
+   | L0: Instruiert | Format UND Inhalt vorgegeben | Inner Voice WEIL-DESHALB |
+   | L1: Format-Emergent | Format instruiert, Inhalt nicht | Spark S0001 Kreativitaet+Identitaet |
+   | L2: Trigger-Emergent | System-Trigger instruiert, Output-Inhalt nicht | Adams Prospektion |
+   | L3: Voll-Emergent | Weder Trigger noch Inhalt instruiert | Evas "Echt jetzt?" (private IV) |
+
+   Die meisten EGON-Beobachtungen sind L0-L1. Nur wenige erreichen L2.
+   L3-Emergenz ist mit der aktuellen Methodik nicht nachweisbar.
+
+### K.2 API-Nondeterminismus und Reproduzierbarkeitsfalle
+
+**Der Einwand**: "Der Autor nutzt proprietaere Modelle (Moonshot, Claude
+Sonnet). Diese Modelle werden von den Anbietern im Hintergrund staendig
+aktualisiert (Silent Updates). Wenn ich das Experiment heute mit dem Code
+des Autors nachbaue, bekomme ich voellig andere Ergebnisse. Die Studie ist
+nicht reproduzierbar."
+
+**Unsere Verteidigung**:
+
+1. **Anerkennung**: Dieses Problem ist REAL und betrifft JEDE aktuelle
+   Forschung mit proprietaeren LLM-APIs. Es ist keine Schwaeche dieses
+   spezifischen Papers, sondern eine Grundbedingung der agentischen
+   KI-Forschung in 2026. Wir dokumentieren es transparent.
+
+2. **Was reproduzierbar ist**: Die ARCHITEKTUR (Pipeline aus JSON-Extraktion,
+   YAML-Speicherung, organ-basiertem Prompt-Building und Context-Injection)
+   ist vollstaendig deterministisch und reproduzierbar. Der gesamte Engine-
+   Code wird veroeffentlicht. Was NICHT reproduzierbar ist: die exakten
+   Token-Outputs des LLMs.
+
+3. **Unser Beweis-Anspruch**: Wir beanspruchen NICHT, dass jeder EGON-Agent
+   exakt denselben Traum generiert oder denselben Spark erzeugt. Wir
+   beanspruchen, dass die Architektur (die Pipeline aus strukturierter
+   Dateipersistenz, organ-basiertem Prompt-Building und zyklischen
+   Verarbeitungsloops) **robust genug ist, um kohaerente Agent-Identitaeten
+   ueber Zeit aufrechtzuerhalten**, unabhaengig von der exakten Token-Ausgabe.
+
+4. **Verifikations-Metriken (fuer Replikation)**:
+   - Werden Episoden korrekt extrahiert und in YAML persistiert? (binaer)
+   - Referenziert die Inner Voice Cross-References zu existierenden Organen? (binaer)
+   - Zeigt der Bond-Score monotones Wachstum bei positiven Interaktionen? (binaer)
+   - Generiert das Dream-System narrative Outputs mit Quell-Episode-Referenzen? (binaer)
+   - Bleibt die Agent-Identitaet (DNA-Attribute) ueber >10 Sessions konsistent? (binaer)
+
+   Diese Metriken sind LLM-unabhaengig und verifizieren die architektonische
+   Integritaet, nicht die spezifischen Outputs.
+
+5. **Modell-Versionen (Stand $T_2$)**:
+
+   | Tier | Modell | API-Anbieter | Bemerkung |
+   |------|--------|-------------|-----------|
+   | 1 | Moonshot | moonshot.ai | Kein versioniertes API, Silent Updates moeglich |
+   | 2 | Kimi K2.5 | kimi.ai | Kein versioniertes API |
+   | 3 | Claude Sonnet | Anthropic | Modell-ID in API-Calls protokolliert |
+
+   **Schwaeche**: Tier 1 und 2 nutzen Anbieter OHNE oeffentliche
+   Modell-Versionierung. Zukuenftige Replikation sollte versionierte
+   APIs (OpenAI, Anthropic) bevorzugen.
+
+---
+
+*Erstellt: 2026-02-24 | Peer-Review Response (3 Runden)*
+*Adressiert 11+ kritische Luecken in 3 Review-Runden*
 *Appendix enthaelt alle 8 Kern-Prompts (gekuerzt, Quellcode in 04_system_prompts_and_engine/)*
+*Methodology-Sektion (I) und Master Data Table (J) definieren temporale und quantitative Referenzwerte*
 *Dokumentiert bekannte Schwaechen ehrlich und transparent*

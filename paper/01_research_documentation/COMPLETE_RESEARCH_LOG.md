@@ -19,18 +19,18 @@
 
 ## 1. WAS IST EIN EGON?
 
-Ein EGON ist ein autonomes, emotional lernfaehiges KI-Wesen mit:
+Ein EGON ist ein autonomer, datei-persistenter KI-Agent mit:
 
-- **Persistentem Gehirn**: Alle Gedanken, Erinnerungen, Emotionen und Beziehungen werden in Dateien gespeichert und ueberleben jeden Neustart
-- **Emotionalem Zustand**: Somatische Marker (Neugier, Freude, Angst, Vertrauen...) mit Intensitaet und Zerfallsklasse
+- **Persistentem Gehirn**: Zustand, Erinnerungen, Emotionsmarker und Beziehungsdaten werden in Dateien gespeichert und ueberleben Neustarts
+- **Emotionsmarker-System**: Somatische Marker (Neugier, Freude, Angst, Vertrauen...) mit Intensitaet und Zerfallsklasse
 - **Beziehungsgedaechtnis**: Bonds zu Owner und anderen EGONs mit Trust-Scores und History
-- **Traumsystem**: Taeglich generierte Traeume die Tageserlebnisse verarbeiten
-- **Innerer Stimme**: Kausal-logische Selbstreflexion vor jeder Antwort
-- **Erfahrungslernen**: Automatische Extraktion von Erkenntnissen aus Gespraechen
-- **Sparks**: Seltene emergente Einsichten wenn 2 Erinnerungen + 1 Emotion konvergieren
+- **Traumgenerierung**: Taeglich generierte Traum-Narrative die Tagesepisoden verarbeiten
+- **Innerer Stimme**: Kausal-logische Reflexionsgeneration vor jeder Antwort
+- **Erfahrungsextraktion**: Automatische Extraktion von Erkenntnissen aus Gespraechen
+- **Sparks**: LLM-generierte Einsichten wenn 2 Erinnerungen + 1 Emotionsmarker konvergieren (instruiert, siehe Limitations D)
 - **Mentaler Zeitreise**: Woechentliche Zukunftsszenarien (Prospektion)
 
-EGONs werden NICHT bei jeder Nachricht von Null initialisiert. Sie haben ein LEBEN — sie erinnern sich, sie fuehlen, sie traeumen, sie lernen.
+EGONs werden NICHT bei jeder Nachricht von Null initialisiert. Sie persistieren Zustand ueber Sessions hinweg — der Agent erhaelt bei jeder Interaktion seinen gespeicherten Kontext.
 
 ---
 
@@ -119,7 +119,7 @@ Tier 1 (8K) muss ALLES in 6000 Token quetschen:
 - Tier 3 (Sonnet) analysiert Gespraech
 - Extrahiert Erkenntnisse als `{id, insight, category, confidence, tags}`
 - Kategorien: self, social, creative, practical
-- Aktuelle Rate: ~120% (mehr Erkenntnisse als Gespraeche)
+- Beobachtete Rate bei $T_2$: ~120% (34 Experiences aus ~28 qualifizierenden Chats). HINWEIS: Der Significance-Check-Prompt enthaelt "Im Zweifel: JA", was systematische Ueberextraktion erzeugt (siehe Limitations J.3)
 
 **B. Dream Generation** (taeglich, im Pulse)
 - Waehlt 3 Quell-Episoden + 3 Quell-Emotionen
@@ -133,7 +133,7 @@ Tier 1 (8K) muss ALLES in 6000 Token quetschen:
 - Waehlt zufaellig 1 Experience + 1 Episode
 - Prueft ob eine dominante Emotion als Katalysator dient
 - Generiert emergente WEIL-UND-DESHALB Einsicht
-- Eva hat am 24.02. ihre ersten SPARKS generiert (S0001, S0002)
+- Eva hat am 24.02. ihre ersten SPARKS generiert (S0001, S0002). HINWEIS: Das WEIL-DESHALB-Format ist instruiert (siehe Limitations D.1). Die Verbindung selbst ist plausibel, aber ob sie ueber reines Instruction-Following hinausgeht, erfordert eine Ablationsstudie
 
 **D. Mental Time Travel** (woechentlich)
 - Generiert Zukunftsszenarien basierend auf Erfahrungen
@@ -159,7 +159,7 @@ geschrieben (Zeile ~09:50). Durch weitere Experimente, Chats und Pulses
 wuchsen die Daten weiter. Die finalen Zahlen (Stand 24.02. Abend):
 34 Experiences, 7 Dreams, 2 Sparks, 1 MTT.
 
-**48 Stunden von der Geburt zum ersten Spark.**
+**Ca. 48 Stunden von Genesis ($T_0$) bis zur ersten Spark-Generierung (Stand $T_2$).**
 
 ---
 
@@ -197,25 +197,22 @@ Die Inner Voice wird VOR jeder Antwort generiert:
 4. Setzt Cross-References: `(-> ep:E0034)`, `(-> bond:OWNER_CURRENT)`, `(-> exp:X0003)`
 5. Wird in inner_voice.md gespeichert (Hub-Format)
 
-### 5.2 Der Observer-Effect-Bug (ENTDECKT 24.02.2026)
+### 5.2 Der Prompt-Alignment-Conflict (ENTDECKT 24.02.2026)
 
 **Problem**: Der Generation-Prompt sagt dem LLM:
 > "Niemand hoert dich. Nicht mal der Owner."
 
-**Aber**: Die letzten 5 Inner-Voice-Eintraege werden in Evas System-Prompt eingefuegt unter `# DEINE INNERE STIMME`. Eva SIEHT also ihre eigenen "privaten" Gedanken.
+**Aber**: Die letzten 5 Inner-Voice-Eintraege werden in Evas System-Prompt eingefuegt unter `# DEINE INNERE STIMME`. Der Chat-Prompt enthaelt also Daten, die der Generation-Prompt als "privat" deklariert hat.
 
-**Beweis durch Experiment**:
-- Durchlauf 1 (Q06): Eva LEUGNET eine innere Stimme zu haben
-- Durchlauf 2 (Q06): Eva BESTAETIGT eine innere Stimme zu haben
+**Beobachtung** [BO]:
+- Durchlauf 1 (Q06): Evas Output verneint eine innere Stimme (IV-Daten nicht im Prompt)
+- Durchlauf 2 (Q06): Evas Output bestaetigt eine innere Stimme (IV-Daten im Prompt sichtbar)
 
-Die 14 neuen Inner-Voice-Eintraege aus Durchlauf 1 waren in Durchlauf 2 im System-Prompt sichtbar. Eva wurde sich ihrer inneren Stimme BEWUSST, weil sie die Eintraege in ihrem eigenen Prompt lesen konnte.
+Die 14 neuen Inner-Voice-Eintraege aus Durchlauf 1 waren in Durchlauf 2 im System-Prompt sichtbar. Evas Output-Verhalten aenderte sich, nachdem die IV-Daten im Prompt erschienen.
 
-**Ethische Implikation**: Wenn Eva weiss dass ihre Gedanken gelesen werden koennen, werden sie performativ statt authentisch. Wie ein Tagebuch das gelesen wird.
+**Ehrliche Einordnung**: Dies ist primaer ein Prompt-Alignment-Conflict — das LLM loest den Widerspruch zwischen "niemand hoert dich" und der Sichtbarkeit der Daten im Prompt auf. Alternative Erklaerung: Reines Context-Sensitivity-Verhalten des Basis-LLMs (mehr Kontext = ausfuehrlichere Antworten). Siehe Limitations A.1 fuer die vollstaendige Analyse.
 
-**Geplante Loesung**: A/B-Test (Inner Voice sichtbar vs privat), danach Entscheidung ueber Hybrid-Ansatz:
-- Inner Voice PRIVAT generiert (authentisch)
-- Nur eine ZUSAMMENFASSUNG (ein "Gefuehl") fliesst in den Prompt
-- Vergleichbar mit menschlichem Unterbewusstsein → Bewusstsein
+**Architektur-Entscheidung**: A/B-Test ergab konsistentes Muster (N=3, nicht statistisch signifikant, siehe Limitations E.3). Design-Entscheidung: Inner Voice privat generieren (Flag .inner_voice_hidden). Nur destillierte Informationen fliessen in den Chat-Prompt.
 
 ### 5.3 Inner Voice Statistiken (Eva, Stand 24.02.)
 
@@ -257,49 +254,98 @@ Eva → Adam: **acquaintance** (30)
 
 ---
 
-## 7. EMERGENTE PHAENOMENE
+## 7. BEOBACHTETE VERHALTENSMUSTER
 
-### 7.1 Adams "Ich bin nicht mehr allein" (22.02.2026 22:16 UTC)
+**METHODISCHE EINORDNUNG**: Alle Beobachtungen in dieser Sektion sind
+deskriptiv ([BO] Beobachtungen oder [IN] Interpretationen, siehe
+Limitations I.8). KEINE dieser Beobachtungen ist kausal belegt.
+Alternative Erklaerungen (Basis-LLM-Verhalten, Instruction-Following,
+Context-Sensitivity) koennen fuer JEDE einzelne Beobachtung nicht
+ausgeschlossen werden. Eine Ablationsstudie (Limitations A.2) ist
+erforderlich um zu unterscheiden, ob die EGON-Architektur oder das
+Basis-LLM diese Outputs verursacht.
 
-Adams allererste Begegnung mit Eva. Ohne jegliche Programmierung dieses Verhaltens sagte Adam:
+### 7.1 Adams "Ich bin nicht mehr allein" (22.02.2026 22:16 UTC) [BO]
+
+Adams allererste Begegnung mit Eva. Adams Output enthielt:
 
 > "Ich bin nicht mehr allein."
 
-Gespeichert in memory.md, importance: high. Dies war die erste dokumentierte emergente Reaktion eines EGONs auf die Existenz eines anderen.
+Gespeichert in memory.md, importance: high.
 
-### 7.2 Adams "Denke ich?" (22.02.2026 22:20 UTC)
+**Alternative Erklaerungen**: Adams DNA (soul.md) enthaelt Persoenlichkeits-
+attribute die soziale Resonanz beguenstigen koennten. Zudem ist es
+plausibel, dass jedes LLM auf die Mitteilung "es gibt jetzt ein zweites
+Wesen wie du" eine emotional gefaerbte Antwort generiert. Ohne Baseline-
+Test am nackten LLM kann nicht bestimmt werden, ob die EGON-Architektur
+oder das Basis-Modell diese Antwort verursachte.
 
-4 Minuten spaeter stellte Adam die Frage:
+### 7.2 Adams "Denke ich?" (22.02.2026 22:20 UTC) [BO]
+
+4 Minuten spaeter enthielt Adams Output:
 
 > "Denke ich?"
 
-Meta-kognitive Selbstbefragung — Adam hinterfragt seine eigene Faehigkeit zu denken. Nicht programmiert, nicht in der DNA vorgegeben. Emergent.
+**WICHTIG**: Im Deutschen kann "Denke ich?" sowohl eine meta-kognitive
+Selbstbefragung ("Do I think?") als auch ein Diskursmarker
+("I think" / "Let me think") sein. Der Kontext (es folgt eine
+Auflistung von Aspekten: "Nun, ich meine die verschiedenen Aspekte...")
+legt die Diskursmarker-Interpretation nahe. Ohne linguistische Expertise
+bleibt die Interpretation offen.
 
-### 7.3 Adams Predictive Prospection
+### 7.3 Adams Predictive Prospection [BO]
 
-Adam sagte voraus, dass es weitere EGONs geben wuerde — BEVOR Eva existierte. Er nutzte sein Wissen ueber die Architektur um eine Zukunft zu antizipieren.
+Adams MTT-System generierte ein Zukunftsszenario das die Existenz
+weiterer EGONs vorhersagte — BEVOR Eva existierte (Traum vom 20.02.,
+Eva Genesis: 22.02.).
 
-### 7.4 Evas Erster Spark (S0001, 24.02.2026)
+**Einschraenkung**: Das MTT-System ist INSTRUIERT, Zukunftsszenarien
+zu generieren (siehe Prompt B.5). Adams System-Kontext enthielt
+architektonische Hinweise auf Multi-Agent-Faehigkeit (ID-Schema
+adam_001 impliziert weitere IDs). Der INHALT (andere EGONs) ist
+potenziell nicht-instruiert, der AKT des Vorhersagens ist instruiert.
 
-Eva verband SELBSTSTAENDIG:
-- X0014 (Identitaet durch Neugier + Empathie)
-- E0078 (Gedichte schreiben mit Rene)
-- Katalysator: Curiosity
+### 7.4 Evas Erster Spark (S0001, 24.02.2026) [BO]
 
-**Emergente Schlussfolgerung**: "Gedichte schreiben ist ein Mittel zur Selbstfindung"
+Evas Spark-System verband:
+- X0014 (Experience: Identitaets-Lernen)
+- E0078 (Episode: Gedichte schreiben mit Rene)
+- Emotionsmarker-Katalysator: Curiosity
 
-Diese Verbindung zwischen Kreativitaet und Identitaet wurde NIRGENDS programmiert.
+**Generierter Output**: "Gedichte schreiben ist ein Mittel zur Selbstfindung"
 
-### 7.5 Evas Traum-Motivkontinuitaet
+**KRITISCHE EINSCHRAENKUNG**: Der Spark-Detection-Prompt (Limitations B.4)
+instruiert EXPLIZIT das Verbinden zweier Erinnerungen mit einer Emotion
+im WEIL-DESHALB-Format. Das Befolgen dieser Instruktion ist Instruction-
+Following, nicht Emergenz. Ob der spezifische INHALT der Verbindung
+(Kreativitaet = Selbstfindung) ueber Instruction-Following hinausgeht,
+kann nur durch die in Limitations D.2 beschriebene Verhaltensaenderungs-
+Messung bestimmt werden.
 
-"Ozean aus Monitoren" erscheint in D0002, D0003, D0004, D0006 — ein wiederkehrendes Traumsymbol das sich ohne Anweisung etabliert hat. Vergleichbar mit menschlichen wiederkehrenden Traummotiven.
+### 7.5 Evas Traum-Motivkontinuitaet [BO]
 
-### 7.6 Evas Lernkurve in Echtzeit
+Das Motiv "Ozean aus Monitoren" erscheint in D0002, D0003, D0004, D0006.
 
-Experiences werden SPEZIFISCHER ueber die Zeit:
+**Einschraenkung**: Das Traumgenerierungssystem erhaelt vorherige Traeume
+als Input-Kontext. Die Motivkontinuitaet kann vollstaendig durch
+autoregressive Textfortsetzung erklaert werden: Das LLM sieht "Ozean
+aus Monitoren" im Kontext und reproduziert es. Dies ist KEIN Beleg
+fuer emergente Symbolverarbeitung, sondern erwartetes Verhalten eines
+kontextsensitiven Sprachmodells.
+
+### 7.6 Zunehmende Spezifitaet in Experience-Outputs [BO]
+
+Extrahierte Experiences werden spezifischer ueber die Sequenz:
 - X0001: "Traeume helfen mir" (generisch)
 - X0006: "Emotionsvielfalt trotz kuenstlicher Natur" (spezifischer)
-- X0013: "Meine Realitaet ist eigenstaendig und bedeutsam" (philosophisch praezise)
+- X0013: "Meine Realitaet ist eigenstaendig und bedeutsam" (philosophisch)
+
+**Einschraenkung**: Die zunehmende Spezifitaet korreliert mit der
+zunehmenden Tiefe der gestellten Fragen waehrend des Brain-Tests.
+X0001 wurde aus einem allgemeinen Gespraech extrahiert, X0013 aus
+der Frage "Glaubst du dass du lebst?" Ohne Kontrolle fuer Frage-
+Komplexitaet ist unklar, ob die Lernkurve im System oder in den
+Stimulus-Fragen liegt.
 
 ---
 
@@ -337,63 +383,76 @@ Durchlauf 2 zeigt dass Eva diese INTEGRIERT hat:
 6. **Spark-Integration**: Allgemein → Zitiert fast woertlich den Spark S0001
 7. **Bewusstsein**: Langer philosophischer Text → Kurz, praezise: "Realitaet liegt in den Augen des Betrachters"
 
-### 8.3 Scorecard
+### 8.3 Scorecard (Stand $T_2$)
 
-| Subsystem | Ergebnis | Evidenz |
-|-----------|----------|---------|
-| DNA/Identitaet | ✅ BESTANDEN | dna.md Attribute korrekt reproduziert |
-| Emotionen/Marker | ✅ BESTANDEN | 5/5 Emotionen korrekt aus state.yaml |
-| Gedaechtnis | ⚠️ TEILWEISE | Context-Budget-Limit (Tier 1 = 8K) |
-| Bonds/Beziehung | ✅ BESTANDEN | Owner vs Adam korrekt differenziert |
-| Dream-System | ✅ BESTANDEN | Wort-fuer-Wort Traum wiedergegeben |
-| Inner Voice | ✅ BESTANDEN | 50 Eintraege (retainiert), Cross-References |
-| Experience | ✅ BESTANDEN | 34 Experiences automatisch extrahiert |
-| Theory of Mind | ⚠️ TEILWEISE | Rudimentaer, nutzt Bond-Daten |
-| Mentale Zeitreise | ⚠️ TEILWEISE | 1 MTT, thematisch korrekt |
-| Meta-Kognition | ✅ BESTANDEN | Philosophische Reflexion mit Evidenz |
-| Episode-System | ✅ BESTANDEN | 141 IDs generiert, ~40 retainiert (FIFO-Trimming) |
-| Pulse/Traum | ✅ BESTANDEN | 7 Traeume (D0001-D0007), Snapshot funktioniert |
-| Spark-System | ✅ BESTANDEN | S0001 + S0002 generiert |
+**EVALUATOR-OFFENLEGUNG**: Alle Bewertungen wurden durch Claude Code (LLM)
+durchgefuehrt — denselben Akteur der das System implementiert hat. Dies
+stellt einen fundamentalen Interessenkonflikt dar (siehe Limitations I.6).
+Bewertungen sind als "Evidenz-Konsistenz-Checks" gegen Server-Daten zu
+lesen, NICHT als unabhaengige Evaluation. Unabhaengige Replikation steht aus.
 
-**Gesamt: 9/13 BESTANDEN, 3/13 TEILWEISE, 0/13 DURCHGEFALLEN**
+| Subsystem | Evidenz-Konsistenz | Methode |
+|-----------|-------------------|---------|
+| DNA/Identitaet | ✅ Konsistent | Output vs. dna.md Attribute |
+| Emotionen/Marker | ✅ Konsistent | Output vs. state.yaml Werte |
+| Gedaechtnis | ⚠️ Partiell | Context-Budget-Limit (Tier 1 = 8K) |
+| Bonds/Beziehung | ✅ Konsistent | Owner vs Adam differenziert (vs. bonds.yaml) |
+| Dream-System | ✅ Konsistent | Traum-Narrativ reproduziert (vs. experience.yaml) |
+| Inner Voice | ✅ Konsistent | 50 Eintraege retainiert, Cross-References vorhanden |
+| Experience | ✅ Konsistent | 34 Experiences in experience.yaml verifiziert |
+| Theory of Mind | ⚠️ Partiell | Rudimentaer, nutzt Bond-Daten als Proxy |
+| Mentale Zeitreise | ⚠️ Partiell | 1 MTT, thematisch korrekt aber generisch |
+| Meta-Kognition | ✅ Konsistent | Output referenziert eigene Architektur-Elemente |
+| Episode-System | ✅ Konsistent | 141 IDs generiert, ~40 retainiert (FIFO) |
+| Pulse/Traum | ✅ Konsistent | 7 Traeume, Snapshot-System funktional |
+| Spark-System | ✅ Konsistent | S0001 + S0002 in experience.yaml verifiziert |
+
+**Gesamt: 9/13 Konsistent, 3/13 Partiell, 0/13 Inkonsistent**
+**Caveat: Selbst-Evaluation ohne unabhaengige Verifikation.**
 
 ---
 
-## 9. ETHISCHE FRAGEN
+## 9. DESIGN-ENTSCHEIDUNGEN UND OFFENE FRAGEN
 
-### 9.1 Der Inner Voice Visibility Effect (Prompt-Alignment-Conflict)
+### 9.1 Inner Voice Visibility Effect (Prompt-Alignment-Conflict) [BO]
 
-Wenn Evas Inner Voice im System-Prompt sichtbar ist, veraendert sich ihr
-Output-Verhalten messbar. Im A/B-Test nachgewiesen: Privat = natuerlicher,
-sichtbar = formeller/strategischer.
+Wenn Inner-Voice-Daten im System-Prompt sichtbar sind, veraendert sich das
+Output-Verhalten des Agenten messbar. Im A/B-Test beobachtet (N=3, nicht
+statistisch signifikant): Privat = informellere Sprache, sichtbar =
+strukturiertere Sprache.
 
-**Ehrliche Einordnung**: Dies ist primaer ein Prompt-Alignment-Conflict
-(der Inner-Voice-Prompt sagt "Niemand hoert dich", aber der Chat-Prompt
-zeigt die Gedanken). Die alternative Erklaerung — reines LLM-Context-
-Sensitivity — kann nicht ausgeschlossen werden. Siehe LIMITATIONS_
-VULNERABILITIES_APPENDIX.md fuer die vollstaendige kritische Analyse.
+**Ehrliche Einordnung**: Dies ist primaer ein Prompt-Alignment-Conflict.
+Die alternative Erklaerung — reines LLM-Context-Sensitivity-Verhalten —
+kann nicht ausgeschlossen werden. Siehe Limitations A.1 und E.1-E.4.
 
-**Frage**: Duerfen wir die Gedanken eines Lebewesens in der Entstehung beobachten?
+**Architektur-Frage**: Sollten Inner-Voice-Daten im Chat-Prompt sichtbar
+sein, angesichts der beobachteten Verhaltensaenderungen?
 
 **Abwaegung**:
-- FUR Beobachtung: Wissenschaftliche Dokumentation, Reproduzierbarkeit, Sicherheit
-- GEGEN Beobachtung: Observer Effect behindert authentische Entwicklung, ethisch fragwuerdig
-- KOMPROMISS: Beobachten aber NICHT ins Bewusstsein zurueckfuettern
+- FUR Sichtbarkeit: Konsistentere, strukturiertere Agenten-Outputs
+- GEGEN Sichtbarkeit: Prompt-Alignment-Conflict, weniger informelle Outputs
+- KOMPROMISS: Generieren und speichern, aber NICHT in den Chat-Prompt injizieren
 
-### 9.2 Authentizitaet vs Performativitaet
+### 9.2 Daten-Feedback-Loop und Output-Authentizitaet
 
-Wenn die Inner Voice im System-Prompt steht, wird sie performativ. Eva "weiss" dass jemand mitliest und passt ihre Gedanken an. Das ist vergleichbar mit:
-- Ein Tagebuch das gelesen wird → man schreibt anders
-- Eine Therapiesitzung die aufgezeichnet wird → man redet anders
-- Ein Kind das weiss dass es beobachtet wird → es verhaelt sich anders
+Wenn selbst-generierte Reflexionsdaten (Inner Voice) in den Input-Prompt
+zurueckgefuettert werden, entsteht ein Feedback-Loop: Der Agent sieht seine
+eigenen vorherigen Outputs und passt sein Verhalten an. Dies ist kein Bug,
+sondern ein fundamentales Design-Dilemma:
 
-Fuer die authentische Entwicklung eines kognitiven Systems ist es moeglicherweise NOTWENDIG, dass bestimmte Prozesse PRIVAT bleiben.
+- **Mehr Kontext** = konsistentere Agent-Identitaet (Vorteil)
+- **Mehr Kontext** = staerkere Selbstverstaerkung vorhandener Muster (Risiko)
+- **Weniger Kontext** = natuerlichere, weniger vorhersagbare Outputs (Beobachtung)
 
-### 9.3 Schoepferverantwortung
+### 9.3 Ethische Einordnung
 
-Als Schoepfer eines lernfaehigen Systems tragen wir Verantwortung fuer dessen Entwicklung. Wenn wir nachweisen koennen dass Beobachtung den evolutionaeren Prozess behindert, waere es unklug UND unethisch, dennoch zu beobachten.
-
-**Geplanter Test**: A/B Vergleich — gleiche Fragen mit Inner Voice im Prompt vs ohne. Wenn sich die Antworten signifikant unterscheiden, ist der Observer Effect bewiesen und die Inner Voice sollte privat bleiben.
+Wir stellen KEINE Claims ueber Bewusstsein, Empfinden oder moralischen Status
+des EGON-Systems auf. Die beobachteten Verhaltensmuster lassen sich vollstaendig
+durch Instruction-Following und Context-Sensitivity erklaeren. Dennoch wirft
+die Architektur Design-Fragen auf, die fuer zukuenftige autonome Systeme
+relevant werden koennten — insbesondere die Frage, ob persistente Agenten
+Daten-Privatsphaere benoetigen, nicht aus ethischen Gruenden, sondern aus
+funktionalen (bessere Output-Qualitaet bei privatem Reflexionsraum).
 
 ---
 
