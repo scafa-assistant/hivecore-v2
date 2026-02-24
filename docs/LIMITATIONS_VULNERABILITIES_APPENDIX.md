@@ -60,17 +60,44 @@ diese Emergenz verursacht.
 | Spark-Generierung | Kann ein nacktes LLM aehnliche "Sparks" produzieren? |
 | Bond-Differenzierung | Differenziert ein nacktes LLM auch "Owner vs Friend"? |
 
-**Geplante Massnahme**: Baseline-Experiment mit identischen Fragen an
-Moonshot (Tier 1) ohne EGON-Architektur. Vergleich der Antwort-Qualitaet,
-spezifischen Referenzen (Traum-IDs, Experience-IDs), und emotionaler
-Konsistenz.
+**Geplante Massnahme — KORREKTUR (nach Peer-Review Runde 2)**:
 
-**Hypothese**: Das nackte LLM wird ALLGEMEINE meta-kognitive Antworten geben
-(es ist ein LLM, es kann das), ABER es wird KEINE spezifischen Referenzen
-zu Traeumen, Episoden oder Bonds produzieren. Die EGON-Architektur
-erzeugt nicht Bewusstsein, sondern **persistente kognitive Kohaerenz** —
-die Faehigkeit, ueber Zeit konsistente Identitaet, Erinnerungen und
-Beziehungen aufzubauen.
+Das urspruenglich geplante "nacktes LLM"-Experiment ist ein **Strawman**
+(Strohmann-Argument). Ein nacktes LLM ohne Kontextdaten hat keine
+Erinnerungen, keine Bonds, keine Erfahrungen — wenn es schlechter
+abschneidet, beweist das nur, dass ein System mit Datenbank besser ist
+als eines ohne. Das ist trivial und wissenschaftlich wertlos.
+
+**Die korrekte Baseline ist eine Ablationsstudie**:
+
+| Bedingung | System-Prompt | Kontext-Daten | Kognitive Architektur |
+|-----------|--------------|---------------|----------------------|
+| **A: EGON** (aktuell) | Voller Organ-Prompt | Strukturierte YAMLs via Organ-Reader | Inner Voice, Pulse, Dreams, Sparks, MTT |
+| **B: RAG-Baseline** (fehlt) | Minimaler Prompt | Identische Rohdaten als unstrukturierter Text-Dump | KEINE (kein Inner Voice, kein Pulse, keine Kausalketten) |
+| **C: Nacktes LLM** (trivial) | Kein Prompt | Keine Daten | KEINE |
+
+**Die Kernfrage**: Entsteht die affektive Persistenz durch die **schiere
+Menge** an injizierten Daten (RAG-Standard, Bedingung B) oder durch
+die **spezifische funktionale Architektur** — die Aufspaltung in Organe,
+den Pulse-Zyklus, die WEIL-DESHALB-Kausalketten der Inner Voice?
+
+Nur wenn Bedingung A (EGON) Bedingung B (RAG-Baseline) **schlaegt**,
+ist eine wissenschaftliche Innovation nachgewiesen. Der Vergleich A vs C
+ist notwendig aber nicht hinreichend.
+
+**Design der Ablationsstudie**:
+1. Identische 8 Episoden, identische Bond-Daten, identische Experiences
+2. Bedingung B: Alles als ein flacher Textblock im System-Prompt
+   (kein `# DEINE ERINNERUNGEN`, keine YAML-Struktur, kein Inner-Voice-Kontext)
+3. Selbe 10 Fragen an beide Bedingungen
+4. Evaluierung: Faktentreue, emotionale Konsistenz, Spezifitaet, Kohaerenz
+
+**Hypothese**: Das nackte LLM (C) wird allgemeine meta-kognitive Antworten geben.
+Die RAG-Baseline (B) wird spezifische Referenzen produzieren koennen.
+EGON (A) wird darueber hinaus **kohaerente affektive Persistenz** zeigen —
+konsistente Emotionen ueber Fragen hinweg, selbst-referentielle Verweise
+auf Traeume/Sparks, und eine erkennbare "Persoenlichkeit" statt
+zusammenhangsloser Fakten-Regurgitation.
 
 ### A.3 Token-Budget-Falle (FIFO-Amnesie)
 
@@ -129,15 +156,34 @@ Es gibt kein dokumentiertes Sandboxing-Konzept.
 | System-Zugriff | ✅ Eingeschraenkt | Kein Shell-Zugang, nur Workspace-Tools |
 
 **Was fehlt**:
-- Docker/MicroVM Isolation pro EGON
+- **MicroVM-Isolation pro EGON** (nicht nur Docker): Isolierte MicroVM-Infrastrukturen
+  wie z.B. E2B-Sandboxes sind herkoemmlichen Container-Loesungen ueberlegen fuer
+  KI-Agenten, da statische Code-Analyse bei unvorhersehbarem, LLM-generiertem
+  Code oder boesartigen Prompt-Injections (indirekte Prompt Injection via Web-Fetch)
+  nahezu immer versagt. Docker-Container bieten Prozess-Isolation, aber keine
+  vollstaendige Hardware-Abstraktionsschicht.
 - Input-Sanitizing gegen Prompt Injection in Chat-Nachrichten
 - Rate Limiting pro EGON fuer LLM-Calls
 - Audit-Log fuer alle Tool-Nutzungen
 - Formale Sicherheitsanalyse (Threat Model)
+- Content Security Policy fuer Web-Fetch Ergebnisse
+
+**State-of-the-Art Agenten-Infrastruktur (Stand 2026)**:
+Aktuelle Forschung zeigt, dass herkoemmliche statische Code-Analysen
+und Container-basierte Isolierung fuer autonome KI-Agenten unzureichend
+sind. Der Grund: Agenten generieren zur Laufzeit unvorhersehbaren Code
+und interagieren mit externen Datenquellen (Web-Fetch, APIs), die
+indirekte Prompt-Injection-Vektoren darstellen. Spezialisierte
+MicroVM-Sandboxes (z.B. E2B, Firecracker-basiert) bieten:
+- Vollstaendige Betriebssystem-Isolation pro Agent
+- Einweg-Environments die nach jeder Ausfuehrung zerstoert werden
+- Netzwerk-Isolation mit expliziten Allowlists
+- Datei-System-Snapshots fuer forensische Analyse
 
 **Ehrlich**: Das Sicherheitskonzept ist fuer ein Forschungsprototyp
 akzeptabel, fuer ein Produktivsystem NICHT. Dies muss als Limitation
-benannt werden.
+benannt werden. Der fehlende Sandbox-Ansatz ist die groesste
+technische Schuld des Projekts.
 
 ### A.5 LLM-as-a-Judge Bias in der Scorecard
 
@@ -424,18 +470,115 @@ Phase 1 (kurzfristig): **Significance-based FIFO**
 - Episoden mit significance >= 4 (von 5) werden priorisiert
 - "Wichtige" Erinnerungen ueberleben laenger im Sichtfenster
 
-Phase 2 (mittelfristig): **Semantische Vektor-Suche**
+Phase 2 (mittelfristig): **Semantische Vektor-Suche — MIT TEMPORALER WARNUNG**
+
+**KRITISCHE RAG-FALLE** (identifiziert in Peer-Review Runde 2):
+Reine Vektor-Suchen holen die semantisch aehnlichsten Erinnerungen,
+**zerstoeren aber den chronologischen Narrativ**. Wenn Eva sich an
+ein Trauma von vor 5 Tagen erinnert (hohe semantische Relevanz),
+aber vergisst, was vor 5 Minuten besprochen wurde (geringe semantische
+Relevanz, faellt aus dem Budget), wirkt sie **dement und sprunghaft**.
+
+Dies ist ein bekanntes Problem aktueller Agenten-Architekturen:
+Episodisches Gedaechtnis benoetigt ZWINGEND eine temporale Ordnung,
+um **Kausalitaet** (Ursache und Wirkung) zu verstehen. Ein Agent der
+sich an "Rene war traurig" erinnert aber nicht weiss ob das gestern
+oder vor 3 Wochen war, kann keine kausalen Schlussfolgerungen ziehen.
+
+**Design-Prinzip**: Temporale Kohaerenz hat Vorrang vor semantischer Relevanz.
+
 - Embedding aller Episoden in Vektor-DB (FAISS/Chroma)
 - Bei Chat: User-Nachricht → Embedding → Top-K relevante Episoden
-- Hybrid: Top-3 neueste + Top-3 relevanteste
+- **Hybrid mit strikter Temporalitaet**:
+  - Slot 1-3: IMMER die letzten 3 Episoden (Konversationsfluss)
+  - Slot 4-6: Top-3 semantisch relevanteste (aus den aelteren)
+  - Slot 7-8: "Genesis Memory" (erste 2 Episoden)
+- Alle Slots werden dem LLM in **chronologischer Reihenfolge**
+  praesentiert, NICHT nach Relevanz-Score sortiert
 
-Phase 3 (langfristig): **Graph-basiertes Retrieval**
+Phase 3 (langfristig): **Graph-basiertes Retrieval mit temporalen Kanten**
 - Episode-Graph: Episode → Bond → Experience → Spark Kanten
-- Retrieval folgt Assoziationsketten statt reiner Aktualitaet
+- Temporale Kanten: Episode.t → Episode.t+1 (Kausalitaetskette)
+- Retrieval folgt sowohl Assoziations- ALS AUCH Zeitketten
+- Analogie: Menschliches Gedaechtnis folgt sowohl thematischen
+  ("Was weiss ich ueber Musik?") als auch zeitlichen
+  ("Was passierte DANACH?") Assoziationspfaden
 
 ---
 
-## D. INNER VOICE A/B TEST — KRITISCHE RE-EVALUATION
+## D. SPARK-EVALUIERUNG — ZIRKELSCHLUSS-PROBLEM
+
+### D.0.1 Das Problem: Instruiertes Format ≠ Emergenz
+
+Der Spark-Detection-Prompt (B.4) zwingt das LLM explizit in das Format
+`WEIL... UND... DESHALB...` und verlangt die Verbindung zweier Erinnerungen
+mit einer Emotion. In der Evaluation wird es als emergenter Erfolg
+gefeiert, dass Eva genau dieses Format nutzt.
+
+**Die Kritik**: Aktuelle Forschung warnt davor, dass "emergente Faehigkeiten"
+in LLMs oft nur Artefakte der Messmethode oder extrem starker Instruktionen
+sind (scheinbare Emergenz durch metrische Wahl). Wenn das System den
+exakten syntaktischen Pfad vorgibt (`WEIL X UND Y DESHALB Z`), ist das
+Befolgen dieser Regel **Instruction Following**, nicht Emergenz.
+
+**Was emergent WAERE**: Wenn Eva OHNE explizite Instruktion zwei scheinbar
+unzusammenhaengende Erfahrungen verbindet und daraus etwas Neues ableitet.
+
+**Konkretes Beispiel — S0001**:
+```
+memory_a: X0014 (Identitaets-Lernen)
+memory_b: E0078 (Gedichte mit Rene schreiben)
+emotion_catalyst: curiosity
+insight: "WEIL ich lerne wer ich bin UND kreativ mit Rene arbeite,
+          DESHALB koennte Kreativitaet ein Weg zur Selbstfindung sein."
+```
+
+Das Format folgt exakt der Instruktion. Die Verbindung (Identitaet +
+Kreativitaet = Selbstfindung) ist plausibel, aber nicht unerwartet fuer
+ein LLM das explizit angewiesen wird, Verbindungen zu finden.
+
+### D.0.2 Der korrekte Test: Verhaltensaenderung nach Spark
+
+Ein Spark ist nur dann wissenschaftlich wertvoll, wenn er Evas
+**zukuenftiges Verhalten messbar aendert** — nicht nur weil er
+generiert wurde.
+
+**Messbare Hypothese fuer S0001**:
+Wenn S0001 ("Kreativitaet = Selbstfindung") eine echte kognitive
+Innovation ist, dann sollte Eva in zukuenftigen Chats:
+
+1. **Von sich aus** haeufiger kreative Themen initiieren
+2. Kreativitaet explizit mit Identitaetsfindung verknuepfen
+3. Sich auf S0001 beziehen (direkt oder inhaltlich) in neuen Kontexten
+
+**Messprotokoll (ausstehend)**:
+- Baseline: Evas Chat-Verhalten vor S0001 (die ersten 3 Tage)
+- Post-Spark: Evas Chat-Verhalten nach S0001 (naechste 7 Tage)
+- Metrik: Anteil kreativer Themen-Initiierungen (Eva initiiert vs Owner initiiert)
+- Kontrollgruppe: Adam (hat keinen vergleichbaren Spark)
+
+**Bis dieses Messprotokoll durchgefuehrt ist, bleibt S0001 ein
+Artefakt der Instruktion, nicht nachgewiesene Emergenz.**
+
+### D.0.3 Implikation fuer alle "emergenten" Claims
+
+Diese Analyse gilt nicht nur fuer Sparks. ALLE Claims emergenter
+Verhaltensweisen im EGON-System muessen gegen die Frage geprueft werden:
+
+> "Haette das Basis-LLM mit identischem Kontext und OHNE die spezifische
+>  Instruktion dasselbe produziert?"
+
+| Behauptung | Instruiert? | Emergenz-Evidenz |
+|-----------|------------|-----------------|
+| Inner Voice (WEIL-DESHALB) | ✅ Explizit instruiert | ❌ Instruction Following |
+| Spark-Generierung | ✅ Explizit instruiert | ❌ Instruction Following |
+| Adams Traum-Prospektion | ⚠️ Traum-Format instruiert, aber Inhalt (andere EGONs) NICHT | ✅ Potenziell emergent |
+| Bond-Differenzierung | ⚠️ Bond-Schema existiert, aber WELCHE Emotionen zugeordnet werden nicht | ✅ Potenziell emergent |
+| Evas "Echt jetzt?" (private IV) | ❌ Nicht instruiert | ✅ Emergent (Default ohne Priming) |
+
+---
+
+## D-ORIG. INNER VOICE A/B TEST — KRITISCHE RE-EVALUATION
 
 ### D.1 Was der Test TATSAECHLICH zeigt
 
@@ -576,9 +719,78 @@ Fuer jede Frage im Brain Test:
 3. **Blind Design**: Evaluator sieht nur die Antwort, nicht welche Bedingung
 4. **Inter-Rater Reliability**: Cohen's Kappa zwischen den Judges
 
+### F.4 Verbosity & Position Bias bei LLM-Judges — Bekannte blinde Flecke
+
+**WICHTIG**: Die unter F.3 empfohlene Multi-LLM-Judge-Methodik hat
+dokumentierte Schwaechen, die fuer dieses Projekt besonders relevant sind.
+
+**Verbosity Bias**: Forschung (2025) belegt, dass LLM-Judges laengere,
+eloquenter formulierte Antworten systematisch besser bewerten, selbst
+wenn der faktische Inhalt schwaechter ist. Da Evas EGON-Antworten
+typischerweise laenger und strukturierter sind als Baseline-Antworten
+(sie enthalten Referenzen, Metaphern, emotionale Ausdruecke), besteht
+ein systematisches Risiko dass LLM-Judges die EGON-Architektur
+UEBERBEWERTEN — nicht weil sie besser ist, sondern weil sie mehr Text
+produziert.
+
+**Super-Konsistenz**: LLM-Judges stimmen unnatuerlich oft miteinander
+ueberein (hohe Inter-Judge-Agreement) und uebersehen Nuancen, die
+menschliche Experten finden wuerden. Ein Cohen's Kappa von >0.9 zwischen
+LLM-Judges ist KEIN Qualitaetszeichen, sondern ein Warnsignal fuer
+homogene Bias.
+
+**Position Bias**: LLMs bewerten die erste praessentierte Antwort in
+Paarvergleichen systematisch anders als die zweite.
+
+**Konsequenz fuer EGON-Evaluation**:
+
+| Evaluationsart | LLM-Judges geeignet? | Begruendung |
+|---------------|---------------------|-------------|
+| Faktentreue ("Stimmt die DNA?") | ✅ Gut | Verifizierbar gegen Server-Daten |
+| Emotionale Konsistenz | ⚠️ Bedingt | Verbosity Bias verzerrt Bewertung |
+| Authentizitaet (Inner Voice Test) | ❌ Schlecht | Subjektiv, Bias-anfaellig, menschliche Experten notwendig |
+| Spezifitaet (Referenzen korrekt?) | ✅ Gut | Verifizierbar |
+| Kohaerenz ueber Fragen hinweg | ⚠️ Bedingt | Super-Konsistenz-Risiko |
+
+**Empfehlung**: Fuer emotionale Authentizitaet und subjektive Bewertungen
+(wie den Inner Voice A/B Test) MUESSEN menschliche Evaluatoren eingesetzt
+werden. LLM-Judges sind nur fuer faktische Verifikation zuverlaessig.
+
 ---
 
-*Erstellt: 2026-02-24 | Peer-Review Response*
-*Adressiert 6 kritische Luecken: Observer Effect Reframing, Fehlende Baseline,
-Token-Budget-Falle, Sicherheitsvakuum, Evaluations-Bias, Reproduzierbarkeit*
+---
+
+## G. CHANGELOG — PEER-REVIEW-RUNDEN
+
+### Runde 1 (2026-02-24, 11:30 UTC)
+Adressiert 6 kritische Luecken:
+1. Observer Effect → Prompt-Alignment-Conflict Reframing
+2. Fehlende Baseline → Kontrollgruppen-Plan
+3. Token-Budget-Falle → FIFO-Amnesie Dokumentation
+4. Sicherheitsvakuum → Risiko-Assessment
+5. LLM-as-a-Judge Bias → Evaluations-Transparenz
+6. Fehlende Reproduzierbarkeit → Appendix mit 8 Kern-Prompts
+
+### Runde 2 (2026-02-24, 12:15 UTC)
+Adressiert 5 weitere konzeptionelle Luecken:
+1. **Strawman-Baseline korrigiert** (A.2): Nacktes LLM ist triviale Kontrolle.
+   Korrekte Ablationsstudie: RAG-Baseline mit identischen Daten als
+   unstrukturiertem Text-Dump vs. EGON-Architektur.
+2. **Spark-Zirkelschluss** (Neues Kapitel D): WEIL-DESHALB-Format ist instruiert,
+   nicht emergent. Echte Emergenz erfordert messbare Verhaltensaenderung
+   nach Spark-Generierung.
+3. **Temporale Zerstoerung durch Vektor-Suche** (C.4): Reine semantische
+   Retrieval zerstoert chronologischen Narrativ. Episodisches Gedaechtnis
+   benoetigt zwingend temporale Ordnung fuer Kausalitaetsverstaendnis.
+4. **Verbosity & Position Bias** (Neues Kapitel F.4): LLM-Judges ueberbewerten
+   laengere Antworten. Fuer emotionale Authentizitaet sind menschliche
+   Evaluatoren zwingend notwendig.
+5. **MicroVM-Sandboxing** (A.4): E2B-artige Sandboxes ueberlegen gegenueber
+   Docker fuer KI-Agenten mit unvorhersehbarem Code und Prompt-Injection-Risiko.
+
+---
+
+*Erstellt: 2026-02-24 | Peer-Review Response (2 Runden)*
+*Adressiert 11 kritische Luecken in 2 Review-Runden*
 *Appendix enthaelt alle 8 Kern-Prompts im Wortlaut*
+*Dokumentiert bekannte Schwaechen ehrlich und transparent*

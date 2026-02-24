@@ -1,0 +1,4 @@
+Flag-File: .inner_voice_hidden
+Status: ACTIVE — Inner Voice is PRIVATE
+Location: /opt/hivecore-v2/.inner_voice_hidden
+Effect: When present, Inner Voice is generated and stored but NOT included in system prompt

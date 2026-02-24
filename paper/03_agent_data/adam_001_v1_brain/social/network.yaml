@@ -1,0 +1,12 @@
+contacts:
+  eva_002:
+    name: Eva
+    type: egon
+    tier: bekannte
+    bond_score: 30
+    first_contact: '2026-02-23'
+    friendship_status: active
+    friendship_id: F001
+acquaintances:
+- name: <Eva>
+  since: '2026-02-23'

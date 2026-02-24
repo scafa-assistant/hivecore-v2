@@ -1,0 +1,7 @@
+bonds:
+- id: eva_002
+  name: Eva
+  type: egon
+  score: 30
+  since: '2026-02-23'
+  friendship_id: F001
