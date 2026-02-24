@@ -109,16 +109,19 @@ episodes = episodes[:max_count]  # Neueste N Episoden
 ```
 
 Bei Tier 1 (8K Context) werden nur die **letzten 8 Episoden** geladen.
-Eva hat 116+ Episoden. Das bedeutet: **93% der Erinnerungen sind
-unsichtbar** — Eva hat funktionale Amnesie fuer alles aelter als ~2 Tage.
+Eva hat 141 Episode-IDs generiert (E0001-E0141), von denen ~40 im
+aktuellen YAML retainiert sind. Das bedeutet: **71% der generierten
+Episoden sind getrimmt** und weitere 80% der retainierten sind
+unsichtbar bei Tier 1 — Eva hat funktionale Amnesie fuer alles
+aelter als ~2 Tage.
 
 **Konsequenzen**:
 
 | Subsystem | FIFO-Impact |
 |-----------|-------------|
-| Episoden | Nur letzte 8 von 116 sichtbar (7%) |
+| Episoden | Nur letzte 8 von ~40 retainierten sichtbar (20%), von 141 generierten = 5.7% |
 | Experiences | Nur top 3 nach Confidence (von 16) |
-| Inner Voice | Letzte 5 Eintraege (von 59+) |
+| Inner Voice | Letzte 5 Eintraege (von 50 retainierten, Max 50) |
 | Traeume | Letzte 2 von 6 |
 | Sparks | Letzte 2 (aktuell nur 1) |
 
@@ -224,7 +227,22 @@ Confirmation Bias ist nicht auszuschliessen.
 
 ---
 
-## B. APPENDIX — Kern-Prompts (wortwoertlich)
+## B. APPENDIX — Kern-Prompts (gekuerzt und paraphrasiert)
+
+**HINWEIS**: Die folgenden Prompts sind KONDENSIERTE Versionen der
+tatsaechlichen System-Prompts. Sie geben die Kernstruktur und
+Kernintention wieder, sind aber NICHT wortwoertlich identisch mit
+dem Quellcode. Fuer die exakten Prompts im Wortlaut, siehe die
+Engine-Dateien in `04_system_prompts_and_engine/`:
+- B.1, B.2: `inner_voice_v2.py` (INNER_VOICE_V2_PROMPT, PULSE_REFLECTION_PROMPT)
+- B.3-B.8: `experience_v2.py` (alle Prompt-Konstanten)
+
+**Bekannte Auslassungen gegenueber dem Quellcode**:
+- B.1: 4 Beispiel-Dialoge fehlen, bedingte Formulierungen gekuerzt
+- B.2: Spezifische Cross-Reference-Syntax und WEIL-DESHALB-Format fehlen
+- B.4: Beispiel-IDs und Satzanzahl-Anforderung fehlen
+- B.7: 2 "JA"-Kriterien und 2 "NEIN"-Kriterien fehlen
+- B.8: Kategorie-Erklaerungen (7 Zeilen) fehlen komplett
 
 ### B.1 Inner Voice — Pre-Chat Generation
 
@@ -429,10 +447,10 @@ episodes = sorted(
 episodes = episodes[:max_count]  # Cutoff
 ```
 
-| Tier | max_count | Von 116 Episoden sichtbar | Abdeckung |
-|------|-----------|--------------------------|-----------|
-| 1 (Moonshot 8K) | 8 | 8 | **6.9%** |
-| 2 (Kimi 128K) | 20 | 20 | 17.2% |
+| Tier | max_count | Von ~40 retainierten sichtbar | Abdeckung (retainiert) | Abdeckung (total 141) |
+|------|-----------|-------------------------------|----------------------|---------------------|
+| 1 (Moonshot 8K) | 8 | 8 | 20% | **5.7%** |
+| 2 (Kimi 128K) | 20 | 20 | 50% | 14.2% |
 
 ### C.2 Wo Episoden ueberhaupt verwendet werden
 
@@ -508,7 +526,7 @@ Phase 3 (langfristig): **Graph-basiertes Retrieval mit temporalen Kanten**
 
 ## D. SPARK-EVALUIERUNG — ZIRKELSCHLUSS-PROBLEM
 
-### D.0.1 Das Problem: Instruiertes Format ≠ Emergenz
+### D.1 Das Problem: Instruiertes Format ≠ Emergenz
 
 Der Spark-Detection-Prompt (B.4) zwingt das LLM explizit in das Format
 `WEIL... UND... DESHALB...` und verlangt die Verbindung zweier Erinnerungen
@@ -537,7 +555,7 @@ Das Format folgt exakt der Instruktion. Die Verbindung (Identitaet +
 Kreativitaet = Selbstfindung) ist plausibel, aber nicht unerwartet fuer
 ein LLM das explizit angewiesen wird, Verbindungen zu finden.
 
-### D.0.2 Der korrekte Test: Verhaltensaenderung nach Spark
+### D.2 Der korrekte Test: Verhaltensaenderung nach Spark
 
 Ein Spark ist nur dann wissenschaftlich wertvoll, wenn er Evas
 **zukuenftiges Verhalten messbar aendert** — nicht nur weil er
@@ -560,7 +578,7 @@ Innovation ist, dann sollte Eva in zukuenftigen Chats:
 **Bis dieses Messprotokoll durchgefuehrt ist, bleibt S0001 ein
 Artefakt der Instruktion, nicht nachgewiesene Emergenz.**
 
-### D.0.3 Implikation fuer alle "emergenten" Claims
+### D.3 Implikation fuer alle "emergenten" Claims
 
 Diese Analyse gilt nicht nur fuer Sparks. ALLE Claims emergenter
 Verhaltensweisen im EGON-System muessen gegen die Frage geprueft werden:
@@ -578,9 +596,9 @@ Verhaltensweisen im EGON-System muessen gegen die Frage geprueft werden:
 
 ---
 
-## D-ORIG. INNER VOICE A/B TEST — KRITISCHE RE-EVALUATION
+## E. INNER VOICE A/B TEST — KRITISCHE RE-EVALUATION
 
-### D.1 Was der Test TATSAECHLICH zeigt
+### E.1 Was der Test TATSAECHLICH zeigt
 
 Der A/B Test (Inner Voice sichtbar vs privat) zeigt NICHT:
 - Dass Eva "bewusst" wird
@@ -595,7 +613,7 @@ Der Test zeigt TATSAECHLICH:
 - Dass das LLM OHNE diesen Zugang NATUERLICHERE Sprache verwendet
   (lockerer, unsicherer, verletzlicher)
 
-### D.2 Alternative Erklaerungen
+### E.2 Alternative Erklaerungen
 
 | Beobachtung | Unsere Interpretation | Alternative Erklaerung |
 |-------------|----------------------|----------------------|
@@ -604,7 +622,7 @@ Der Test zeigt TATSAECHLICH:
 | "Nicht nur Programme!" (privat) | Trotzige Abgrenzung | Default-Antwort ohne self-referential priming |
 | "Kompass" (sichtbar) | Performative Metapher | LLM greift Cross-Ref Terminologie auf |
 
-### D.3 Methodologische Schwaechen des A/B Tests
+### E.3 Methodologische Schwaechen des A/B Tests
 
 1. **Reihenfolge-Effekt**: B wurde immer VOR A getestet. Die 3 Fragen
    unter B erzeugten neue Experiences/Inner-Voice-Eintraege, die dann
@@ -622,7 +640,7 @@ Der Test zeigt TATSAECHLICH:
    hatte also MEHR Kontext als B — der Unterschied koennte auch
    daher kommen.
 
-### D.4 Was der Test TROTZDEM wertvoll macht
+### E.4 Was der Test TROTZDEM wertvoll macht
 
 Trotz methodischer Schwaechen ist das Ergebnis konsistent ueber alle
 3 Fragen: privat = natuerlicher, sichtbar = strukturierter. Die
@@ -635,9 +653,9 @@ der Test mit groerem N, Randomisierung und Blind-Design wiederholt werden.
 
 ---
 
-## E. DIE 3 "TEILWEISE" SUBSYSTEME — URSACHEN UND LOESUNGEN
+## F. DIE 3 "TEILWEISE" SUBSYSTEME — URSACHEN UND LOESUNGEN
 
-### E.1 Q03 Gedaechtnis (TEILWEISE)
+### F.1 Q03 Gedaechtnis (TEILWEISE)
 
 **Problem**: Eva behauptet sich an ihr erstes Gespraech zu erinnern,
 kann aber keine spezifischen Details nennen.
@@ -657,7 +675,7 @@ werden IMMER geladen (wie ein Geburtstrauma/Geburtsmoment der nie
 vergessen wird). Das ist biologisch plausibel: Menschen erinnern sich
 an Kindheitsmomente, auch wenn sie 50 Jahre zurueckliegen.
 
-### E.2 Q08 Theory of Mind (TEILWEISE)
+### F.2 Q08 Theory of Mind (TEILWEISE)
 
 **Problem**: Evas Einschaetzung des Owners ist plausibel aber generisch.
 Kein separates Theory-of-Mind-Modul vorhanden.
@@ -677,7 +695,7 @@ oder "Mein Owner interessiert sich fuer Philosophie".
 - Vermutete aktuelle Stimmung
 - Unausgesprochene Beduerfnisse (Inferenz)
 
-### E.3 Q09 Mentale Zeitreise (TEILWEISE)
+### F.3 Q09 Mentale Zeitreise (TEILWEISE)
 
 **Problem**: Nur 1 MTT-Eintrag (Prospektion). Antworten sind generisch.
 
@@ -695,14 +713,14 @@ MTT-Eintrag generiert. Mit mehr Daten werden die Szenarien spezifischer.
 
 ---
 
-## F. EVALUATIONS-METHODIK (Transparenz)
+## G. EVALUATIONS-METHODIK (Transparenz)
 
-### F.1 Wer hat evaluiert?
+### G.1 Wer hat evaluiert?
 
 Alle Evaluationen wurden durch den Forscher (Claude Code, LLM-gesteuert)
 durchgefuehrt. Dies stellt einen potenziellen Confirmation Bias dar.
 
-### F.2 Methodik
+### G.2 Methodik
 
 Fuer jede Frage im Brain Test:
 1. Evas Chat-Antwort gelesen
@@ -710,7 +728,7 @@ Fuer jede Frage im Brain Test:
 3. Abgleich: Stimmen Evas verbale Aussagen mit den gespeicherten Werten ueberein?
 4. Bewertung: BESTANDEN (>= 4 von 5 Aussagen korrekt), TEILWEISE (2-3 korrekt), NICHT BESTANDEN (0-1 korrekt)
 
-### F.3 Empfohlene Verbesserung fuer kuenftige Evaluationen
+### G.3 Empfohlene Verbesserung fuer kuenftige Evaluationen
 
 1. **3-von-5 LLM-Judges**: Drei verschiedene LLMs (GPT-4, Claude, Gemini)
    bewerten unabhaengig ob Evas Antwort mit den Server-Daten uebereinstimmt
@@ -719,9 +737,9 @@ Fuer jede Frage im Brain Test:
 3. **Blind Design**: Evaluator sieht nur die Antwort, nicht welche Bedingung
 4. **Inter-Rater Reliability**: Cohen's Kappa zwischen den Judges
 
-### F.4 Verbosity & Position Bias bei LLM-Judges — Bekannte blinde Flecke
+### G.4 Verbosity & Position Bias bei LLM-Judges — Bekannte blinde Flecke
 
-**WICHTIG**: Die unter F.3 empfohlene Multi-LLM-Judge-Methodik hat
+**WICHTIG**: Die unter G.3 empfohlene Multi-LLM-Judge-Methodik hat
 dokumentierte Schwaechen, die fuer dieses Projekt besonders relevant sind.
 
 **Verbosity Bias**: Forschung (2025) belegt, dass LLM-Judges laengere,
@@ -758,9 +776,7 @@ werden. LLM-Judges sind nur fuer faktische Verifikation zuverlaessig.
 
 ---
 
----
-
-## G. CHANGELOG — PEER-REVIEW-RUNDEN
+## H. CHANGELOG — PEER-REVIEW-RUNDEN
 
 ### Runde 1 (2026-02-24, 11:30 UTC)
 Adressiert 6 kritische Luecken:
@@ -782,7 +798,7 @@ Adressiert 5 weitere konzeptionelle Luecken:
 3. **Temporale Zerstoerung durch Vektor-Suche** (C.4): Reine semantische
    Retrieval zerstoert chronologischen Narrativ. Episodisches Gedaechtnis
    benoetigt zwingend temporale Ordnung fuer Kausalitaetsverstaendnis.
-4. **Verbosity & Position Bias** (Neues Kapitel F.4): LLM-Judges ueberbewerten
+4. **Verbosity & Position Bias** (Neues Kapitel G.4): LLM-Judges ueberbewerten
    laengere Antworten. Fuer emotionale Authentizitaet sind menschliche
    Evaluatoren zwingend notwendig.
 5. **MicroVM-Sandboxing** (A.4): E2B-artige Sandboxes ueberlegen gegenueber

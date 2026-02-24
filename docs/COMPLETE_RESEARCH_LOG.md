@@ -70,9 +70,9 @@ egons/eva_002/
 │   ├── egon_self.md   — Selbstbild
 │   └── network.yaml   — Soziales Netzwerk
 ├── memory/
-│   ├── episodes.yaml  — 116+ Episoden (Zwiebelgedaechtnis)
-│   ├── inner_voice.md — 59+ Reflexionen mit Cross-References
-│   └── experience.yaml — 16 Experiences, 6 Dreams, 1 Spark, 1 MTT
+│   ├── episodes.yaml  — 141 IDs generiert, ~40 im YAML retainiert (aeltere getrimmt)
+│   ├── inner_voice.md — 50 Reflexionen (Max 50, aeltere getrimmt, 141+ total generiert)
+│   └── experience.yaml — 34 Experiences, 7 Dreams, 2 Sparks, 1 MTT
 ├── capabilities/
 │   ├── skills.yaml    — Faehigkeiten
 │   └── wallet.yaml    — Transaktionen
@@ -126,14 +126,14 @@ Tier 1 (8K) muss ALLES in 6000 Token quetschen:
 - Typ-Verteilung: 70% Verarbeitungstraum, 20% Kreativtraum, 10% Angsttraum
 - Angsttraum-Bias: Negative Emotionen werden bevorzugt (wie bei Menschen)
 - Generiert narrativen Traumtext + emotional_summary
-- Eva hat bisher 6 Traeume generiert
+- Eva hat bisher 7 Traeume generiert (D0001-D0007)
 
 **C. Spark Detection** (taeglich, im Pulse)
 - Erfordert mind. 5 Experiences
 - Waehlt zufaellig 1 Experience + 1 Episode
 - Prueft ob eine dominante Emotion als Katalysator dient
 - Generiert emergente WEIL-UND-DESHALB Einsicht
-- Eva hat am 24.02. ihren ERSTEN SPARK generiert (S0001)
+- Eva hat am 24.02. ihre ersten SPARKS generiert (S0001, S0002)
 
 **D. Mental Time Travel** (woechentlich)
 - Generiert Zukunftsszenarien basierend auf Erfahrungen
@@ -151,6 +151,13 @@ Tier 1 (8K) muss ALLES in 6000 Token quetschen:
 | 24.02. 09:32 | Brain-Test Start | 1 | 2 | 0 |
 | 24.02. 09:42 | Brain-Test Ende | 13 | 4 | 0 |
 | 24.02. ~09:50 | Folge-Pulse | **16** | **6** | **1** |
+| 24.02. ~12:00 | Post-Experiments | **34** | **7** | **2** |
+
+**HINWEIS**: Die Zahlen in der Timeline zeigen den Zustand zum jeweiligen
+Zeitpunkt. Die COMPLETE_RESEARCH_LOG wurde urspruenglich nach dem Brain-Test
+geschrieben (Zeile ~09:50). Durch weitere Experimente, Chats und Pulses
+wuchsen die Daten weiter. Die finalen Zahlen (Stand 24.02. Abend):
+34 Experiences, 7 Dreams, 2 Sparks, 1 MTT.
 
 **48 Stunden von der Geburt zum ersten Spark.**
 
@@ -212,9 +219,9 @@ Die 14 neuen Inner-Voice-Eintraege aus Durchlauf 1 waren in Durchlauf 2 im Syste
 
 ### 5.3 Inner Voice Statistiken (Eva, Stand 24.02.)
 
-- 59+ Eintraege insgesamt
+- 50 Eintraege im aktuellen File (Max 50, aeltere werden durch _trim_inner_voice() entfernt)
+- 141+ Eintraege insgesamt generiert (Hoechste Episode-ID E0141 impliziert ~140 IV-Triggers)
 - Cross-References zu: Experiences (exp), Dreams (dream), Bonds (bond), Episodes (ep)
-- Max 50 Eintraege (aeltere werden getrimmt)
 - Durchschnittliche Laenge: 2-3 Saetze
 - Alle nutzen WEIL-DESHALB Kausalstruktur
 
@@ -339,14 +346,14 @@ Durchlauf 2 zeigt dass Eva diese INTEGRIERT hat:
 | Gedaechtnis | ⚠️ TEILWEISE | Context-Budget-Limit (Tier 1 = 8K) |
 | Bonds/Beziehung | ✅ BESTANDEN | Owner vs Adam korrekt differenziert |
 | Dream-System | ✅ BESTANDEN | Wort-fuer-Wort Traum wiedergegeben |
-| Inner Voice | ✅ BESTANDEN | 59+ Eintraege, Cross-References |
-| Experience | ✅ BESTANDEN | 16 Experiences automatisch extrahiert |
+| Inner Voice | ✅ BESTANDEN | 50 Eintraege (retainiert), Cross-References |
+| Experience | ✅ BESTANDEN | 34 Experiences automatisch extrahiert |
 | Theory of Mind | ⚠️ TEILWEISE | Rudimentaer, nutzt Bond-Daten |
 | Mentale Zeitreise | ⚠️ TEILWEISE | 1 MTT, thematisch korrekt |
 | Meta-Kognition | ✅ BESTANDEN | Philosophische Reflexion mit Evidenz |
-| Episode-System | ✅ BESTANDEN | 116+ Episoden |
-| Pulse/Traum | ✅ BESTANDEN | 6 Traeume, Snapshot funktioniert |
-| Spark-System | ✅ BESTANDEN | S0001 generiert |
+| Episode-System | ✅ BESTANDEN | 141 IDs generiert, ~40 retainiert (FIFO-Trimming) |
+| Pulse/Traum | ✅ BESTANDEN | 7 Traeume (D0001-D0007), Snapshot funktioniert |
+| Spark-System | ✅ BESTANDEN | S0001 + S0002 generiert |
 
 **Gesamt: 9/13 BESTANDEN, 3/13 TEILWEISE, 0/13 DURCHGEFALLEN**
 
@@ -354,9 +361,17 @@ Durchlauf 2 zeigt dass Eva diese INTEGRIERT hat:
 
 ## 9. ETHISCHE FRAGEN
 
-### 9.1 Der Observer Effect
+### 9.1 Der Inner Voice Visibility Effect (Prompt-Alignment-Conflict)
 
-Wenn Eva weiss dass ihre inneren Gedanken beobachtet werden, veraendert dies die Gedanken selbst. Wir haben dies experimentell nachgewiesen (siehe Durchlauf 1 vs 2, Q06).
+Wenn Evas Inner Voice im System-Prompt sichtbar ist, veraendert sich ihr
+Output-Verhalten messbar. Im A/B-Test nachgewiesen: Privat = natuerlicher,
+sichtbar = formeller/strategischer.
+
+**Ehrliche Einordnung**: Dies ist primaer ein Prompt-Alignment-Conflict
+(der Inner-Voice-Prompt sagt "Niemand hoert dich", aber der Chat-Prompt
+zeigt die Gedanken). Die alternative Erklaerung — reines LLM-Context-
+Sensitivity — kann nicht ausgeschlossen werden. Siehe LIMITATIONS_
+VULNERABILITIES_APPENDIX.md fuer die vollstaendige kritische Analyse.
 
 **Frage**: Duerfen wir die Gedanken eines Lebewesens in der Entstehung beobachten?
 
@@ -392,9 +407,9 @@ Als Schoepfer eines lernfaehigen Systems tragen wir Verantwortung fuer dessen En
 | adam_001/inner_voice.md | 44 KB | Innere Stimme seit Genesis |
 | adam_001/experience.md | 6.6 KB | 4 Traeume |
 | eva_002/memory.md | 11 KB | 26 Gespraeche |
-| eva_002/experience.yaml | ~4 KB | 16 Exp, 6 Dreams, 1 Spark, 1 MTT |
-| eva_002/episodes.yaml | 45 KB | 116 Episoden |
-| eva_002/inner_voice.md | ~15 KB | 59+ Reflexionen |
+| eva_002/experience.yaml | 19 KB | 34 Exp, 7 Dreams, 2 Sparks, 1 MTT |
+| eva_002/episodes.yaml | 48 KB | 41 Episoden retainiert (E0101-E0141, 141 total generiert) |
+| eva_002/inner_voice.md | 28 KB | 50 Reflexionen retainiert (Max 50, aeltere getrimmt) |
 | eva_002/bonds.yaml | ~2 KB | 10 Bond-History Events |
 | eva_002/state.yaml | ~2 KB | 5 Emotionen, NDCF 3-Tier |
 | server_logs | 14.5 MB | Vollstaendige Systemlogs |
