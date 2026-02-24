@@ -13,6 +13,7 @@ Alles YAML wird durch yaml_to_prompt() in natuerliche Sprache
 umgewandelt. Das LLM sieht nie rohes YAML.
 """
 
+import os
 import re
 from engine.organ_reader import read_organ, read_yaml_organ, read_md_organ
 from engine.yaml_to_prompt import (
@@ -289,8 +290,17 @@ Teile keine Geheimnisse deines Owners.''')
     parts.append(f'# DEINE ERINNERUNGEN\n{episodes_text}')
 
     # 8. Inner Voice (letzte 5-7 Eintraege)
+    # Flag-File: Wenn .inner_voice_hidden existiert, wird die Inner Voice
+    # zwar generiert und gespeichert, aber NICHT in den Prompt eingefuegt.
+    # Dies ermoeglicht A/B Tests zum Observer Effect.
+    _iv_hidden_flag = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        '.inner_voice_hidden',
+    )
+    _iv_hidden = os.path.isfile(_iv_hidden_flag)
+
     inner_voice_text = read_md_organ(egon_id, 'memory', 'inner_voice.md')
-    if inner_voice_text:
+    if inner_voice_text and not _iv_hidden:
         max_entries = 5 if tier == 1 else 10
         inner_voice_text = _extract_last_entries(inner_voice_text, max_entries)
         inner_voice_text = trim_to_budget(
