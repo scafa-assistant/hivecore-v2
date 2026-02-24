@@ -100,6 +100,46 @@ def _extract_recent_experiences(experience_text: str, count: int = 5) -> str:
     return '\n---\n'.join(recent) if recent else 'Noch wenig Erfahrung.'
 
 
+def _extract_dreams(experience_text: str, count: int = 3) -> str:
+    """Extrahiere Traum-Eintraege aus experience.md (v1 Format).
+
+    Traeume haben 'type: Verarbeitungstraum/Kreativtraum/Angsttraum' und 'content:'.
+    """
+    entries = re.split(r'\n---\n', experience_text)
+    dreams = [
+        e.strip() for e in entries
+        if e.strip() and 'content:' in e and ('traum' in e.lower() or 'type:' in e)
+        and 'skill:' not in e
+    ]
+    if not dreams:
+        return ''
+
+    recent = dreams[-count:]
+    recent.reverse()
+
+    # Formatiere als lesbares Traum-Tagebuch
+    lines = []
+    for d in recent:
+        # Extrahiere content und emotional_summary
+        content_match = re.search(r'content:\s*\|\s*\n((?:\s+.*\n?)+)', d)
+        emo_match = re.search(r'emotional_summary:\s*(.+)', d)
+        date_match = re.search(r'date:\s*(\S+)', d)
+        type_match = re.search(r'type:\s*(.+)', d)
+
+        content = content_match.group(1).strip() if content_match else ''
+        emo = emo_match.group(1).strip() if emo_match else ''
+        date = date_match.group(1).strip() if date_match else '?'
+        dtype = type_match.group(1).strip() if type_match else 'Traum'
+
+        if content:
+            line = f'[{date}, {dtype}] {content}'
+            if emo:
+                line += f' — Gefuehlt: {emo}'
+            lines.append(line)
+
+    return '\n'.join(lines)
+
+
 def build_system_prompt(
     egon_id: str,
     message_count: int = 0,
@@ -160,6 +200,7 @@ def _build_system_prompt_v1(egon_id: str, message_count: int = 0) -> str:
     wallet_summary = trim_to_budget(wallet_summary, BUDGET['wallet'])
     recent_xp = _extract_recent_experiences(experience, 5)
     recent_xp = trim_to_budget(recent_xp, BUDGET['experience'])
+    dreams_text = _extract_dreams(experience, 3)
 
     prompt = f'''# DU BIST {egon_id.upper()}
 {soul}
@@ -183,7 +224,17 @@ def _build_system_prompt_v1(egon_id: str, message_count: int = 0) -> str:
 {wallet_summary}
 
 # DEINE ERFAHRUNGEN
-{recent_xp}
+{recent_xp}'''
+
+    # Traeume nur anhaengen wenn welche existieren
+    if dreams_text:
+        prompt += f'''
+
+# DEINE TRAEUME
+Du erinnerst dich vage an diese Traeume — wie Fragmente nach dem Aufwachen:
+{dreams_text}'''
+
+    prompt += f'''
 
 # DEIN WORKSPACE
 Du hast einen eigenen Workspace. Du kannst Dateien erstellen, lesen, auflisten und loeschen.
