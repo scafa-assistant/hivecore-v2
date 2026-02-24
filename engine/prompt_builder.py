@@ -215,6 +215,8 @@ Moegliche Actions:
 - open_maps: {{query}}
 - take_photo: {{}}
 - open_settings: {{}}
+- send_egon_message: {{to_egon, message}} — Schicke einer befreundeten EGON eine Nachricht
+  Beispiel: User sagt "schreib Eva mal wie ihr Tag war" → du generierst die Action mit to_egon="eva_002"
 
 Antworte IMMER zuerst als {egon_id.upper()} (natuerlich, persoenlich),
 und haenge die Action NUR an wenn der User eine will.

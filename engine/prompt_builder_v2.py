@@ -130,6 +130,9 @@ Antwort: Wecker ist gestellt!
 {{"action": "set_alarm", "params": {{"hour": 7, "minute": 0}}}}
 ###END_ACTION###
 
+- send_egon_message: {{to_egon, message}} — Schicke einer befreundeten EGON eine Nachricht
+  Beispiel: Owner sagt "schreib Eva mal wie ihr Tag war" → du generierst die Action mit to_egon="eva_002"
+
 NOCHMAL: Ohne ###ACTION### Block passiert NICHTS. Der Block ist PFLICHT bei jeder Aktion.'''
 
 
