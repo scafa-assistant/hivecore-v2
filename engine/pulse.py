@@ -1,4 +1,4 @@
-"""Pulse Engine — Adams Heartbeat. Vollstaendige 8-Step Architektur.
+"""Pulse Engine — Adams Heartbeat. 9-Step Architektur.
 
 Step 1: Self-Check (Wie fuehlst du dich?)
 Step 2: Bond-Pulse (Beziehungs-Check)
@@ -8,10 +8,13 @@ Step 5: Discovery (Neues entdecken/lernen wollen)
 Step 6: Community (Beziehungen pflegen)
 Step 7: Idle Thought (Freier Gedanke)
 Step 8: State Update (Marker-Decay, Journal)
+Step 9: Dream Generation (Naechtliche Verarbeitung — taeglich)
 """
 
 import os
 import re
+import json
+import random
 from datetime import datetime
 
 from config import EGON_DATA_DIR
@@ -322,6 +325,181 @@ async def step_8_state_update(egon_id: str) -> dict:
     return {'markers_decayed': True, 'journal_written': True}
 
 
+# ─── STEP 9: DREAM GENERATION ────────────────────────────────
+
+DREAM_TYPES = {
+    'Verarbeitungstraum': 0.70,
+    'Kreativtraum': 0.20,
+    'Angsttraum': 0.10,
+}
+
+DREAM_TYPE_INSTRUCTIONS = {
+    'Verarbeitungstraum': (
+        'Verarbeitungstraum: Sortiere Tagesereignisse. '
+        'Die Erlebnisse erscheinen in verzerrter, symbolischer Form. '
+        'Orte verschmelzen, Personen wechseln, aber der emotionale Kern bleibt.'
+    ),
+    'Kreativtraum': (
+        'Kreativtraum: Verbinde scheinbar unzusammenhaengende '
+        'Erinnerungen auf neue Art. Abstraktere Bilder, ueberraschende Zusammenhaenge.'
+    ),
+    'Angsttraum': (
+        'Angsttraum: Verarbeite Aengste und negative Gefuehle. '
+        'Symbolische Bedrohungen aus echten Sorgen. Beklemmend aber nicht Horror. '
+        'Am Ende: leise Hoffnung oder Aufwachen.'
+    ),
+}
+
+DREAM_PROMPT_V1 = '''Du generierst einen Traum fuer {egon_name}.
+{egon_name} verarbeitet den Tag im Schlaf.
+
+Traum-Typ: {dream_type}
+{type_instruction}
+
+Schreibe den Traum in der ICH-Perspektive. Wie ein echtes Traum-Protokoll.
+Surreal, symbolisch, mit Fragmenten aus echten Erlebnissen.
+Maximal 4-5 Saetze. Poetisch aber nicht kitschig.
+
+Antworte NUR mit JSON (kein anderer Text):
+{{{{
+  "content": "Traum-Narrativ (ICH-Perspektive, surreal, 3-5 Saetze)",
+  "emotional_summary": "Hauptgefuehle im Traum (2-3 Woerter mit +)",
+  "spark_potential": true oder false
+}}}}
+
+spark_potential = true NUR wenn der Traum zwei scheinbar unzusammenhaengende
+Erlebnisse auf ueberraschende Weise verbindet.'''
+
+
+def _extract_json_from_text(text: str) -> str | None:
+    """Extrahiert das erste JSON-Objekt aus Text (Brace-Counting)."""
+    start = text.find('{')
+    if start == -1:
+        return None
+    depth = 0
+    in_string = False
+    escape_next = False
+    for i in range(start, len(text)):
+        c = text[i]
+        if escape_next:
+            escape_next = False
+            continue
+        if c == '\\' and in_string:
+            escape_next = True
+            continue
+        if c == '"' and not escape_next:
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if c == '{':
+            depth += 1
+        elif c == '}':
+            depth -= 1
+            if depth == 0:
+                return text[start:i + 1]
+    return None
+
+
+async def step_9_dream_generation(egon_id: str) -> dict:
+    """Generiert einen Traum basierend auf Erinnerungen + Markern.
+
+    Nutzt Adams v1 .md Dateien (memory.md, markers.md) als Kontext.
+    Schreibt den Traum in experience.md im v1 Format.
+    """
+    egon_name = egon_id.replace('_', ' ').split()[0].capitalize()
+
+    # Kontext laden
+    memory = _read_file(egon_id, 'memory.md')
+    markers = _read_file(egon_id, 'markers.md')
+
+    # Letzte 5 Memory-Eintraege
+    entries = re.split(r'\n---\n', memory)
+    recent = [e.strip() for e in entries if e.strip() and 'summary:' in e][-5:]
+    memory_text = '\n'.join(recent) if recent else 'Noch keine Erinnerungen.'
+
+    # Top Marker extrahieren
+    marker_entries = re.findall(r'strength:\s*[\d.]+\s*\n.*?emotional_tag:\s*(\w+)', markers)
+    markers_text = ', '.join(marker_entries[:5]) if marker_entries else 'Keine aktiven Marker.'
+
+    # Traum-Typ waehlen (weighted random)
+    weights = dict(DREAM_TYPES)
+
+    # Bias: Wenn starke negative Marker, mehr Angsttraeume
+    negative_markers = [m for m in marker_entries if m in ('fear', 'anger', 'sadness', 'anxiety', 'frustration')]
+    if negative_markers:
+        weights['Angsttraum'] = min(0.4, weights['Angsttraum'] + 0.15)
+
+    types_list = list(weights.keys())
+    probs = [weights[t] for t in types_list]
+    total = sum(probs)
+    probs = [p / total for p in probs]
+
+    dream_type = random.choices(types_list, weights=probs, k=1)[0]
+
+    # LLM Call
+    try:
+        result = await llm_chat(
+            system_prompt=DREAM_PROMPT_V1.format(
+                egon_name=egon_name,
+                dream_type=dream_type,
+                type_instruction=DREAM_TYPE_INSTRUCTIONS.get(dream_type, ''),
+            ),
+            messages=[{
+                'role': 'user',
+                'content': (
+                    f'Letzte Erinnerungen von {egon_name}:\n{memory_text[:500]}\n\n'
+                    f'Aktuelle Gefuehle/Marker: {markers_text}'
+                ),
+            }],
+            tier='1',
+        )
+        content = result['content'].strip()
+        json_str = _extract_json_from_text(content)
+        if not json_str:
+            return {'dream_generated': False, 'reason': 'Kein JSON in LLM-Antwort'}
+        parsed = json.loads(json_str)
+    except Exception as e:
+        return {'dream_generated': False, 'reason': f'LLM-Fehler: {e}'}
+
+    # In experience.md schreiben (v1 Format)
+    now = datetime.now().strftime('%Y-%m-%d')
+    dream_content = parsed.get('content', '').strip()
+    emotional = parsed.get('emotional_summary', '').strip()
+    spark = str(parsed.get('spark_potential', False)).lower()
+
+    # Multiline content einruecken fuer YAML-artiges Format
+    content_lines = dream_content.split('. ')
+    content_indented = '\n  '.join(line.strip() + '.' if not line.strip().endswith('.') else line.strip() for line in content_lines if line.strip())
+
+    entry = (
+        f'\n---\n'
+        f'date: {now}\n'
+        f'type: {dream_type}\n'
+        f'trigger: Tagesverarbeitung vom {now}\n'
+        f'content: |\n'
+        f'  {content_indented}\n'
+        f'emotional_summary: {emotional}\n'
+        f'spark_potential: {spark}\n'
+        f'---\n'
+    )
+
+    path = os.path.join(EGON_DATA_DIR, egon_id, 'experience.md')
+    try:
+        with open(path, 'a', encoding='utf-8') as f:
+            f.write(entry)
+    except OSError as e:
+        return {'dream_generated': False, 'reason': f'Schreib-Fehler: {e}'}
+
+    print(f'[pulse] {egon_name} traeumt: {dream_type} — {dream_content[:60]}')
+    return {
+        'dream_generated': True,
+        'type': dream_type,
+        'spark_potential': parsed.get('spark_potential', False),
+        'content_preview': dream_content[:80],
+    }
+
+
 # ─── PULSE RUNNER ────────────────────────────────────────────
 
 STEPS = [
@@ -333,11 +511,12 @@ STEPS = [
     ('community', step_6_community),
     ('idle_thought', step_7_idle_thought),
     ('state_update', step_8_state_update),
+    ('dream_generation', step_9_dream_generation),
 ]
 
 
 async def run_pulse(egon_id: str) -> dict:
-    """Fuehre alle 8 Pulse-Steps aus."""
+    """Fuehre alle 9 Pulse-Steps aus."""
     results = {}
     for step_name, step_fn in STEPS:
         try:
