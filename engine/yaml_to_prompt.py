@@ -250,6 +250,73 @@ def experience_to_prompt(exp_data: dict, max_count: int = 5) -> str:
     return '\n'.join(lines) if lines else 'Noch wenig Lebenserfahrung.'
 
 
+def dreams_to_prompt(exp_data: dict, max_count: int = 3) -> str:
+    """Wandelt dreams[] aus experience.yaml in Traum-Narrativ um.
+
+    Neueste zuerst. Poetisch, kurz. Wie ein Traum-Tagebuch.
+    """
+    if not exp_data:
+        return ''
+
+    dreams = exp_data.get('dreams', [])
+    if not dreams:
+        return ''
+
+    # Neueste zuerst
+    dreams = dreams[-max_count:]
+    dreams.reverse()
+
+    lines = []
+    for d in dreams:
+        did = d.get('id', '?')
+        date = d.get('date', '?')
+        dtype = d.get('type', 'traum')
+        content = d.get('content', '').strip()
+        emotional = d.get('emotional_summary', '')
+
+        # Traum-Typ lesbarer machen
+        type_label = dtype.replace('traum', '-Traum').title()
+
+        line = f'[{did}, {date}] ({type_label}) {content}'
+        if emotional:
+            line += f' — Gefuehlt: {emotional}'
+        lines.append(line)
+
+    return '\n'.join(lines)
+
+
+def sparks_to_prompt(exp_data: dict, max_count: int = 3) -> str:
+    """Wandelt sparks[] aus experience.yaml in Einsichts-Saetze um.
+
+    Sparks sind selten und wertvoll. Jeder Spark verbindet 2 Erinnerungen.
+    """
+    if not exp_data:
+        return ''
+
+    sparks = exp_data.get('sparks', [])
+    if not sparks:
+        return ''
+
+    # Neueste zuerst
+    sparks = sparks[-max_count:]
+    sparks.reverse()
+
+    lines = []
+    for s in sparks:
+        sid = s.get('id', '?')
+        date = s.get('date', '?')
+        insight = s.get('insight', '').strip()
+        mem_a = s.get('memory_a', '?')
+        mem_b = s.get('memory_b', '?')
+        impact = s.get('impact', 'medium')
+
+        line = f'[{sid}, {date}] {insight}'
+        line += f' (Verbindet: {mem_a} + {mem_b}, Bedeutung: {impact})'
+        lines.append(line)
+
+    return '\n'.join(lines)
+
+
 def skills_to_prompt(skills_data: dict) -> str:
     """Wandelt skills.yaml in kompakte Liste um."""
     if not skills_data:

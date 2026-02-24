@@ -243,18 +243,37 @@ def _trim_inner_voice(path: str, max_entries: int = 50):
 # ================================================================
 
 def _format_experiences_short(exp_data: dict) -> str:
-    """Formatiert Experiences kompakt fuer Inner Voice Kontext."""
+    """Formatiert Experiences + Dreams + Sparks kompakt fuer Inner Voice Kontext."""
     if not exp_data:
         return 'Noch keine Erkenntnisse.'
 
-    experiences = exp_data.get('experiences', [])
-    if not experiences:
-        return 'Noch keine Erkenntnisse.'
-
     lines = []
-    for xp in experiences[:5]:
-        xid = xp.get('id', '?')
-        insight = xp.get('insight', '').strip()
-        lines.append(f'[{xid}] {insight}')
+
+    # Erkenntnisse
+    experiences = exp_data.get('experiences', [])
+    if experiences:
+        for xp in experiences[-5:]:
+            xid = xp.get('id', '?')
+            insight = xp.get('insight', '').strip()
+            lines.append(f'[{xid}] {insight}')
+
+    # Letzte 2 Traeume
+    dreams = exp_data.get('dreams', [])
+    if dreams:
+        for d in dreams[-2:]:
+            did = d.get('id', '?')
+            content = d.get('content', '').strip()
+            dtype = d.get('type', 'traum')
+            short = content[:80] if len(content) > 80 else content
+            lines.append(f'(-> dream:{did}) [{dtype}] {short}')
+
+    # Letzte 2 Sparks
+    sparks = exp_data.get('sparks', [])
+    if sparks:
+        for s in sparks[-2:]:
+            sid = s.get('id', '?')
+            insight = s.get('insight', '').strip()
+            short = insight[:80] if len(insight) > 80 else insight
+            lines.append(f'(-> spark:{sid}) {short}')
 
     return '\n'.join(lines) if lines else 'Noch keine Erkenntnisse.'

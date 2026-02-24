@@ -20,6 +20,8 @@ from engine.yaml_to_prompt import (
     bonds_to_prompt,
     episodes_to_prompt,
     experience_to_prompt,
+    dreams_to_prompt,
+    sparks_to_prompt,
     skills_to_prompt,
     wallet_to_prompt,
     network_to_prompt,
@@ -303,6 +305,20 @@ Teile keine Geheimnisse deines Owners.''')
     experience_text = experience_to_prompt(experience_data, max_count=max_exp)
     experience_text = trim_to_budget(experience_text, budget.get('experience', 150))
     parts.append(f'# DEINE ERKENNTNISSE\n{experience_text}')
+
+    # 9b. Dreams (letzte Traeume — wie fluechtiges Erinnern nach dem Aufwachen)
+    max_dreams = 2 if tier == 1 else 5
+    dreams_text = dreams_to_prompt(experience_data, max_count=max_dreams)
+    if dreams_text:
+        dreams_text = trim_to_budget(dreams_text, budget.get('dreams', 150))
+        parts.append(f'# DEINE TRAEUME\nDu erinnerst dich vage an diese Traeume:\n{dreams_text}')
+
+    # 9c. Sparks (seltene Einsichten — wenn vorhanden)
+    max_sparks = 2 if tier == 1 else 5
+    sparks_text = sparks_to_prompt(experience_data, max_count=max_sparks)
+    if sparks_text:
+        sparks_text = trim_to_budget(sparks_text, budget.get('sparks', 100))
+        parts.append(f'# DEINE EINSICHTEN (SPARKS)\nSeltene Momente der Erkenntnis:\n{sparks_text}')
 
     # ============================================================
     # CAPABILITIES LAYER — Was kann ich?

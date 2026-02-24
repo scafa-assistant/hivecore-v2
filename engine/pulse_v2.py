@@ -1,8 +1,8 @@
-"""Pulse v2 — 10-Step Heartbeat mit neuem Gehirn.
+"""Pulse v2 — 13-Step Heartbeat mit neuem Gehirn.
 
 Ersetzt das alte pulse.py (8 Steps) fuer BRAIN_VERSION v2.
 
-10 Steps:
+13 Steps:
   1. Self-Check (State lesen, Selbstbewertung)
   2. Bond-Pulse (Decay, vernachlaessigte Beziehungen)
   3. Emotion Decay (Decay-Klassen anwenden)
@@ -13,6 +13,9 @@ Ersetzt das alte pulse.py (8 Steps) fuer BRAIN_VERSION v2.
   8. Egon-Self Review (alle 7-14 Tage: Selbstbild aktualisieren)
   9. Inner Voice Reflexion (Tagesreflexion mit Cross-Refs)
  10. State Update (Survive/Thrive Werte neu berechnen)
+ 11. Dream Generation (Naechtliche Verarbeitung — taeglich)
+ 12. Spark Check (Konvergierende Erinnerungen → Einsicht)
+ 13. Mental Time Travel (Retrospektion/Prospektion — woechentlich)
 """
 
 import re
@@ -25,6 +28,7 @@ from engine.state_manager import decay_emotions, update_survive_thrive
 from engine.bonds_v2 import decay_bonds, get_days_since_last_interaction
 from engine.thread_manager import maybe_create_thread, close_stale_threads
 from engine.inner_voice_v2 import generate_pulse_reflection
+from engine.experience_v2 import generate_dream, maybe_generate_spark, generate_mental_time_travel
 from engine.ledger import log_transaction
 from llm.router import llm_chat
 
@@ -386,6 +390,54 @@ def step_10_state_update(egon_id: str) -> dict:
 
 
 # ================================================================
+# Step 11: Dream Generation
+# ================================================================
+
+async def step_11_dream_generation(egon_id: str) -> dict:
+    """Generiert einen Traum basierend auf Tageserlebnissen + Emotionen."""
+    dream = await generate_dream(egon_id)
+    if dream:
+        return {
+            'dream_id': dream.get('id'),
+            'type': dream.get('type'),
+            'spark_potential': dream.get('spark_potential', False),
+            'content_preview': dream.get('content', '')[:80],
+        }
+    return {'dream_generated': False}
+
+
+# ================================================================
+# Step 12: Spark Check
+# ================================================================
+
+async def step_12_spark_check(egon_id: str) -> dict:
+    """Prueft ob zwei Erfahrungen zu einer neuen Einsicht konvergieren."""
+    spark = await maybe_generate_spark(egon_id)
+    if spark:
+        return {
+            'spark_id': spark.get('id'),
+            'insight_preview': spark.get('insight', '')[:80],
+            'impact': spark.get('impact'),
+        }
+    return {'spark_generated': False}
+
+
+# ================================================================
+# Step 13: Mental Time Travel
+# ================================================================
+
+async def step_13_mental_time_travel(egon_id: str) -> dict:
+    """Generiert eine Retrospektion oder Prospektion (woechentlich)."""
+    mtt = await generate_mental_time_travel(egon_id)
+    if mtt:
+        return {
+            'mtt_id': mtt.get('id'),
+            'type': mtt.get('type'),
+        }
+    return {'mtt_generated': False, 'reason': 'Noch nicht faellig oder keine Episoden'}
+
+
+# ================================================================
 # Pulse Runner
 # ================================================================
 
@@ -400,11 +452,14 @@ STEPS = [
     ('egon_self_review', step_8_egon_self_review, True), # async
     ('inner_voice', step_9_inner_voice_reflection, True),# async
     ('state_update', step_10_state_update, False),       # sync
+    ('dream_generation', step_11_dream_generation, True),  # async
+    ('spark_check', step_12_spark_check, True),            # async
+    ('mental_time_travel', step_13_mental_time_travel, True),  # async
 ]
 
 
 async def run_pulse(egon_id: str) -> dict:
-    """Fuehre alle 10 Pulse-Steps aus.
+    """Fuehre alle 13 Pulse-Steps aus.
 
     Bei BRAIN_VERSION != 'v2' faellt auf altes pulse.py zurueck.
     """

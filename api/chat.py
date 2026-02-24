@@ -285,6 +285,14 @@ async def chat(req: ChatRequest):
         except Exception as e:
             print(f'[post] maybe_create_episode FEHLER: {e}')
         try:
+            from engine.experience_v2 import maybe_extract_experience
+            ep_id = ep.get('id') if ep else None
+            xp = await maybe_extract_experience(egon_id, message, display_text, source_episode_id=ep_id)
+            if xp:
+                print(f'[post] Experience: {xp.get("id")} — {xp.get("insight", "")[:60]}')
+        except Exception as e:
+            print(f'[post] Experience FEHLER: {e}')
+        try:
             await maybe_update_owner_portrait(egon_id, message, display_text)
         except Exception as e:
             print(f'[post] owner_portrait FEHLER: {e}')

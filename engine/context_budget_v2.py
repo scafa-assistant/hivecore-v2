@@ -29,6 +29,8 @@ BUDGET_TIER1 = {
     'bonds_owner': 100,        # Nur Owner-Bond (gekuerzt)
     'episodes': 500,           # Letzte 5-8 Episoden (gekuerzt)
     'experience': 100,         # Top 3 relevante Erkenntnisse (gekuerzt)
+    'dreams': 150,             # Letzte 2-3 Traeume (narrativ)
+    'sparks': 100,             # Letzte 2-3 Sparks (Einsichten)
     'skills': 100,             # Kompakte Skill-Liste (gekuerzt)
     'wallet': 80,              # Nur Kontostand (gekuerzt)
     'ecr_instruction': 150,    # ECR-Chain Anweisung
@@ -52,6 +54,8 @@ BUDGET_TIER2 = {
     'bonds_others': 400,       # Andere wichtige Bonds
     'episodes': 2000,          # Letzte 20 + Thread-Episoden
     'experience': 400,         # Top 5-8 Erkenntnisse
+    'dreams': 400,             # Letzte 3-5 Traeume (ausfuehrlich)
+    'sparks': 200,             # Alle Sparks
     'skills': 300,             # Volle Skill-Liste
     'wallet': 200,             # Kontostand + Transaktionen
     'network': 200,            # Netzwerk-Ueberblick
