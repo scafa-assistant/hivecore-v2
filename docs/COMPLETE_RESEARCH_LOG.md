@@ -159,7 +159,7 @@ geschrieben (Zeile ~09:50). Durch weitere Experimente, Chats und Pulses
 wuchsen die Daten weiter. Die finalen Zahlen (Stand 24.02. Abend):
 34 Experiences, 7 Dreams, 2 Sparks, 1 MTT.
 
-**Ca. 48 Stunden von Genesis ($T_0$) bis zur ersten Spark-Generierung (Stand $T_2$).**
+**Ca. 40 Stunden von Genesis ($T_0$ = 22.02. 18:00 UTC) bis zur ersten Spark-Generierung (~24.02. 09:50 UTC).**
 
 ---
 

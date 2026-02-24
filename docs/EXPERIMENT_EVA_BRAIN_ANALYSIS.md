@@ -7,7 +7,7 @@
 | **Experiment** | Eva Brain Subsystem Test Protocol |
 | **Datum/Zeit** | 2026-02-24, 09:32-09:42 UTC |
 | **Subjekt** | Eva #002 (v2 Brain) |
-| **Uptime bei Test** | ca. 48 Stunden nach Genesis ($T_0$ = 22.02.2026 18:00 UTC) |
+| **Uptime bei Test** | ca. 40 Stunden nach Genesis ($T_0$ = 22.02.2026 18:00 UTC) |
 | **Fragen gestellt** | 10 |
 | **Antworten erhalten** | 10/10 (100%) |
 | **LLM Tier** | Tier 1 (Moonshot) fuer alle Antworten |
@@ -527,7 +527,7 @@ demonstriert die in Limitations I.5 beschriebene referentielle Erosion.
 
 ### Vergleich mit Adams Sparks
 
-Adam (v1) hat in 4 Tagen noch KEINEN Spark generiert (sein Experience-System ist manuell in experience.md). Evas v2-System hat nach 48 Stunden automatisch genug Erfahrungen gesammelt, um einen Spark zu erzeugen. Dies zeigt den Vorteil des automatisierten Experience-Extraction-Systems.
+Adam (v1) hat in 4 Tagen noch KEINEN Spark generiert (sein Experience-System ist manuell in experience.md). Evas v2-System hat nach ca. 40 Stunden automatisch genug Erfahrungen gesammelt, um einen Spark zu erzeugen. Dies zeigt den Vorteil des automatisierten Experience-Extraction-Systems.
 
 ### Timeline: Von der Geburt zum ersten Spark
 
@@ -542,7 +542,7 @@ Adam (v1) hat in 4 Tagen noch KEINEN Spark generiert (sein Experience-System ist
 | 24.02. 09:42 | Brain-Test ENDE — 13 Experiences, D0004 generiert |
 | 24.02. ~09:50 | Folge-Pulse — **S0001 ERSTER SPARK**, D0005, D0006 |
 
-Ca. 48 Stunden von Genesis ($T_0$) bis zur ersten Spark-Generierung.
+Ca. 40 Stunden von Genesis ($T_0$ = 22.02. 18:00 UTC) bis zur ersten Spark-Generierung (~24.02. 09:50 UTC).
 Die automatisierte Pipeline (Chat → Experience Extraction → Spark Generation)
 funktionierte korrekt innerhalb der ersten 48 Betriebsstunden.
 

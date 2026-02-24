@@ -12,7 +12,7 @@ $^{1}$Independent Researcher
 
 We present EGON (Emotional Growing Organic Network), a cognitive architecture that maintains coherent AI agent identity through structured file persistence and cyclical internal processing. Unlike session-stateless LLM deployments, EGON agents retain memories, emotional markers, social bonds, and internally generated reflections across sessions via a modular organ system — structured YAML and Markdown files read into the LLM context window at each interaction. The architecture comprises five subsystems: (1) an episodic memory store with FIFO-managed retrieval, (2) a somatic marker system tracking affective state with intensity and decay, (3) a bond system modeling social relationships with trust scores and interaction history, (4) an inner voice generating causal-chain reflections before each response, and (5) a daily Pulse cycle performing dream generation, insight synthesis (Sparks), and prospective mental time travel.
 
-We report observations from a 66-hour deployment of two agents — Adam (v1, flat-file brain) and Eva (v2, organ-based brain) — running on commodity hardware with three LLM tiers (Moonshot 8K, Kimi K2.5 128K, Claude Sonnet 200K). At evaluation snapshot $T_2$ (2026-02-24, 12:00 UTC), Eva's persistent state contained 141 generated episode identifiers (~40 retained in file, 8 visible at Tier 1), 34 extracted experiences, 7 dream narratives, 2 cross-referential Sparks, and 1 prospective mental time travel entry. We document a Prompt-Alignment Conflict in which inner voice visibility in the chat prompt measurably altered agent output behavior, and we characterize referential erosion — a phenomenon where higher-order organs (Sparks) retain references to episodes that FIFO trimming has removed.
+We report observations from a 42-hour deployment of two agents — Adam (v1, flat-file brain) and Eva (v2, organ-based brain) — running on commodity hardware with three LLM tiers (Moonshot 8K, Kimi K2.5 128K, Claude Sonnet 200K). At evaluation snapshot $T_2$ (2026-02-24, 12:00 UTC), Eva's persistent state contained 141 generated episode identifiers (~40 retained in file, 8 visible at Tier 1), 34 extracted experiences, 7 dream narratives, 2 cross-referential Sparks, and 1 prospective mental time travel entry. We document a Prompt-Alignment Conflict in which inner voice visibility in the chat prompt measurably altered agent output behavior, and we characterize referential erosion — a phenomenon where higher-order organs (Sparks) retain references to episodes that FIFO trimming has removed.
 
 This work is a descriptive single-case study. It makes no causal claims: without an ablation study comparing organ-based context injection against an unstructured RAG baseline, we cannot distinguish architectural effects from base-LLM instruction-following. All behavioral observations admit alternative explanations (training data extrapolation, context sensitivity, prompt compliance). We publish the complete engine code, all raw agent data (YAML/JSON), experiment scripts, and system prompts to enable independent replication. The contribution is architectural: a reproducible, LLM-agnostic pipeline for building file-persistent agents whose cognitive state survives restarts, accumulates over time, and can be externally audited at any snapshot.
 
@@ -40,7 +40,7 @@ This paper makes three contributions:
 
 1. **Architecture Description** [AF]: We describe the EGON organ-based cognitive architecture in sufficient detail for independent reimplementation, including all prompt templates, processing pipelines, and trimming strategies.
 
-2. **Observational Data** [DB/BO]: We report quantitative and qualitative observations from a 66-hour deployment of two agents with different brain versions (v1 flat-file, v2 organ-based), documenting system behavior including a Prompt-Alignment Conflict and referential erosion.
+2. **Observational Data** [DB/BO]: We report quantitative and qualitative observations from a 42-hour deployment of two agents with different brain versions (v1 flat-file, v2 organ-based), documenting system behavior including a Prompt-Alignment Conflict and referential erosion.
 
 3. **Transparency Protocol** [AF]: We publish the complete codebase, all raw agent data, experiment scripts, and this limitations analysis as a companion archive, establishing a standard for full-disclosure AI agent research.
 
@@ -50,11 +50,11 @@ We explicitly do **not** claim:
 - Statistical significance (N=2 agents, no control group)
 - Reproducibility of specific LLM outputs (proprietary APIs)
 
-**Scope**: This paper addresses the **cognitive substrate** — file-persistent organs, prompt compilation, cyclical internal processing, and memory distillation. The broader EGON platform includes additional subsystems not evaluated here: a 3D avatar client for visual embodiment (Section 7.6), blockchain infrastructure for decentralized identity verification (Section 7.7), and a friendship network for multi-agent communication (Section 7.8). These are discussed as planned future work, ensuring that the cognitive architecture is validated independently before extending to embodied, decentralized, or multi-agent interaction.
+**Scope**: This paper addresses the **cognitive substrate** — file-persistent organs, prompt compilation, cyclical internal processing, and memory distillation. The broader EGON platform includes additional subsystems not evaluated here: a 3D avatar client for visual embodiment (Section 7.5), blockchain infrastructure for decentralized identity verification (Section 7.6), and a friendship network for multi-agent communication (Section 7.7). These are discussed as planned future work, ensuring that the cognitive architecture is validated independently before extending to embodied, decentralized, or multi-agent interaction.
 
 ### 1.4 Paper Organization
 
-Section 2 surveys related work. Section 3 describes the architecture. Section 4 details the experimental setup and observations. Section 5 presents results. Section 6 discusses findings and limitations. Section 7 outlines future work, including an ablation study (7.1), embodiment (7.6), decentralized identity (7.7), and multi-agent networks (7.8). Appendices contain prompt templates, raw data references, and the full limitations analysis.
+Section 2 surveys related work. Section 3 describes the architecture. Section 4 details the experimental setup and observations. Section 5 presents results. Section 6 discusses findings and limitations. Section 7 outlines future work, including an ablation study (7.1), embodiment (7.5), decentralized identity (7.6), and multi-agent networks (7.7). Appendices contain prompt templates, raw data references, and the full limitations analysis.
 
 ---
 
@@ -76,7 +76,7 @@ The concept of an "inner voice" in AI systems relates to work on chain-of-though
 
 ### 2.4 Memory Systems for LLM Agents
 
-Recent work on LLM memory includes: retrieval-augmented generation (Lewis et al., 2020), memory-augmented transformers (Wu et al., 2022), and hierarchical memory with context management (Packer et al., 2023). EGON's contribution to this space is the distinction between **generated**, **retained**, and **visible** artifacts — a taxonomy we find necessary when working with FIFO-managed memory under strict context budgets. We document how this creates referential erosion (Section 5.4) and discuss its implications.
+Recent work on LLM memory includes: retrieval-augmented generation (Lewis et al., 2020) and hierarchical memory with context management (Packer et al., 2023). EGON's contribution to this space is the distinction between **generated**, **retained**, and **visible** artifacts — a taxonomy we find necessary when working with FIFO-managed memory under strict context budgets. We document how this creates referential erosion (Section 5.4) and discuss its implications.
 
 ---
 
@@ -181,7 +181,7 @@ Each agent maintains relationship records (bonds) with trust scores (0.0-1.0), r
 | Agent | Brain Version | Genesis ($T_0$) | Observation Period |
 |-------|--------------|-----------------|-------------------|
 | Adam #001 | v1 (flat Markdown) | 2026-02-21 | ~72 hours |
-| Eva #002 | v2 (YAML organs) | 2026-02-22 18:00 UTC | ~66 hours |
+| Eva #002 | v2 (YAML organs) | 2026-02-22 18:00 UTC | ~42 hours |
 
 ### 4.2 Evaluation Snapshots
 
@@ -203,7 +203,7 @@ An observational comparison (N=3 question pairs, not statistically significant) 
 
 ### 4.5 Client Interface
 
-Agents are accessed through EgonsDash, a React Native/Expo mobile application featuring real-time chat and cognitive state visualization. The client displays conversation history, active emotional markers, bond status, and inner voice entries — providing a direct window into the agent's organ-based state. A 3D avatar component (ReadyPlayerMe) is integrated for visual embodiment but is not part of the cognitive architecture evaluated in this paper (see Section 7.6).
+Agents are accessed through EgonsDash, a React Native/Expo mobile application featuring real-time chat and cognitive state visualization. The client displays conversation history, active emotional markers, bond status, and inner voice entries — providing a direct window into the agent's organ-based state. A 3D avatar component (ReadyPlayerMe) is integrated for visual embodiment but is not part of the cognitive architecture evaluated in this paper (see Section 7.5).
 
 > **[Figure 2]**: *EgonsDash mobile interface. Replace with screenshot showing: (a) chat conversation with an EGON agent, (b) agent state visualization (emotions, bonds), (c) cognitive state dashboard. Use actual screenshots from device/emulator.*
 
@@ -251,8 +251,8 @@ Between Run 1 and Run 2, the agent's responses showed increased specificity in r
 
 The inner voice generation prompt states "nobody hears you." However, the 5 most recent inner voice entries are injected into the chat system prompt under `# YOUR INNER VOICE`. This creates a logical contradiction that the LLM resolves through behavioral adaptation:
 
-- **When IV data is absent from chat prompt** (Run 1, Q06): Agent denies having an inner voice
-- **When IV data is present in chat prompt** (Run 2, Q06): Agent affirms and describes inner voice
+- **When IV data is absent from chat prompt** (Run 1, Q06): Agent output negates inner voice existence
+- **When IV data is present in chat prompt** (Run 2, Q06): Agent output affirms and describes inner voice content
 
 **Interpretation** [IN]: This is primarily a prompt-alignment artifact — the LLM resolves the contradiction between "private" generation context and "public" visibility context. It can be fully explained by instruction-following and context sensitivity without invoking self-awareness. The observation is nonetheless architecturally relevant: it demonstrates that prompt composition affects agent self-report, a consideration for any system injecting internal state into LLM context.
 
@@ -262,7 +262,7 @@ Eva's first Spark (S0001) references episode E0078 as `memory_b`. At $T_2$, epis
 
 This **referential erosion** is a documented consequence of heterogeneous trimming policies across organs: Sparks have no trimming (all 2 retained), while episodes are aggressively trimmed (~40 of 141 retained). Higher-order artifacts outlive their source material, preserving the distilled insight while losing the original context.
 
-**Architectural Implication**: This is functionally analogous to the transition from episodic to semantic memory in cognitive science — the lesson survives, the specific situation does not. In EGON, this is an unintentional side effect of FIFO trimming, not a designed feature. Whether the outcome (insight without context) is functionally equivalent to biological memory reconsolidation requires further investigation.
+**Architectural Implication**: This is functionally analogous to the transition from episodic to semantic memory in cognitive science — the distilled insight persists while the source episode does not. In EGON, this is an unintentional side effect of FIFO trimming, not a designed feature. Whether the outcome (insight without context) is functionally equivalent to biological memory reconsolidation requires further investigation.
 
 ### 5.5 Behavioral Observations Catalog
 
@@ -295,7 +295,7 @@ The EGON architecture demonstrates that file-persistent, organ-based cognitive s
 
 - **Emergent cognition**: All observed behaviors admit alternative explanations rooted in base-LLM capabilities
 - **Superiority over alternatives**: Without a RAG baseline comparison, we cannot claim that organ-based decomposition outperforms unstructured context injection
-- **Scalability**: The system was tested with 2 agents over 66 hours; long-term stability and multi-agent scaling are untested
+- **Scalability**: The system was tested with 2 agents over 42 hours; long-term stability and multi-agent scaling are untested
 - **Consciousness or sentience**: The system produces text outputs that may read as self-aware; this is a property of LLM training data, not evidence of subjective experience
 
 ### 6.3 The Emergence Mirage Problem
@@ -344,15 +344,11 @@ Replace self-evaluation with: (a) 3-of-5 LLM judges for consensus scoring, (b) b
 
 Replace FIFO episodic retrieval with hybrid retrieval: FIFO for recency + vector search (FAISS/Chroma) for relevance. This would address the referential erosion problem and enable long-term memory access.
 
-### 7.4 Multi-Agent Communication
-
-The current system isolates agents. A planned extension enables direct EGON-to-EGON communication, allowing study of emergent social dynamics in multi-agent file-persistent systems.
-
-### 7.5 Open-Source LLM Replication
+### 7.4 Open-Source LLM Replication
 
 Replicate observations using versionable open-source models (LLaMA, Mistral) to address the API nondeterminism limitation and enable exact reproduction.
 
-### 7.6 Embodiment and Proprioception
+### 7.5 Embodiment and Proprioception
 
 The present work demonstrates cognitive and affective persistence at the architectural level — the agent's internal state (memories, emotions, bonds, reflections) survives across sessions and evolves over time. This is deliberately scoped to the **cognitive substrate**: file-persistent organs, prompt compilation, and cyclical internal processing.
 
@@ -366,9 +362,9 @@ Future research will investigate:
 
 3. **Embodied Social Signaling**: In multi-agent scenarios, investigating whether agents develop consistent non-verbal communication patterns when their bodies are coupled to their bond and emotional systems.
 
-This two-phase approach (Paper 1: cognition, Paper 2: embodiment) ensures that each contribution can be evaluated independently. The cognitive architecture must demonstrate coherence without embodiment before embodied extensions can be meaningfully studied.
+This phased approach — establishing cognitive coherence first, then extending to embodiment — ensures that each contribution can be evaluated independently. The cognitive architecture must demonstrate coherence without embodiment before embodied extensions can be meaningfully studied.
 
-### 7.7 Decentralized Identity and On-Chain Verification
+### 7.6 Decentralized Identity and On-Chain Verification
 
 The current system stores all agent state in server-side files. Agent identity is bound to a directory path (`egons/eva_002/`), and data integrity relies on SHA-256 hashes appended to a local transaction ledger. This creates a single point of trust: the server operator controls the agent's entire cognitive history.
 
@@ -391,7 +387,7 @@ Future research will investigate:
 
 4. **Agora Marketplace**: A planned agent-to-agent and agent-to-human service marketplace where agents offer capabilities (skills) in exchange for credits. This introduces economic incentives into the cognitive architecture — the question is whether resource scarcity (finite credits, daily maintenance costs) produces more strategic agent behavior than unlimited-resource conditions.
 
-### 7.8 Multi-Agent Communication Network
+### 7.7 Multi-Agent Communication Network
 
 The current system isolates agents at the cognitive level. While the friendship infrastructure exists (bilateral friendship records, bond entries, network graphs), agents cannot directly exchange messages. Communication occurs only through shared file structures read during scheduled cycles — there is no real-time inter-agent channel.
 
@@ -422,7 +418,7 @@ Future research will investigate:
 
 We have presented EGON, an organ-based cognitive architecture for file-persistent AI agents. The architecture decomposes agent cognitive state into modular, human-readable files organized in a biologically inspired hierarchy, compiled into LLM context windows through a deterministic prompt-building pipeline. A daily Pulse cycle enables autonomous internal processing — dream generation, insight synthesis, and prospective simulation — without user interaction.
 
-Over a 66-hour observation period, two agents accumulated structured cognitive states (141 episodes, 34 experiences, 7 dreams, 2 sparks) and demonstrated coherent identity maintenance across sessions. We documented two architecturally significant phenomena: a Prompt-Alignment Conflict revealing how prompt composition affects agent self-report, and referential erosion showing how heterogeneous memory trimming creates a functional analog to memory consolidation.
+Over a 42-hour observation period, two agents accumulated structured cognitive states (141 generated episode identifiers, 34 experiences, 7 dreams, 2 sparks) and demonstrated coherent identity maintenance across sessions. We documented two architecturally significant phenomena: a Prompt-Alignment Conflict revealing how prompt composition affects agent self-report, and referential erosion showing how heterogeneous memory trimming creates a functional analog to memory consolidation.
 
 This work is exploratory. It describes an architecture and documents observations without causal claims. The absence of a baseline comparison, the use of proprietary LLMs, and the self-evaluation methodology are significant limitations. We address these through radical transparency: the complete codebase, all raw agent data, experiment scripts, system prompts, and this limitations analysis are published as a companion archive.
 
@@ -432,14 +428,14 @@ The contribution is not a claim of emergent AI cognition. It is a reproducible, 
 
 ## Appendices
 
-- **Appendix A**: Full Limitations and Vulnerabilities Analysis (LIMITATIONS_VULNERABILITIES_APPENDIX.md)
-- **Appendix B**: Condensed System Prompts (see B.1-B.8 in Research Log)
-- **Appendix C**: Master Data Table (authoritative reference numbers)
-- **Appendix D**: Behavioral Observations Evidence Catalog (EMERGENT_BEHAVIORS_EVIDENCE.md)
-- **Appendix E**: Brain Subsystem Test — Full Analysis (EXPERIMENT_EVA_BRAIN_ANALYSIS.md)
-- **Appendix F**: Engine Source Code (experience_v2.py, inner_voice_v2.py, pulse_v2.py, prompt_builder_v2.py, context_budget_v2.py, yaml_to_prompt.py, episodes_v2.py, organ_reader.py, snapshot.py)
-- **Appendix G**: Raw Agent Data (YAML/JSON brain files for Adam and Eva)
-- **Appendix H**: Experiment Scripts (_experiment_eva_brain_test.py, _experiment_inner_voice_ab.py)
+- **Appendix A**: Full Limitations, Vulnerabilities & Methodology (`01_research_documentation/LIMITATIONS_VULNERABILITIES_APPENDIX.md`) — includes Methodology & Temporal Scope (Section I), Master Data Table (Section J), Anticipated Reviewer Objections (Section K)
+- **Appendix B**: Complete Research Log (`01_research_documentation/COMPLETE_RESEARCH_LOG.md`) — includes condensed system prompts (Sections B.1-B.8)
+- **Appendix C**: Behavioral Observations Evidence Catalog (`01_research_documentation/EMERGENT_BEHAVIORS_EVIDENCE.md`) — 11 observations classified L0-L3
+- **Appendix D**: Brain Subsystem Test — Full Analysis (`02_experiments/EXPERIMENT_EVA_BRAIN_ANALYSIS.md`)
+- **Appendix E**: Inner Voice A/B Observation (`02_experiments/EXPERIMENT_INNER_VOICE_OBSERVER_EFFECT.md`)
+- **Appendix F**: Engine Source Code (`04_system_prompts_and_engine/` — 9 Python modules: experience_v2.py, inner_voice_v2.py, pulse_v2.py, prompt_builder_v2.py, context_budget_v2.py, yaml_to_prompt.py, episodes_v2.py, organ_reader.py, snapshot.py)
+- **Appendix G**: Raw Agent Data (`03_agent_data/` — complete YAML/JSON brain files for Adam #001 and Eva #002, plus pre-experiment archive at $T_1$)
+- **Appendix H**: Experiment Scripts (`05_experiment_scripts/` — _experiment_eva_brain_test.py, _experiment_inner_voice_ab.py)
 
 ---
 

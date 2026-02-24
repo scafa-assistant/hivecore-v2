@@ -700,7 +700,7 @@ oder "Mein Owner interessiert sich fuer Philosophie".
 
 **Problem**: Nur 1 MTT-Eintrag (Prospektion). Antworten sind generisch.
 
-**Ursache**: MTT wird woechentlich getriggert. Eva ist 48 Stunden alt —
+**Ursache**: MTT wird woechentlich getriggert. Eva ist ca. 40 Stunden alt —
 sie hatte erst EINE Gelegenheit fuer MTT. Ausserdem: MTT nutzt nur
 Episoden + Experiences als Input, keine Bonds oder emotionalen Trends.
 
@@ -878,8 +878,8 @@ eingefrorenen Zustand bei $T_2$ (finale Datenerhebung), sofern nicht
 explizit anders angegeben. Systemaktivitaet nach $T_2$ ist von der
 Analyse ausgeschlossen.
 
-**Forschungszeitraum**: $T_0$ bis $T_2$ umfasst ca. 66 Stunden fuer
-Eva #002. Adam #001 Genesis war am 2026-02-21 (v1 Brain).
+**Forschungszeitraum**: $T_0$ (22.02. 18:00 UTC) bis $T_2$ (24.02. ~12:00 UTC) umfasst
+ca. 42 Stunden fuer Eva #002. Adam #001 Genesis war am 2026-02-21 (v1 Brain).
 
 ### I.3 Active State vs. Historical State — Das Snapshot-Problem
 
