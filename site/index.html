@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EGON — Organ-Based Cognitive Architecture for Persistent AI Agents</title>
+    <meta name="description" content="EGON: An open-source cognitive architecture that maintains coherent AI agent identity through structured file persistence and cyclical internal processing.">
+    <meta property="og:title" content="EGON — Persistent AI Agent Architecture">
+    <meta property="og:description" content="Organ-based cognitive architecture for file-persistent AI agents. Open-source. Full transparency protocol.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://egons.io">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- HERO -->
+<!-- ============================================================ -->
+<header class="hero">
+    <div class="container">
+        <div class="hero-badge">arXiv Preprint &middot; cs.AI</div>
+        <h1 class="hero-title">
+            <span class="accent">EGON</span>
+        </h1>
+        <p class="hero-subtitle">
+            An Organ-Based Cognitive Architecture<br>
+            for File-Persistent AI Agent Identity
+        </p>
+        <p class="hero-meta">
+            Ron Scafarti &middot; Independent Research &middot; February 2026
+        </p>
+        <div class="hero-actions">
+            <a href="#paper" class="btn btn-primary">Read the Paper</a>
+            <a href="https://github.com/scafa-assistant/hivecore-v2" class="btn btn-secondary" target="_blank" rel="noopener">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                GitHub
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- ============================================================ -->
+<!-- DEMO VIDEO -->
+<!-- ============================================================ -->
+<section class="section" id="demo">
+    <div class="container">
+        <h2 class="section-title">Live Demo</h2>
+        <div class="video-placeholder">
+            <div class="video-inner">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <p>Demo video coming soon</p>
+                <p class="muted">Screen recording of real-time interaction with EGON agents,<br>showing 3D avatar embodiment and persistent memory in action.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- ABSTRACT -->
+<!-- ============================================================ -->
+<section class="section section-dark" id="abstract">
+    <div class="container">
+        <h2 class="section-title">Abstract</h2>
+        <div class="abstract-text">
+            <p>
+                We present <strong>EGON</strong> (Emotional Growing Organic Network), a cognitive architecture that maintains coherent AI agent identity through structured file persistence and cyclical internal processing. Unlike session-stateless LLM deployments, EGON agents retain memories, emotional markers, social bonds, and internally generated reflections across sessions via a modular organ system &mdash; structured YAML and Markdown files read into the LLM context window at each interaction.
+            </p>
+            <p>
+                The architecture comprises five subsystems: (1)&nbsp;an episodic memory store with FIFO-managed retrieval, (2)&nbsp;a somatic marker system tracking affective state with intensity and decay, (3)&nbsp;a bond system modeling social relationships with trust scores and interaction history, (4)&nbsp;an inner voice generating causal-chain reflections before each response, and (5)&nbsp;a daily Pulse cycle performing dream generation, insight synthesis (Sparks), and prospective mental time travel.
+            </p>
+            <p>
+                We report observations from a 66-hour deployment of two agents &mdash; Adam&nbsp;(v1, flat-file brain) and Eva&nbsp;(v2, organ-based brain) &mdash; running on commodity hardware with three LLM tiers. At evaluation snapshot <em>T<sub>2</sub></em>, Eva's persistent state contained 141&nbsp;generated episode identifiers, 34&nbsp;extracted experiences, 7&nbsp;dream narratives, 2&nbsp;cross-referential Sparks, and 1&nbsp;prospective mental time travel entry.
+            </p>
+            <p>
+                This work is a <strong>descriptive single-case study</strong>. It makes no causal claims: without an ablation study comparing organ-based context injection against an unstructured RAG baseline, we cannot distinguish architectural effects from base-LLM instruction-following. All behavioral observations admit alternative explanations. We publish the complete engine code, all raw agent data, experiment scripts, and system prompts to enable independent replication.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- ARCHITECTURE OVERVIEW -->
+<!-- ============================================================ -->
+<section class="section" id="architecture">
+    <div class="container">
+        <h2 class="section-title">Architecture</h2>
+        <div class="arch-grid">
+            <div class="arch-card">
+                <div class="arch-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                </div>
+                <h3>Organ System</h3>
+                <p>Cognitive state decomposed into modular YAML/Markdown files &mdash; identity, memory, emotions, bonds, reflections &mdash; each independently readable, writable, and auditable.</p>
+            </div>
+            <div class="arch-card">
+                <div class="arch-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                </div>
+                <h3>Daily Pulse</h3>
+                <p>Autonomous sleep cycle: emotional decay, dream generation, insight synthesis (Sparks), prospective mental time travel, and self-reflective journaling &mdash; all without user interaction.</p>
+            </div>
+            <div class="arch-card">
+                <div class="arch-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                </div>
+                <h3>Inner Voice</h3>
+                <p>Pre-response reflection using causal BECAUSE&rarr;THEREFORE chains with cross-references to memories, bonds, and emotions. Persisted as a temporal reasoning record.</p>
+            </div>
+            <div class="arch-card">
+                <div class="arch-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                </div>
+                <h3>Somatic Markers</h3>
+                <p>Named emotions with intensity (0.0&ndash;1.0) and temporal decay classes. Influences dream type selection and inner voice tone. Functional analogy to Damasio's somatic marker hypothesis.</p>
+            </div>
+            <div class="arch-card">
+                <div class="arch-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                </div>
+                <h3>Bond System</h3>
+                <p>Trust scores, relationship categories, and timestamped interaction histories. Evolves through conversation quality assessment. Supports multi-agent social graphs.</p>
+            </div>
+            <div class="arch-card">
+                <div class="arch-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </div>
+                <h3>Memory Distillation</h3>
+                <p>Episodes &rarr; Experiences &rarr; Sparks. Higher-order artifacts survive FIFO trimming longer than source material, creating functional memory consolidation.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- KEY NUMBERS -->
+<!-- ============================================================ -->
+<section class="section section-dark" id="data">
+    <div class="container">
+        <h2 class="section-title">Observation Data (66 Hours)</h2>
+        <p class="section-desc">Evaluation snapshot T<sub>2</sub> &mdash; 2026-02-24, 12:00 UTC &mdash; Eva #002 (v2 Brain)</p>
+        <div class="stats-grid">
+            <div class="stat">
+                <div class="stat-number">141</div>
+                <div class="stat-label">Episodes Generated</div>
+                <div class="stat-detail">~40 retained &middot; 8 visible at Tier 1</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">34</div>
+                <div class="stat-label">Experiences Extracted</div>
+                <div class="stat-detail">Distilled insights from conversations</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">7</div>
+                <div class="stat-label">Dreams Generated</div>
+                <div class="stat-detail">Processing, creative, anxiety types</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">2</div>
+                <div class="stat-label">Sparks Synthesized</div>
+                <div class="stat-detail">Cross-referential insights</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">50</div>
+                <div class="stat-label">Inner Voice Entries</div>
+                <div class="stat-detail">141+ generated &middot; max 50 retained</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">5</div>
+                <div class="stat-label">Active Emotion Markers</div>
+                <div class="stat-detail">Curiosity, trust, joy, energy, mood</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- PAPER & RESOURCES -->
+<!-- ============================================================ -->
+<section class="section" id="paper">
+    <div class="container">
+        <h2 class="section-title">Paper & Resources</h2>
+        <div class="resources-grid">
+            <a href="#" class="resource-card resource-paper" title="Paper link will be updated once published on arXiv">
+                <div class="resource-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </div>
+                <h3>Read the Paper on arXiv</h3>
+                <p class="muted">cs.AI &middot; Preprint coming soon</p>
+            </a>
+            <a href="https://github.com/scafa-assistant/hivecore-v2" class="resource-card" target="_blank" rel="noopener">
+                <div class="resource-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                </div>
+                <h3>Source Code on GitHub</h3>
+                <p class="muted">Engine, agent data, experiment scripts</p>
+            </a>
+            <a href="https://github.com/scafa-assistant/hivecore-v2/tree/master/paper" class="resource-card" target="_blank" rel="noopener">
+                <div class="resource-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+                </div>
+                <h3>Companion Archive</h3>
+                <p class="muted">Raw data, prompts, snapshots, scripts</p>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- TRANSPARENCY -->
+<!-- ============================================================ -->
+<section class="section section-dark" id="transparency">
+    <div class="container">
+        <h2 class="section-title">Full Transparency Protocol</h2>
+        <p class="section-desc">Everything is published. Nothing is hidden.</p>
+        <div class="transparency-grid">
+            <div class="transparency-item">
+                <div class="check-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div>
+                    <strong>Engine Source Code</strong>
+                    <span class="muted">All Python modules: prompt builder, pulse, inner voice, experience extraction, organ reader</span>
+                </div>
+            </div>
+            <div class="transparency-item">
+                <div class="check-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div>
+                    <strong>Raw Agent Brain Data</strong>
+                    <span class="muted">Complete YAML/Markdown brain files for both agents at multiple snapshots</span>
+                </div>
+            </div>
+            <div class="transparency-item">
+                <div class="check-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div>
+                    <strong>System Prompts</strong>
+                    <span class="muted">Exact prompt templates used for inner voice, dreams, sparks, experience extraction</span>
+                </div>
+            </div>
+            <div class="transparency-item">
+                <div class="check-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div>
+                    <strong>Experiment Scripts</strong>
+                    <span class="muted">Runnable Python scripts for brain subsystem test and inner voice A/B observation</span>
+                </div>
+            </div>
+            <div class="transparency-item">
+                <div class="check-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div>
+                    <strong>Limitations Analysis</strong>
+                    <span class="muted">Comprehensive self-critique: no causal claims, no emergence claims, conflict of interest disclosed</span>
+                </div>
+            </div>
+            <div class="transparency-item">
+                <div class="check-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div>
+                    <strong>SHA-256 Verified Snapshots</strong>
+                    <span class="muted">Integrity-verified brain state archives at documented timestamps</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- FOOTER -->
+<!-- ============================================================ -->
+<footer class="footer">
+    <div class="container">
+        <p>EGON &mdash; Emotional Growing Organic Network</p>
+        <p class="muted">A research project by Ron Scafarti &middot; 2026</p>
+    </div>
+</footer>
+
+</body>
+</html>

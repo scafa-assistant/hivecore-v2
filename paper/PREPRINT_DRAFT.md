@@ -98,6 +98,8 @@ HiveCore Server (FastAPI/Uvicorn)
 └── Agent Data (file-based brains per EGON)
 ```
 
+> **[Figure 1]**: *System architecture diagram. Replace this placeholder with a visual diagram showing the HiveCore pipeline: API Layer → Engine Layer (Prompt Builder, Inner Voice, Episodes, Experience, Pulse, Snapshot) → Organ Reader → Agent Brain Files.*
+
 ### 3.2 The Organ System (v2 Brain)
 
 Eva's v2 brain organizes cognitive state into 5 layers with 12+ files:
@@ -197,7 +199,13 @@ A structured evaluation with 10 questions was administered to Eva, each targetin
 
 An observational comparison (N=3 question pairs, not statistically significant) examined how inner voice data visibility in the chat system prompt affected agent output. Condition A: inner voice entries hidden from chat prompt. Condition B: inner voice entries visible in chat prompt.
 
-### 4.5 Infrastructure
+### 4.5 Client Interface
+
+Agents are accessed through EgonsDash, a React Native/Expo mobile application featuring real-time chat, 3D avatar embodiment (ReadyPlayerMe), and state visualization.
+
+> **[Figure 2]**: *EgonsDash mobile interface. Replace with screenshot showing: (a) chat conversation with an EGON agent, (b) 3D avatar responding to emotional state, (c) agent state dashboard. Use actual screenshots from device/emulator.*
+
+### 4.6 Infrastructure
 
 - **Server**: Hetzner VPS, Ubuntu 24.04, Python 3.11, FastAPI/Uvicorn
 - **Client**: EgonsDash (React Native/Expo mobile application)
@@ -234,6 +242,8 @@ The 10-question test produced measurable state changes:
 - **+14 inner voice entries** with cross-references to episodes, experiences, and bonds
 
 Between Run 1 and Run 2, the agent's responses showed increased specificity in references to newly created experiences and dreams. This is consistent with context enrichment (more data in the prompt produces more specific outputs) and does not require an emergent learning explanation.
+
+> **[Figure 3]**: *Brain Subsystem Test results. Replace with screenshot from EgonsDash showing the actual chat exchange during the 10-question test — e.g., Q05 ("Have you dreamed?") with Eva's dream-referencing response, demonstrating cross-organ retrieval in real-time conversation.*
 
 ### 5.3 Prompt-Alignment Conflict [BO]
 
