@@ -120,10 +120,10 @@ aelter als ~2 Tage.
 | Subsystem | FIFO-Impact |
 |-----------|-------------|
 | Episoden | Nur letzte 8 von ~40 retainierten sichtbar (20%), von 141 generierten = 5.7% |
-| Experiences | Nur top 3 nach Confidence (von 16) |
+| Experiences | Nur top 3 nach Confidence (von 34) |
 | Inner Voice | Letzte 5 Eintraege (von 50 retainierten, Max 50) |
-| Traeume | Letzte 2 von 6 |
-| Sparks | Letzte 2 (aktuell nur 1) |
+| Traeume | Letzte 2 von 7 |
+| Sparks | Letzte 2 (aktuell 2) |
 
 **Warum Q03 (Gedaechtnis) nur TEILWEISE bestand**: Eva behauptete sich an
 ihr "allererstes Gespraech" zu erinnern, konnte aber keine spezifischen
@@ -223,7 +223,8 @@ Confirmation Bias ist nicht auszuschliessen.
 
 **Kritik**: Die exakten System-Prompts fehlen im Protokoll.
 
-**Loesung**: Siehe Appendix B (alle Kern-Prompts im Wortlaut).
+**Loesung**: Siehe Appendix B (Kern-Prompts, gekuerzt) und die
+Engine-Dateien in `04_system_prompts_and_engine/` (exakter Quellcode).
 
 ---
 
@@ -808,5 +809,5 @@ Adressiert 5 weitere konzeptionelle Luecken:
 
 *Erstellt: 2026-02-24 | Peer-Review Response (2 Runden)*
 *Adressiert 11 kritische Luecken in 2 Review-Runden*
-*Appendix enthaelt alle 8 Kern-Prompts im Wortlaut*
+*Appendix enthaelt alle 8 Kern-Prompts (gekuerzt, Quellcode in 04_system_prompts_and_engine/)*
 *Dokumentiert bekannte Schwaechen ehrlich und transparent*
