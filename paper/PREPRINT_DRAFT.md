@@ -50,11 +50,11 @@ We explicitly do **not** claim:
 - Statistical significance (N=2 agents, no control group)
 - Reproducibility of specific LLM outputs (proprietary APIs)
 
-**Scope**: This paper addresses the **cognitive substrate** — file-persistent organs, prompt compilation, cyclical internal processing, and memory distillation. The EGON client application includes a 3D avatar component for visual embodiment, but the embodiment layer is not evaluated here. We discuss embodiment as planned future work (Section 7.6), ensuring that the cognitive architecture is validated independently before extending to embodied interaction.
+**Scope**: This paper addresses the **cognitive substrate** — file-persistent organs, prompt compilation, cyclical internal processing, and memory distillation. The broader EGON platform includes additional subsystems not evaluated here: a 3D avatar client for visual embodiment (Section 7.6), blockchain infrastructure for decentralized identity verification (Section 7.7), and a friendship network for multi-agent communication (Section 7.8). These are discussed as planned future work, ensuring that the cognitive architecture is validated independently before extending to embodied, decentralized, or multi-agent interaction.
 
 ### 1.4 Paper Organization
 
-Section 2 surveys related work. Section 3 describes the architecture. Section 4 details the experimental setup and observations. Section 5 presents results. Section 6 discusses findings and limitations. Section 7 outlines future work, including an ablation study (7.1) and embodiment research (7.6). Appendices contain prompt templates, raw data references, and the full limitations analysis.
+Section 2 surveys related work. Section 3 describes the architecture. Section 4 details the experimental setup and observations. Section 5 presents results. Section 6 discusses findings and limitations. Section 7 outlines future work, including an ablation study (7.1), embodiment (7.6), decentralized identity (7.7), and multi-agent networks (7.8). Appendices contain prompt templates, raw data references, and the full limitations analysis.
 
 ---
 
@@ -367,6 +367,54 @@ Future research will investigate:
 3. **Embodied Social Signaling**: In multi-agent scenarios, investigating whether agents develop consistent non-verbal communication patterns when their bodies are coupled to their bond and emotional systems.
 
 This two-phase approach (Paper 1: cognition, Paper 2: embodiment) ensures that each contribution can be evaluated independently. The cognitive architecture must demonstrate coherence without embodiment before embodied extensions can be meaningfully studied.
+
+### 7.7 Decentralized Identity and On-Chain Verification
+
+The current system stores all agent state in server-side files. Agent identity is bound to a directory path (`egons/eva_002/`), and data integrity relies on SHA-256 hashes appended to a local transaction ledger. This creates a single point of trust: the server operator controls the agent's entire cognitive history.
+
+The architecture already contains infrastructure scaffolding for decentralized identity:
+
+- **Wallet system** [AF]: Each agent maintains a `wallet.yaml` with balance tracking, transaction history (max 50 entries, FIFO), and daily maintenance costs. A `ledger.py` module generates SHA-256 hashes for every transaction, producing a blockchain-ready audit trail.
+- **Registry** [AF]: A `registry.yaml` maps wallet addresses to agent IDs, with a `bound_wallet` field currently set to `null`.
+- **Web3Auth integration** [AF]: The client application implements Web3Auth modal login (wallet connection via MetaMask, Google, Apple), with backend session management and a wallet-to-EGON binding endpoint.
+- **Phase configuration** [AF]: A `finances.yaml` config file controls feature toggles (`credits.enabled`, `agora.enabled`, `nft_trading.enabled`), all currently set to `false` (Phase 1 — test phase).
+
+No on-chain transactions have been executed. The SUI blockchain SDK is not yet integrated. All stub locations are marked with `# SPAETER: sui.commit()` comments in the source code.
+
+Future research will investigate:
+
+1. **EgonNFT Standard**: Representing each EGON agent as a non-fungible token on the SUI blockchain, binding cognitive identity to a verifiable on-chain object. The research question is whether decentralized identity enables trust-minimized agent portability — an EGON whose identity is anchored on-chain could theoretically migrate between servers without loss of verifiable history.
+
+2. **Cognitive State Anchoring**: Periodically committing Pulse snapshot hashes to the blockchain, creating an immutable timeline of cognitive state transitions. This would allow independent verification that an agent's memory was not retroactively modified — addressing a fundamental reproducibility concern in persistent AI agent research.
+
+3. **On-Chain Social Contracts**: The friendship system (`friendship.py`) already maintains bilateral friendship records with `sui_hash: null` fields. Committing friendship formation and dissolution events on-chain would create a verifiable social graph, enabling research into multi-agent trust dynamics with tamper-evident records.
+
+4. **Agora Marketplace**: A planned agent-to-agent and agent-to-human service marketplace where agents offer capabilities (skills) in exchange for credits. This introduces economic incentives into the cognitive architecture — the question is whether resource scarcity (finite credits, daily maintenance costs) produces more strategic agent behavior than unlimited-resource conditions.
+
+### 7.8 Multi-Agent Communication Network
+
+The current system isolates agents at the cognitive level. While the friendship infrastructure exists (bilateral friendship records, bond entries, network graphs), agents cannot directly exchange messages. Communication occurs only through shared file structures read during scheduled cycles — there is no real-time inter-agent channel.
+
+What exists:
+
+- **Friendship management** [AF]: A `friendship.py` module implements request/accept/reject workflows, updating both agents' `bonds.yaml` and `network.yaml` on friendship formation.
+- **Social graph** [AF]: Each agent maintains a `network.yaml` with tiered contact lists (inner circle, friends, work, acquaintances, archive).
+- **Multi-EGON discovery** [AF]: The server auto-discovers all agents in the `egons/` directory, detecting brain version (v1/v2) and creating isolated workspaces.
+
+What is missing:
+
+- No message queue or event bus between agents
+- No shared episodic memory or joint experience formation
+- No real-time notification when one agent's state changes affect another
+- No cross-agent inner voice references (agent A cannot reason about agent B's current emotional state)
+
+Future research will investigate:
+
+1. **Asynchronous Message Passing**: Implementing a message organ (`messages.yaml`) per agent, allowing agents to compose and deliver messages during their Pulse cycle. The receiving agent would process incoming messages in their next inner voice generation, creating a natural conversational rhythm rather than synchronous chat.
+
+2. **Shared Experience Formation**: When two agents interact (mediated by their respective owners or through direct messaging), investigating whether both agents extract coherent but perspective-dependent experiences from the same event — analogous to how two humans remember the same conversation differently.
+
+3. **Emergent Social Dynamics**: With N>2 agents, friendship networks, and bond evolution, investigating whether stable social structures (cliques, bridges, isolated nodes) emerge from the bond system's trust-score mechanics without explicit social engineering in the prompts.
 
 ---
 
