@@ -22,7 +22,7 @@ BUDGET_TIER1 = {
     'dna_compressed': 1500,    # DNA ist WER ICH BIN — Persoenlichkeit, Sprechstil,
                                # Werte, Regeln. Wie Adams soul.md. MUSS gross sein.
     'ego': 200,                # Dynamische Persoenlichkeit (klein)
-    'egon_self_short': 150,    # Selbstbild: Nur erste 2 Abschnitte (gekuerzt)
+    'egon_self_short': 300,    # Selbstbild: Erste 2 Abschnitte (Wer ich bin + Wie ich aussehe)
     'state': 300,              # yaml_to_prompt Output (gekuerzt)
     'inner_voice': 300,        # Letzte 3-5 Eintraege (gekuerzt)
     'owner': 150,              # Owner-Portrait (kompakt)

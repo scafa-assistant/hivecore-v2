@@ -38,6 +38,37 @@ from engine.action_detector import detect_action
 
 router = APIRouter()
 
+
+# ================================================================
+# Emotion → Body-Action / Display-State Maps (Phase 3: Embodiment)
+# ================================================================
+EMOTION_BODY_MAP = {
+    'joy': 'chains_swing',
+    'excitement': 'display_glitch',
+    'anger': 'fists_clench',
+    'fear': 'step_back',
+    'sadness': 'head_down',
+    'surprise': 'antenna_twitch',
+    'pride': 'chest_out',
+    'gratitude': 'nod_slow',
+    'curiosity': 'head_tilt',
+    'love': 'display_heart',
+}
+
+EMOTION_DISPLAY_MAP = {
+    'joy': 'happy_wave',
+    'excitement': 'glitch_burst',
+    'anger': 'static_red',
+    'fear': 'flicker_fast',
+    'sadness': 'dim_blue',
+    'surprise': 'flash_white',
+    'pride': 'steady_bright',
+    'gratitude': 'warm_glow',
+    'curiosity': 'scan_pattern',
+    'love': 'heart_pulse',
+}
+
+
 # In-Memory Chat-History pro Kanal (+ Disk-Persistence fuer EGON-Chats)
 # Keys:
 #   owner_chat:       "{egon_id}"
@@ -112,6 +143,11 @@ class ChatResponse(BaseModel):
     tool_results: Optional[list[dict[str, Any]]] = None  # Agent Loop Ergebnisse
     iterations: Optional[int] = None  # Agent Loop Iterationen
     voice_id: Optional[str] = None  # ElevenLabs Voice-ID fuer TTS
+    # Emotion + Body (Phase 3: Embodiment)
+    primary_emotion: Optional[str] = None
+    emotion_intensity: Optional[float] = None
+    body_action: Optional[str] = None
+    display_state: Optional[str] = None
 
 
 def parse_action(text: str) -> tuple[str, Optional[dict]]:
@@ -291,6 +327,25 @@ async def chat(req: ChatRequest):
     except Exception:
         pass
 
+    # 10. Emotion + Body-Action aus state.yaml extrahieren (Phase 3: Embodiment)
+    primary_emotion = None
+    emotion_intensity = None
+    body_action = None
+    display_state = None
+    try:
+        from engine.organ_reader import read_yaml_organ
+        state_data = read_yaml_organ(egon_id, 'core', 'state.yaml')
+        if state_data:
+            emotions = state_data.get('express', {}).get('active_emotions', [])
+            if emotions:
+                top = max(emotions, key=lambda e: e.get('intensity', 0))
+                primary_emotion = top.get('type')
+                emotion_intensity = round(top.get('intensity', 0), 2)
+                body_action = EMOTION_BODY_MAP.get(primary_emotion)
+                display_state = EMOTION_DISPLAY_MAP.get(primary_emotion, 'idle_wave')
+    except Exception as e:
+        print(f'[chat] emotion/body read: {e}')
+
     return ChatResponse(
         response=display_text,
         tier_used=result['tier_used'],
@@ -300,6 +355,10 @@ async def chat(req: ChatRequest):
         tool_results=tool_results_data if tool_results_data else None,
         iterations=iterations if iterations else None,
         voice_id=voice_id,
+        primary_emotion=primary_emotion,
+        emotion_intensity=emotion_intensity,
+        body_action=body_action,
+        display_state=display_state,
     )
 
 
