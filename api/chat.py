@@ -220,6 +220,12 @@ async def chat(req: ChatRequest):
     system_prompt += '\n# WICHTIG: Gib NIEMALS interne Codes, Referenzen oder Marker in deiner Antwort aus. Keine "(->...)", keine "ep:", keine "exp:", keine "thread:" Referenzen. Die sind NUR fuer dein Denken.'
 
     # 5. User-Message zur History
+    # Few-Shot Primer: Wenn History leer, ein Beispiel injizieren damit
+    # das LLM das ###BODY### Format lernt (besonders wichtig fuer Tier 1).
+    if len(history) == 0:
+        history.append({'role': 'user', 'content': 'Hey!'})
+        history.append({'role': 'assistant', 'content': 'Hey, was geht?\n###BODY###\n{"words": ["nicken", "gewicht_links"], "intensity": 0.4, "reason": "Lockere Begruessung"}\n###END_BODY###'})
+
     history.append({'role': 'user', 'content': message})
     # Max 10 Messages in History
     if len(history) > 10:
