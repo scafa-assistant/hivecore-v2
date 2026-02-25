@@ -1,21 +1,23 @@
-"""Pulse v2 — 13-Step Heartbeat mit neuem Gehirn.
+"""Pulse v2 — 16-Step Heartbeat mit neuem Gehirn.
 
 Ersetzt das alte pulse.py (8 Steps) fuer BRAIN_VERSION v2.
 
-13 Steps:
-  1. Self-Check (State lesen, Selbstbewertung)
-  2. Bond-Pulse (Decay, vernachlaessigte Beziehungen)
-  3. Emotion Decay (Decay-Klassen anwenden)
-  4. Thread Lifecycle (Stale Threads schliessen)
-  5. Skill Refresh (Freshness Decay)
-  6. Discovery (Neugierde-Impuls aus Episoden)
-  7. Ego Update (Neues Selbstwissen → ego.md)
-  8. Egon-Self Review (alle 7-14 Tage: Selbstbild aktualisieren)
-  9. Inner Voice Reflexion (Tagesreflexion mit Cross-Refs)
- 10. State Update (Survive/Thrive Werte neu berechnen)
- 11. Dream Generation (Naechtliche Verarbeitung — taeglich)
- 12. Spark Check (Konvergierende Erinnerungen → Einsicht)
- 13. Mental Time Travel (Retrospektion/Prospektion — woechentlich)
+16 Steps:
+  1.  Self-Check (State lesen, Selbstbewertung)
+  1b. Somatic Gate (Intuitions-Schleife — Patch 1)
+  1c. Circadian Check (Phasenuebergang — Patch 2)
+  2.  Bond-Pulse (Decay, vernachlaessigte Beziehungen)
+  3.  Emotion Decay (Decay-Klassen anwenden)
+  4.  Thread Lifecycle (Stale Threads schliessen)
+  5.  Skill Refresh (Freshness Decay)
+  6.  Discovery (Neugierde-Impuls aus Episoden)
+  7.  Ego Update (Neues Selbstwissen → ego.md)
+  8.  Egon-Self Review (alle 7-14 Tage: Selbstbild aktualisieren)
+  9.  Inner Voice Reflexion (Tagesreflexion + Lobby + Social Maps)
+ 10.  State Update (Survive/Thrive Werte neu berechnen)
+ 11.  Dream Generation (Naechtliche Verarbeitung — nur RUHE Phase)
+ 12.  Spark Check (Konvergierende Erinnerungen → Einsicht)
+ 13.  Mental Time Travel (Retrospektion/Prospektion — woechentlich)
 """
 
 import re
@@ -31,6 +33,8 @@ from engine.inner_voice_v2 import generate_pulse_reflection
 from engine.experience_v2 import generate_dream, maybe_generate_spark, generate_mental_time_travel
 from engine.ledger import log_transaction
 from llm.router import llm_chat
+from engine.somatic_gate import check_somatic_gate, run_decision_gate, execute_autonomous_action
+from engine.circadian import check_phase_transition, get_current_phase, update_energy
 
 
 # ================================================================
@@ -67,6 +71,43 @@ async def step_1_self_check(egon_id: str) -> dict:
     write_yaml_organ(egon_id, 'core', 'state.yaml', state)
 
     return {'self_assessment': self_text}
+
+
+# ================================================================
+# Step 1b: Somatic Gate (Patch 1)
+# ================================================================
+
+async def step_1b_somatic_gate(egon_id: str) -> dict:
+    """Somatic Decision Gate — prueft ob Emotionen Handlungsschwellen ueberschreiten."""
+    impulse = check_somatic_gate(egon_id)
+    if not impulse:
+        return {'gate_triggered': False}
+
+    decision = await run_decision_gate(egon_id, impulse)
+    if decision.get('entscheidung') == 'handeln':
+        await execute_autonomous_action(egon_id, decision)
+
+    return {
+        'gate_triggered': True,
+        'marker': impulse.get('marker'),
+        'value': impulse.get('value'),
+        'entscheidung': decision.get('entscheidung', 'unbekannt'),
+    }
+
+
+# ================================================================
+# Step 1c: Circadian Check (Patch 2)
+# ================================================================
+
+async def step_1c_circadian(egon_id: str) -> dict:
+    """Circadian phase check + transition."""
+    phase = get_current_phase(egon_id)
+    transition = await check_phase_transition(egon_id)
+
+    result = {'current_phase': phase}
+    if transition:
+        result['transition'] = transition
+    return result
 
 
 # ================================================================
@@ -350,8 +391,49 @@ async def step_8_egon_self_review(egon_id: str) -> dict:
 # ================================================================
 
 async def step_9_inner_voice_reflection(egon_id: str) -> str:
-    """Tagesreflexion mit Cross-Refs und kausalen Ketten."""
-    return await generate_pulse_reflection(egon_id)
+    """Tagesreflexion mit Cross-Refs und kausalen Ketten.
+
+    Patch 3: Waehrend DAEMMERUNG auch Lobby reflektieren + Social Maps updaten.
+    """
+    reflection = await generate_pulse_reflection(egon_id)
+
+    # Patch 3: Lobby reflection + Social Map updates waehrend Daemmerung
+    try:
+        phase = get_current_phase(egon_id)
+        if phase == 'daemmerung':
+            from engine.lobby import read_lobby
+            from engine.social_mapping import generate_social_map_update
+            from engine.organ_reader import read_yaml_organ
+
+            # Bekannte EGONs aus network.yaml lesen
+            network = read_yaml_organ(egon_id, 'social', 'network.yaml')
+            known_egons = []
+            if network:
+                for entry in network.get('known_egons', []):
+                    if isinstance(entry, dict):
+                        kid = entry.get('id', '')
+                        if kid and kid != egon_id:
+                            known_egons.append(kid)
+                    elif isinstance(entry, str) and entry != egon_id:
+                        known_egons.append(entry)
+
+            # Lobby-Nachrichten lesen und Social Maps updaten
+            lobby_msgs = read_lobby(max_messages=10)
+            for other_id in known_egons[:5]:  # Max 5 Maps pro Pulse
+                other_msgs = [m for m in lobby_msgs if m.get('from') == other_id]
+                if other_msgs:
+                    interaction = '\n'.join(
+                        f'{m.get("name", m.get("from"))}: {m.get("message")}'
+                        for m in other_msgs[-3:]
+                    )
+                    await generate_social_map_update(
+                        egon_id, other_id,
+                        f'Lobby-Beobachtung:\n{interaction}',
+                    )
+    except Exception as e:
+        print(f'[pulse_v2] Lobby reflection error: {e}')
+
+    return reflection
 
 
 # ================================================================
@@ -394,7 +476,14 @@ def step_10_state_update(egon_id: str) -> dict:
 # ================================================================
 
 async def step_11_dream_generation(egon_id: str) -> dict:
-    """Generiert einen Traum basierend auf Tageserlebnissen + Emotionen."""
+    """Generiert einen Traum — NUR waehrend RUHE Phase (Patch 2)."""
+    try:
+        phase = get_current_phase(egon_id)
+        if phase != 'ruhe':
+            return {'dream_generated': False, 'reason': f'Nicht in RUHE Phase (aktuell: {phase})'}
+    except Exception:
+        pass  # Wenn Circadian nicht verfuegbar, normal traeumen
+
     dream = await generate_dream(egon_id)
     if dream:
         return {
@@ -442,18 +531,20 @@ async def step_13_mental_time_travel(egon_id: str) -> dict:
 # ================================================================
 
 STEPS = [
-    ('self_check', step_1_self_check, True),            # async
-    ('bond_pulse', step_2_bond_pulse, True),             # async
-    ('emotion_decay', step_3_emotion_decay, False),      # sync
-    ('thread_lifecycle', step_4_thread_lifecycle, False), # sync
-    ('skill_refresh', step_5_skill_refresh, False),      # sync
-    ('discovery', step_6_discovery, True),               # async
-    ('ego_update', step_7_ego_update, True),             # async
-    ('egon_self_review', step_8_egon_self_review, True), # async
-    ('inner_voice', step_9_inner_voice_reflection, True),# async
-    ('state_update', step_10_state_update, False),       # sync
-    ('dream_generation', step_11_dream_generation, True),  # async
-    ('spark_check', step_12_spark_check, True),            # async
+    ('self_check', step_1_self_check, True),              # async
+    ('somatic_gate', step_1b_somatic_gate, True),         # async — Patch 1
+    ('circadian', step_1c_circadian, True),               # async — Patch 2
+    ('bond_pulse', step_2_bond_pulse, True),              # async
+    ('emotion_decay', step_3_emotion_decay, False),       # sync
+    ('thread_lifecycle', step_4_thread_lifecycle, False),  # sync
+    ('skill_refresh', step_5_skill_refresh, False),       # sync
+    ('discovery', step_6_discovery, True),                # async
+    ('ego_update', step_7_ego_update, True),              # async
+    ('egon_self_review', step_8_egon_self_review, True),  # async
+    ('inner_voice', step_9_inner_voice_reflection, True), # async — Patch 3 erweitert
+    ('state_update', step_10_state_update, False),        # sync
+    ('dream_generation', step_11_dream_generation, True), # async — Patch 2 gated
+    ('spark_check', step_12_spark_check, True),           # async
     ('mental_time_travel', step_13_mental_time_travel, True),  # async
 ]
 

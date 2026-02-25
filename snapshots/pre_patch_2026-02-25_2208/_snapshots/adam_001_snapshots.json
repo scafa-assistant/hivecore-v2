@@ -1,0 +1,1 @@
+{"count":1,"snapshots":[{"date":"2026-02-25","egon_id":"adam_001","brain_version":"v1","files_count":10,"total_size_bytes":87101,"pulse":{"steps_executed":["self_check","bond_pulse","job_check","skill_refresh","discovery","community","idle_thought","state_update","dream_generation"],"steps_count":9,"errors":[],"dream_generated":true,"dream_type":"Kreativtraum"}}]}

@@ -359,6 +359,26 @@ async def chat(req: ChatRequest):
             await detect_and_process_mentions(egon_id, message, display_text)
         except Exception as e:
             print(f'[post] contact_manager FEHLER: {e}')
+
+        # Patch 1: Somatic Gate Check — nach allem Post-Processing
+        try:
+            from engine.somatic_gate import check_somatic_gate, run_decision_gate, execute_autonomous_action
+            impulse = check_somatic_gate(egon_id)
+            if impulse:
+                decision = await run_decision_gate(egon_id, impulse)
+                if decision.get('entscheidung') == 'handeln':
+                    await execute_autonomous_action(egon_id, decision)
+                print(f'[post] somatic_gate: {impulse.get("marker")} -> {decision.get("entscheidung")}')
+        except Exception as e:
+            print(f'[post] somatic_gate FEHLER: {e}')
+
+        # Patch 2: Circadian Energy Update — jeder Chat kostet Energie
+        try:
+            from engine.circadian import update_energy, check_phase_transition
+            update_energy(egon_id)  # DNA-differenzierter Decay (Profil + Phase)
+            await check_phase_transition(egon_id)
+        except Exception as e:
+            print(f'[post] circadian FEHLER: {e}')
     else:
         # v1: Altes System (Markers + Flat Memory + Bonds)
         try:
@@ -524,6 +544,15 @@ async def egon_to_egon_chat(req: EgonToEgonRequest):
             # Episode in BEIDEN EGONs: semi_public (beide duerfen es sehen)
             await maybe_create_episode(from_egon, message, response_text)
             await maybe_create_episode(to_egon, formatted_msg, response_text)
+
+            # Patch 3: Social Map Updates fuer beide EGONs
+            try:
+                from engine.social_mapping import generate_social_map_update
+                interaction = f'{from_egon}: {message}\n{to_egon}: {response_text}'
+                await generate_social_map_update(from_egon, to_egon, interaction)
+                await generate_social_map_update(to_egon, from_egon, interaction)
+            except Exception as e:
+                print(f'[post] social_mapping FEHLER: {e}')
     except Exception:
         pass  # Post-Processing darf den Chat nicht blockieren
 
