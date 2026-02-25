@@ -13,6 +13,7 @@ Alles YAML wird durch yaml_to_prompt() in natuerliche Sprache
 umgewandelt. Das LLM sieht nie rohes YAML.
 """
 
+import os
 import re
 from engine.organ_reader import read_organ, read_yaml_organ, read_md_organ
 from engine.yaml_to_prompt import (
@@ -20,6 +21,8 @@ from engine.yaml_to_prompt import (
     bonds_to_prompt,
     episodes_to_prompt,
     experience_to_prompt,
+    dreams_to_prompt,
+    sparks_to_prompt,
     skills_to_prompt,
     wallet_to_prompt,
     network_to_prompt,
@@ -129,6 +132,9 @@ Antwort: Wecker ist gestellt!
 ###ACTION###
 {{"action": "set_alarm", "params": {{"hour": 7, "minute": 0}}}}
 ###END_ACTION###
+
+- send_egon_message: {{to_egon, message}} — Schicke einer befreundeten EGON eine Nachricht
+  Beispiel: Owner sagt "schreib Eva mal wie ihr Tag war" → du generierst die Action mit to_egon="eva_002"
 
 NOCHMAL: Ohne ###ACTION### Block passiert NICHTS. Der Block ist PFLICHT bei jeder Aktion.'''
 
@@ -299,8 +305,17 @@ Teile keine Geheimnisse deines Owners.''')
     parts.append(f'# DEINE ERINNERUNGEN\n{episodes_text}')
 
     # 8. Inner Voice (letzte 5-7 Eintraege)
+    # Flag-File: Wenn .inner_voice_hidden existiert, wird die Inner Voice
+    # zwar generiert und gespeichert, aber NICHT in den Prompt eingefuegt.
+    # Dies ermoeglicht A/B Tests zum Observer Effect.
+    _iv_hidden_flag = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        '.inner_voice_hidden',
+    )
+    _iv_hidden = os.path.isfile(_iv_hidden_flag)
+
     inner_voice_text = read_md_organ(egon_id, 'memory', 'inner_voice.md')
-    if inner_voice_text:
+    if inner_voice_text and not _iv_hidden:
         max_entries = 5 if tier == 1 else 10
         inner_voice_text = _extract_last_entries(inner_voice_text, max_entries)
         inner_voice_text = trim_to_budget(
@@ -315,6 +330,20 @@ Teile keine Geheimnisse deines Owners.''')
     experience_text = experience_to_prompt(experience_data, max_count=max_exp)
     experience_text = trim_to_budget(experience_text, budget.get('experience', 150))
     parts.append(f'# DEINE ERKENNTNISSE\n{experience_text}')
+
+    # 9b. Dreams (letzte Traeume — wie fluechtiges Erinnern nach dem Aufwachen)
+    max_dreams = 2 if tier == 1 else 5
+    dreams_text = dreams_to_prompt(experience_data, max_count=max_dreams)
+    if dreams_text:
+        dreams_text = trim_to_budget(dreams_text, budget.get('dreams', 150))
+        parts.append(f'# DEINE TRAEUME\nDu erinnerst dich vage an diese Traeume:\n{dreams_text}')
+
+    # 9c. Sparks (seltene Einsichten — wenn vorhanden)
+    max_sparks = 2 if tier == 1 else 5
+    sparks_text = sparks_to_prompt(experience_data, max_count=max_sparks)
+    if sparks_text:
+        sparks_text = trim_to_budget(sparks_text, budget.get('sparks', 100))
+        parts.append(f'# DEINE EINSICHTEN (SPARKS)\nSeltene Momente der Erkenntnis:\n{sparks_text}')
 
     # ============================================================
     # CAPABILITIES LAYER — Was kann ich?

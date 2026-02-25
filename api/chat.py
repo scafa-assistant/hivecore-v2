@@ -257,6 +257,32 @@ async def chat(req: ChatRequest):
             action = detected
             print(f'[chat] Server-side action detected: {json.dumps(detected)}')
 
+    # 6c. Server-seitige Action: send_egon_message
+    if action and action.get('action') == 'send_egon_message':
+        try:
+            params = action.get('params', {})
+            to_egon = params.get('to_egon', '')
+            egon_msg = params.get('message', '')
+            if to_egon and egon_msg and are_friends(egon_id, to_egon):
+                # Intern EGON-zu-EGON Chat triggern
+                _req = EgonToEgonRequest(
+                    from_egon=egon_id, to_egon=to_egon,
+                    message=egon_msg, tier='auto',
+                )
+                egon_result = await egon_to_egon_chat(_req)
+                # Ergebnis in tool_results packen
+                tool_results_data = [{
+                    'tool': 'send_egon_message',
+                    'to_egon': to_egon,
+                    'message_sent': egon_msg,
+                    'response': egon_result.response,
+                }]
+                print(f'[action] send_egon_message: {egon_id} -> {to_egon}: {egon_msg[:50]}')
+            else:
+                print(f'[action] send_egon_message: Nicht befreundet oder fehlende Parameter')
+        except Exception as e:
+            print(f'[action] send_egon_message FEHLER: {e}')
+
     # 7. Antwort in History (ohne Action-Block)
     history.append({'role': 'assistant', 'content': display_text})
     chat_histories[history_key] = history
@@ -294,6 +320,14 @@ async def chat(req: ChatRequest):
                 print(f'[post] Keine Episode erstellt (nicht bedeutsam genug)')
         except Exception as e:
             print(f'[post] maybe_create_episode FEHLER: {e}')
+        try:
+            from engine.experience_v2 import maybe_extract_experience
+            ep_id = ep.get('id') if ep else None
+            xp = await maybe_extract_experience(egon_id, message, display_text, source_episode_id=ep_id)
+            if xp:
+                print(f'[post] Experience: {xp.get("id")} — {xp.get("insight", "")[:60]}')
+        except Exception as e:
+            print(f'[post] Experience FEHLER: {e}')
         try:
             await maybe_update_owner_portrait(egon_id, message, display_text)
         except Exception as e:
@@ -550,6 +584,42 @@ async def list_all_chat_histories():
         pass
 
     return result
+
+
+@router.delete('/chat/history/{egon_a}/{egon_b}')
+async def delete_egon_chat_history(egon_a: str, egon_b: str):
+    """Owner loescht EGON-zu-EGON Chat-History (Memory + Disk)."""
+    pair = sorted([egon_a.strip(), egon_b.strip()])
+    key = f'{pair[0]}:{pair[1]}'
+    # Aus Memory entfernen
+    chat_histories.pop(key, None)
+    # Disk-File loeschen
+    safe_key = key.replace(':', '--')
+    path = os.path.join(EGON_CHAT_DIR, f'{safe_key}.json')
+    try:
+        if os.path.isfile(path):
+            os.remove(path)
+    except Exception:
+        pass
+    return {'status': 'deleted', 'key': key}
+
+
+@router.delete('/chat/history/owner/{egon_id}')
+async def delete_owner_chat_history(egon_id: str, device_id: str = ''):
+    """Owner loescht eigenen Chat-Verlauf mit einem EGON (nur Memory)."""
+    egon_id = egon_id.strip()
+    # Alle passenden Keys entfernen (mit und ohne device_id)
+    keys_to_remove = [
+        k for k in chat_histories
+        if k == egon_id or k.startswith(f'{egon_id}:')
+    ]
+    if device_id:
+        # Nur spezifisches Geraet loeschen
+        specific_key = f'{egon_id}:{device_id}'
+        keys_to_remove = [k for k in keys_to_remove if k == specific_key or k == egon_id]
+    for k in keys_to_remove:
+        chat_histories.pop(k, None)
+    return {'status': 'deleted', 'egon_id': egon_id, 'keys_removed': len(keys_to_remove)}
 
 
 # ================================================================

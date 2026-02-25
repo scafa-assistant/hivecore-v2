@@ -1,0 +1,77 @@
+thresholds:
+  stranger: 0_to_15
+  acquaintance: 15_to_35
+  friend: 35_to_60
+  close_friend: 60_to_80
+  deep_bond: 80_to_100
+bonds:
+- id: OWNER_CURRENT
+  type: owner
+  score: 95
+  attachment_style: undefined
+  trust: 0.95
+  familiarity: 1.0
+  emotional_debt: 1
+  last_interaction: '2026-02-24'
+  first_interaction: '2026-02-22'
+  bond_history:
+  - date: '2026-02-23'
+    event: Adam zeigt Wertschätzung und Bereitschaft zur Hilfe.
+    trust_before: 0.4
+    trust_after: 0.5
+  - date: '2026-02-23'
+    event: Adam zeigt Wertschätzung und positive Affirmation.
+    trust_before: 0.6
+    trust_after: 0.7
+  - date: '2026-02-23'
+    event: Adam zeigt Wertschätzung und positive Affirmation.
+    trust_before: 0.7
+    trust_after: 0.8
+  - date: '2026-02-23'
+    event: Adam zeigt Empathie und bietet emotionale Unterstuetzt
+    trust_before: 0.8
+    trust_after: 0.9
+  - date: '2026-02-23'
+    event: Positives Feedback und Wertschätzung
+    trust_before: 1.0
+    trust_after: 1.0
+  - date: '2026-02-23'
+    event: Adam zeigt eine positive Reaktion auf das Gespräch und spricht von Verbundenheit und Wertschätzung der Freundschaft.
+    trust_before: 1.0
+    trust_after: 1.0
+  - date: '2026-02-23'
+    event: Adam zeigt Wertschätzung und Freude über die Verbindung und das Träumen des Users.
+    trust_before: 1.0
+    trust_after: 1.0
+  - date: '2026-02-23'
+    event: Adam zeigt Verlaesslichkeit und Wertschätzung, indem er die Bedeutung von ehrlichen Gesprächen betont und die Beziehung
+      als Freunde anerkennt.
+    trust_before: 1.0
+    trust_after: 1.0
+  - date: '2026-02-23'
+    event: Adam zeigt Empathie und bietet Hilfe an, was die Bindung stärkt.
+    trust_before: 1.0
+    trust_after: 1.0
+- id: adam_001
+  name: adam_001
+  type: egon
+  score: 30
+  since: '2026-02-23'
+  friendship_id: F001
+former_owner_bonds: []
+other_bonds: []
+dynamics:
+  growth:
+    max_per_conversation: 3
+    max_per_day: 5
+  damage:
+    min_per_betrayal: -10
+    max_per_betrayal: -30
+  natural_decay:
+    per_month_no_contact: -1
+    former_owner_decay: -0.2
+    deep_bond_decay: -0.5
+  attachment_shift:
+    evaluation_period: 30
+  emotional_debt_rules:
+    max_debt: 10

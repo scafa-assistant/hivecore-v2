@@ -1,0 +1,23 @@
+agora:
+  enabled: false
+api:
+  api_key: shared
+  daily_limit: 100
+  mode: owner_api
+display:
+  battery_saver: true
+  homescreen_widget: false
+  show_mood: true
+  show_name: true
+  tap_action: open_chat
+  widget_size: medium
+formatting:
+  custom_rules:
+  - Keine Sternchen bitte, schreib normal ohne Markdown
+  use_bold_italic: false
+  use_emojis: true
+  use_markdown: true
+nft_trading:
+  enabled: false
+wallet:
+  enabled: false

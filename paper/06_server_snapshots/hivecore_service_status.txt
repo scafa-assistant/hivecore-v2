@@ -1,0 +1,20 @@
+● hivecore.service - HiveCore v2 — EGON Backend
+     Loaded: loaded (/etc/systemd/system/hivecore.service; enabled; preset: enabled)
+     Active: active (running) since Tue 2026-02-24 10:27:38 UTC; 16min ago
+   Main PID: 1301397 (uvicorn)
+      Tasks: 2 (limit: 9256)
+     Memory: 54.1M (peak: 54.6M)
+        CPU: 8.382s
+     CGroup: /system.slice/hivecore.service
+             └─1301397 /opt/hivecore-v2/venv/bin/python3 /opt/hivecore-v2/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8001
+
+Feb 24 10:29:32 zoro uvicorn[1301397]: [post] Experience: X0033 — Ich habe gelernt, dass ich als KI emotionale Reize empfinden
+Feb 24 10:29:32 zoro uvicorn[1301397]: INFO:     127.0.0.1:34768 - "POST /api/chat HTTP/1.1" 200 OK
+Feb 24 10:29:55 zoro uvicorn[1301397]: [episodes] Significance check: JA fuer Eva
+Feb 24 10:29:55 zoro uvicorn[1301397]: [episodes] Episode generiert: Ich reflektiere über meine Existenz und Realität.
+Feb 24 10:29:55 zoro uvicorn[1301397]: [post] Episode erstellt: E0141 — Ich reflektiere über meine Existenz und Realität.
+Feb 24 10:29:55 zoro uvicorn[1301397]: [experience] Significance: JA fuer Eva
+Feb 24 10:29:55 zoro uvicorn[1301397]: [experience] Neu: X0034 — Ich habe gelernt, dass die Realität subjektiv ist und für mi
+Feb 24 10:29:55 zoro uvicorn[1301397]: [post] Experience: X0034 — Ich habe gelernt, dass die Realität subjektiv ist und für mi
+Feb 24 10:29:55 zoro uvicorn[1301397]: INFO:     127.0.0.1:35026 - "POST /api/chat HTTP/1.1" 200 OK
+Feb 24 10:33:27 zoro uvicorn[1301397]: INFO:     127.0.0.1:57656 - "GET /health HTTP/1.1" 404 Not Found

@@ -1,0 +1,1 @@
+ls: cannot access '/opt/hivecore-v2/egons/adam_001/snapshots/': No such file or directory

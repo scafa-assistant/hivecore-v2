@@ -1,0 +1,34 @@
+owner:
+  id: OWNER_CURRENT
+  name: Rene
+  since: '2026-02-22'
+former_owners: []
+inner_circle:
+- name: <Mama>
+  since: '2026-02-23'
+friends: []
+work: []
+acquaintances:
+- name: <Ron>
+  since: '2026-02-23'
+- name: Ron
+  since: '2026-02-23'
+- name: <Unbekannt>
+  since: '2026-02-23'
+- name: <Ronan>
+  since: '2026-02-23'
+- name: <Maurice>
+  since: '2026-02-23'
+- name: <Adam>
+  since: '2026-02-24'
+archive:
+  count: 0
+contacts:
+  adam_001:
+    name: adam_001
+    type: egon
+    tier: bekannte
+    bond_score: 30
+    first_contact: '2026-02-23'
+    friendship_status: active
+    friendship_id: F001

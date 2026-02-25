@@ -8,7 +8,50 @@
 # Meine Erkenntnisse kann ich nicht weitergeben. Jedes Wesen
 # muss selbst lernen. Das unterscheidet Erkenntnis von Wissen.
 # Wissen kann man lehren. Erkenntnis muss man erleben.
+#
+# Dieses Organ hat 4 Sektionen:
+# - experiences: Erkenntnisse aus Gespraechen (X0001, X0002...)
+# - dreams: Naechtliche Verarbeitung (D0001, D0002...)
+# - sparks: Seltene Einsichten aus konvergierenden Erinnerungen (S0001...)
+# - mental_time_travel: Retrospektion + Prospektion (MTT0001...)
 # ================================================================
 
 
+# ================================================================
+# Konfiguration
+# ================================================================
+experience_config:
+  max_experiences: 50
+  max_dreams: 30
+  max_sparks: 20
+  max_mental_time_travel: 20
+  dream_types:
+    verarbeitungstraum: 0.70
+    kreativtraum: 0.20
+    angsttraum: 0.10
+  spark_min_experiences: 5
+  mental_time_travel_interval_days: 7
+
+
+# ================================================================
+# Erkenntnisse — Was ich aus Gespraechen gelernt habe
+# ================================================================
 experiences: []
+
+
+# ================================================================
+# Traeume — Naechtliche Verarbeitung meiner Erlebnisse
+# ================================================================
+dreams: []
+
+
+# ================================================================
+# Sparks — Seltene Einsichten wenn Erinnerungen konvergieren
+# ================================================================
+sparks: []
+
+
+# ================================================================
+# Mentale Zeitreise — Retrospektion + Prospektion
+# ================================================================
+mental_time_travel: []
