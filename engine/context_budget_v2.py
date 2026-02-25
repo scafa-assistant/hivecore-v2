@@ -36,6 +36,10 @@ BUDGET_TIER1 = {
     'body_md': 300,             # body.md — Koerper-Beschreibung + Bewegungs-Vokabular
     'motor_instruction': 200,   # Motor-Instruktion (###BODY### Output-Format)
     'ecr_instruction': 150,    # ECR-Chain Anweisung
+    'somatic_gate': 100,       # Patch 1: Somatischer Impuls
+    'circadian': 80,           # Patch 2: Tagesrhythmus
+    'lobby': 150,              # Patch 3: Lobby-Nachrichten
+    'social_maps': 100,        # Patch 3: Social Maps
     'workspace_rules': 200,    # Workspace + Action Regeln
     'persona_rules': 100,      # Persona Refresher (alle 8 Messages)
     'chat_history': 2000,      # Letzte 8-10 Messages
@@ -65,6 +69,10 @@ BUDGET_TIER2 = {
     'body_md': 600,             # body.md — Volle Koerper-Beschreibung
     'motor_instruction': 400,   # Motor-Instruktion (ausfuehrlicher)
     'ecr_instruction': 200,    # ECR-Chain ausfuehrlicher
+    'somatic_gate': 150,       # Patch 1: Somatischer Impuls
+    'circadian': 120,          # Patch 2: Tagesrhythmus
+    'lobby': 300,              # Patch 3: Lobby-Nachrichten
+    'social_maps': 300,        # Patch 3: Social Maps
     'workspace_rules': 300,    # Workspace + Action Regeln
     'persona_rules': 150,      # Persona Refresher
     'chat_history': 4000,      # Mehr Chat-History

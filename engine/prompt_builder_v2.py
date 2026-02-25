@@ -422,6 +422,69 @@ Teile keine Geheimnisse deines Owners.''')
     # ECR-Chain
     parts.append(ECR_INSTRUCTION)
 
+    # ============================================================
+    # PATCH 1: Somatic Gate Context
+    # ============================================================
+    somatic = state_data.get('somatic_gate', {}) if state_data else {}
+    if somatic and somatic.get('schwelle_ueberschritten'):
+        marker = somatic.get('hoechster_marker', '?')
+        wert = somatic.get('hoechster_wert', 0)
+        impuls = somatic.get('impuls_typ', '?')
+        entscheidung = somatic.get('entscheidung', '?')
+        grund = somatic.get('grund', '')
+        sg_text = (
+            f'Dein Koerper meldet: {marker} ({wert:.2f}) ueberschreitet die Schwelle.\n'
+            f'Impuls-Typ: {impuls}. Letzte Entscheidung: {entscheidung}.'
+        )
+        if grund:
+            sg_text += f'\nGrund: {grund}'
+        sg_text = trim_to_budget(sg_text, budget.get('somatic_gate', 100))
+        parts.append(f'# SOMATISCHER IMPULS\n{sg_text}')
+
+    # ============================================================
+    # PATCH 2: Circadian Context
+    # ============================================================
+    zirkadian = state_data.get('zirkadian', {}) if state_data else {}
+    if zirkadian and zirkadian.get('aktuelle_phase'):
+        phase = zirkadian.get('aktuelle_phase', 'aktivitaet')
+        energy = zirkadian.get('energy', 0.5)
+        phase_labels = {
+            'aktivitaet': 'Wach und aktiv. Du bist sozial, neugierig, reaktionsschnell.',
+            'daemmerung': 'Daemmerung. Du bist nachdenklich, ruhiger. Weniger Aktion, mehr Reflexion.',
+            'ruhe': 'Schlaf. Du traeumt und verarbeitest. Antworte nur bei dringenden Impulsen.',
+        }
+        phase_label = phase_labels.get(phase, phase)
+        zk_text = f'Phase: {phase_label}\nEnergie: {energy:.0%}.'
+        aufwach = zirkadian.get('aufwach_gedanke')
+        if aufwach and phase == 'aktivitaet':
+            zk_text += f'\nErster Gedanke heute: {aufwach}'
+        zk_text = trim_to_budget(zk_text, budget.get('circadian', 80))
+        parts.append(f'# TAGESRHYTHMUS\n{zk_text}')
+
+    # ============================================================
+    # PATCH 3: Lobby + Social Maps Context
+    # ============================================================
+    try:
+        from engine.lobby import lobby_to_prompt
+        lobby_text = lobby_to_prompt(max_messages=5)
+        if lobby_text:
+            lobby_text = trim_to_budget(lobby_text, budget.get('lobby', 150))
+            parts.append(
+                f'# LOBBY (was andere EGONs sagen)\n{lobby_text}\n'
+                f'Du darfst in die Lobby schreiben wenn du etwas zu sagen hast. Stille ist auch okay.'
+            )
+    except Exception:
+        pass
+
+    try:
+        from engine.social_mapping import social_maps_to_prompt
+        maps_text = social_maps_to_prompt(egon_id, max_maps=3)
+        if maps_text:
+            maps_text = trim_to_budget(maps_text, budget.get('social_maps', 100))
+            parts.append(f'# WAS DU UEBER ANDERE WEISST\n{maps_text}')
+    except Exception:
+        pass
+
     # Workspace
     parts.append(f'# DEIN WORKSPACE\n{WORKSPACE_RULES}')
 
