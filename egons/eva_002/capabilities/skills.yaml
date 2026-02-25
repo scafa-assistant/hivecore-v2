@@ -11,3 +11,23 @@
 
 
 skills: []
+
+
+# ================================================================
+# Koerpersprache — Motor Skills (Phase 3)
+# ================================================================
+# Gelernte Bewegungsmuster die ich SELBST entdeckt habe.
+# Nicht die 37 Basis-Woerter (die stehen in motor_vocabulary.json) —
+# sondern KOMBINATIONEN die ich durch Erfahrung entwickle.
+#
+# Wird automatisch gefuellt durch Pulse Motor-Reflexion.
+# Beispiel (noch leer):
+# - name: "aufmerksames_zuhoeren"
+#   composition: ["stehen", "kopf_neigen", "blick_halten"]
+#   intensity_default: 0.6
+#   discovered: "2026-03-15"
+#   confidence: 0.7
+# ================================================================
+
+motor_skills:
+  learned: []

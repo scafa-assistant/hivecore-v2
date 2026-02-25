@@ -1,0 +1,31 @@
+{
+  "skeleton": {
+    "version": "1.0",
+    "bone_count": 22,
+    "_note": "Standard-Skeleton fuer EGON Avatare. 22 kontrollierbare Bones. eye_L/eye_R sind virtuell — werden auf head umgeleitet da die GLBs keine Eye-Bones haben.",
+    "bones": {
+      "hips":          { "parent": null,          "index": 0  },
+      "spine_0":       { "parent": "hips",        "index": 1  },
+      "spine_1":       { "parent": "spine_0",     "index": 2  },
+      "spine_2":       { "parent": "spine_1",     "index": 3  },
+      "neck":          { "parent": "spine_2",     "index": 4  },
+      "head":          { "parent": "neck",        "index": 5  },
+      "shoulder_L":    { "parent": "spine_2",     "index": 6  },
+      "upper_arm_L":   { "parent": "shoulder_L",  "index": 7  },
+      "lower_arm_L":   { "parent": "upper_arm_L", "index": 8  },
+      "hand_L":        { "parent": "lower_arm_L", "index": 9  },
+      "shoulder_R":    { "parent": "spine_2",     "index": 10 },
+      "upper_arm_R":   { "parent": "shoulder_R",  "index": 11 },
+      "lower_arm_R":   { "parent": "upper_arm_R", "index": 12 },
+      "hand_R":        { "parent": "lower_arm_R", "index": 13 },
+      "upper_leg_L":   { "parent": "hips",        "index": 14 },
+      "lower_leg_L":   { "parent": "upper_leg_L", "index": 15 },
+      "foot_L":        { "parent": "lower_leg_L", "index": 16 },
+      "upper_leg_R":   { "parent": "hips",        "index": 17 },
+      "lower_leg_R":   { "parent": "upper_leg_R", "index": 18 },
+      "foot_R":        { "parent": "lower_leg_R", "index": 19 },
+      "eye_L":         { "parent": "head",        "index": 20, "_redirect": "head" },
+      "eye_R":         { "parent": "head",        "index": 21, "_redirect": "head" }
+    }
+  }
+}

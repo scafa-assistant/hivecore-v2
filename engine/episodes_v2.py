@@ -73,6 +73,7 @@ async def maybe_create_episode(
     user_msg: str,
     egon_response: str,
     partner_id: str = 'OWNER_CURRENT',
+    motor_data: dict = None,
 ):
     """Evaluiert ob ein Chat eine Erinnerung verdient und speichert sie.
 
@@ -170,6 +171,14 @@ async def maybe_create_episode(
         'significance': min(1.0, max(0.1, float(ep_data.get('significance', 0.5)))),
         'tags': ep_data.get('tags', []),
     }
+
+    # Motor-Daten anhaengen (Phase 1: Body Motor System)
+    if motor_data:
+        new_episode['motor'] = {
+            'words': motor_data.get('words', []),
+            'intensity': motor_data.get('intensity', 0.5),
+            'reason': motor_data.get('reason', ''),
+        }
 
     episodes.append(new_episode)
 

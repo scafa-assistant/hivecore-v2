@@ -1,0 +1,41 @@
+{
+  "natural_motion": {
+    "enabled": true,
+    "_note": "Laeuft IMMER im Renderer, additiv auf jede Pose. eye_L/eye_R auf head umgeleitet (keine Eye-Bones im GLB).",
+
+    "breathing": {
+      "bones": {
+        "spine_1": { "rx_amplitude": 1.5, "frequency_hz": 0.25 },
+        "spine_2": { "rx_amplitude": 1.0, "frequency_hz": 0.25 },
+        "shoulder_L": { "ry_amplitude": 0.5, "frequency_hz": 0.25 },
+        "shoulder_R": { "ry_amplitude": 0.5, "frequency_hz": 0.25 }
+      },
+      "_formula": "offset = sin(time * frequency * 2PI) * amplitude"
+    },
+
+    "weight_shift": {
+      "bones": {
+        "hips": { "tx_amplitude": 0.008, "frequency_hz": 0.12 },
+        "spine_0": { "rz_amplitude": 0.8, "frequency_hz": 0.12 }
+      }
+    },
+
+    "micro_movements": {
+      "head": {
+        "rx_range": [-1.5, 1.5],
+        "ry_range": [-2.0, 2.0],
+        "interval_ms": [3000, 6000],
+        "transition_ms": 800,
+        "_note": "Inkludiert umgeleitete eye_L/eye_R Mikro-Bewegungen"
+      },
+      "_note_eyes": "eye_L/eye_R Eintraege gestrichen — keine Eye-Bones im GLB. Head micro_movements decken Blick-Variation ab."
+    },
+
+    "anticipation": {
+      "enabled": true,
+      "lead_ms": 80,
+      "lead_percent": 0.03,
+      "_comment": "Bevor eine Bewegung startet, bewegt sich der Parent-Bone 3% in die Richtung, 80ms vorher."
+    }
+  }
+}

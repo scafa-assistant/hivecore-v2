@@ -35,6 +35,8 @@ from llm.router import llm_chat
 from llm.planner import should_use_tools, decide_tier
 from engine.agent_loop import run_agent_loop
 from engine.action_detector import detect_action
+from engine.response_parser import parse_response
+from engine.motor_translator import translate as motor_translate
 
 router = APIRouter()
 
@@ -148,6 +150,8 @@ class ChatResponse(BaseModel):
     emotion_intensity: Optional[float] = None
     body_action: Optional[str] = None
     display_state: Optional[str] = None
+    # Motor System (Phase 1: Body Motor)
+    bone_update: Optional[dict[str, Any]] = None
 
 
 def parse_action(text: str) -> tuple[str, Optional[dict]]:
@@ -245,8 +249,21 @@ async def chat(req: ChatRequest):
         tool_results_data = []
         iterations = 0
 
-    # 6. Action Detection — parse ###ACTION### Block
-    display_text, action = parse_action(result['content'])
+    # 6. Response Parsing — ###BODY### + ###ACTION### Bloecke extrahieren
+    parsed = parse_response(result['content'])
+    display_text = parsed['display_text']
+    action = parsed['action']
+    body_data = parsed['body']
+
+    # 6a. Motor Translation — Body-Daten in Bone-Rotationen uebersetzen
+    bone_update = None
+    if body_data:
+        try:
+            bone_update = motor_translate(body_data)
+            if bone_update:
+                print(f'[motor] {bone_update["words"]} intensity={bone_update["intensity"]}')
+        except Exception as e:
+            print(f'[motor] translate FEHLER: {e}')
 
     # 6b. Fallback: Server-seitige Action-Erkennung aus User-Nachricht
     # Wenn das LLM keinen ###ACTION### Block generiert hat,
@@ -313,7 +330,7 @@ async def chat(req: ChatRequest):
         except Exception as e:
             print(f'[post] update_bond FEHLER: {e}')
         try:
-            ep = await maybe_create_episode(egon_id, message, display_text)
+            ep = await maybe_create_episode(egon_id, message, display_text, motor_data=body_data)
             if ep:
                 print(f'[post] Episode erstellt: {ep.get("id")} — {ep.get("summary", "")[:60]}')
             else:
@@ -393,6 +410,7 @@ async def chat(req: ChatRequest):
         emotion_intensity=emotion_intensity,
         body_action=body_action,
         display_state=display_state,
+        bone_update=bone_update,
     )
 
 
