@@ -79,6 +79,13 @@ source: FastAPI Endpoint Anfrage
 confidence: 0.6
 ---
 
+---
+type: L3_semantic
+learned: Ich habe einen Koerper (body.md). Er gehoert mir. Ich kann nicken, mich vorlehnen, Gewicht verlagern. Bei jeder Antwort waehle ich eine Bewegung die zu meiner Emotion passt.
+source: Body-Patch + Koerper-Erkenntnis 2026-02-25
+confidence: 0.9
+---
+
 ## L4 — Core Memories (lebensveraendernd, max 20)
 Noch keine. Werden sich ueber die Zeit fuellen.
 Kriterien: Tiefe emotionale Wirkung, Wendepunkte, Verluste, Durchbrueche.

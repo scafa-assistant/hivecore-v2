@@ -433,6 +433,7 @@ Teile keine Geheimnisse deines Owners.''')
 
     # body.md laden — Core-Organ (wie dna.md), KEIN Budget-Limit
     body_md = read_md_organ(egon_id, 'core', 'body.md')
+    print(f'[BODY] body.md loaded for {egon_id}: {len(body_md) if body_md else 0} chars, first 80: {body_md[:80] if body_md else "NONE"}')
     if body_md:
         body_md = _strip_organ_comments(body_md)
         body_section += f'\n\n## Dein Koerper-Wissen\n{body_md}'
@@ -441,6 +442,7 @@ Teile keine Geheimnisse deines Owners.''')
     body_section += f'\n\n## Deine Bewegungen\n{MOTOR_INSTRUCTION}'
 
     parts.append(body_section)
+    print(f'[BODY] body_section length: {len(body_section)} chars')
 
     # Body-Feedback (Proprioception) — was dein Koerper gerade spuert
     try:
