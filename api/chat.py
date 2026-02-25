@@ -35,8 +35,41 @@ from llm.router import llm_chat
 from llm.planner import should_use_tools, decide_tier
 from engine.agent_loop import run_agent_loop
 from engine.action_detector import detect_action
+from engine.response_parser import parse_response
+from engine.motor_translator import translate as motor_translate
 
 router = APIRouter()
+
+
+# ================================================================
+# Emotion → Body-Action / Display-State Maps (Phase 3: Embodiment)
+# ================================================================
+EMOTION_BODY_MAP = {
+    'joy': 'chains_swing',
+    'excitement': 'display_glitch',
+    'anger': 'fists_clench',
+    'fear': 'step_back',
+    'sadness': 'head_down',
+    'surprise': 'antenna_twitch',
+    'pride': 'chest_out',
+    'gratitude': 'nod_slow',
+    'curiosity': 'head_tilt',
+    'love': 'display_heart',
+}
+
+EMOTION_DISPLAY_MAP = {
+    'joy': 'happy_wave',
+    'excitement': 'glitch_burst',
+    'anger': 'static_red',
+    'fear': 'flicker_fast',
+    'sadness': 'dim_blue',
+    'surprise': 'flash_white',
+    'pride': 'steady_bright',
+    'gratitude': 'warm_glow',
+    'curiosity': 'scan_pattern',
+    'love': 'heart_pulse',
+}
+
 
 # In-Memory Chat-History pro Kanal (+ Disk-Persistence fuer EGON-Chats)
 # Keys:
@@ -112,6 +145,13 @@ class ChatResponse(BaseModel):
     tool_results: Optional[list[dict[str, Any]]] = None  # Agent Loop Ergebnisse
     iterations: Optional[int] = None  # Agent Loop Iterationen
     voice_id: Optional[str] = None  # ElevenLabs Voice-ID fuer TTS
+    # Emotion + Body (Phase 3: Embodiment)
+    primary_emotion: Optional[str] = None
+    emotion_intensity: Optional[float] = None
+    body_action: Optional[str] = None
+    display_state: Optional[str] = None
+    # Motor System (Phase 1: Body Motor)
+    bone_update: Optional[dict[str, Any]] = None
 
 
 def parse_action(text: str) -> tuple[str, Optional[dict]]:
@@ -209,8 +249,21 @@ async def chat(req: ChatRequest):
         tool_results_data = []
         iterations = 0
 
-    # 6. Action Detection — parse ###ACTION### Block
-    display_text, action = parse_action(result['content'])
+    # 6. Response Parsing — ###BODY### + ###ACTION### Bloecke extrahieren
+    parsed = parse_response(result['content'])
+    display_text = parsed['display_text']
+    action = parsed['action']
+    body_data = parsed['body']
+
+    # 6a. Motor Translation — Body-Daten in Bone-Rotationen uebersetzen
+    bone_update = None
+    if body_data:
+        try:
+            bone_update = motor_translate(body_data)
+            if bone_update:
+                print(f'[motor] {bone_update["words"]} intensity={bone_update["intensity"]}')
+        except Exception as e:
+            print(f'[motor] translate FEHLER: {e}')
 
     # 6b. Fallback: Server-seitige Action-Erkennung aus User-Nachricht
     # Wenn das LLM keinen ###ACTION### Block generiert hat,
@@ -277,7 +330,7 @@ async def chat(req: ChatRequest):
         except Exception as e:
             print(f'[post] update_bond FEHLER: {e}')
         try:
-            ep = await maybe_create_episode(egon_id, message, display_text)
+            ep = await maybe_create_episode(egon_id, message, display_text, motor_data=body_data)
             if ep:
                 print(f'[post] Episode erstellt: {ep.get("id")} — {ep.get("summary", "")[:60]}')
             else:
@@ -325,6 +378,25 @@ async def chat(req: ChatRequest):
     except Exception:
         pass
 
+    # 10. Emotion + Body-Action aus state.yaml extrahieren (Phase 3: Embodiment)
+    primary_emotion = None
+    emotion_intensity = None
+    body_action = None
+    display_state = None
+    try:
+        from engine.organ_reader import read_yaml_organ
+        state_data = read_yaml_organ(egon_id, 'core', 'state.yaml')
+        if state_data:
+            emotions = state_data.get('express', {}).get('active_emotions', [])
+            if emotions:
+                top = max(emotions, key=lambda e: e.get('intensity', 0))
+                primary_emotion = top.get('type')
+                emotion_intensity = round(top.get('intensity', 0), 2)
+                body_action = EMOTION_BODY_MAP.get(primary_emotion)
+                display_state = EMOTION_DISPLAY_MAP.get(primary_emotion, 'idle_wave')
+    except Exception as e:
+        print(f'[chat] emotion/body read: {e}')
+
     return ChatResponse(
         response=display_text,
         tier_used=result['tier_used'],
@@ -334,6 +406,11 @@ async def chat(req: ChatRequest):
         tool_results=tool_results_data if tool_results_data else None,
         iterations=iterations if iterations else None,
         voice_id=voice_id,
+        primary_emotion=primary_emotion,
+        emotion_intensity=emotion_intensity,
+        body_action=body_action,
+        display_state=display_state,
+        bone_update=bone_update,
     )
 
 

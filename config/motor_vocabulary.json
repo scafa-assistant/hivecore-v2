@@ -1,0 +1,670 @@
+{
+  "motor_vocabulary": {
+    "version": "1.0",
+    "word_count": 37,
+    "_note": "Alle eye_L/eye_R Referenzen auf head umgeleitet (GLBs haben keine Eye-Bones).",
+    "words": {
+
+      "stehen": {
+        "id": "MOT_STAND",
+        "category": "posture",
+        "type": "static",
+        "duration_ms": 800,
+        "bones": {},
+        "easing": "ease_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null,
+        "_comment": "Leeres bones = Bind Pose (Reset auf Null)"
+      },
+
+      "nicken": {
+        "id": "MOT_NOD",
+        "category": "gesture",
+        "type": "sequence",
+        "duration_ms": 600,
+        "keyframes": [
+          { "t": 0.0,  "bones": { "head": { "rx": 0 } } },
+          { "t": 0.35, "bones": { "head": { "rx": -15 } } },
+          { "t": 0.7,  "bones": { "head": { "rx": 0 } } },
+          { "t": 1.0,  "bones": { "head": { "rx": -10 } } }
+        ],
+        "easing": "ease_in_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "kopf_schuetteln": {
+        "id": "MOT_HEADSHAKE",
+        "category": "gesture",
+        "type": "sequence",
+        "duration_ms": 700,
+        "keyframes": [
+          { "t": 0.0,  "bones": { "head": { "ry": 0 } } },
+          { "t": 0.25, "bones": { "head": { "ry": -20 } } },
+          { "t": 0.5,  "bones": { "head": { "ry": 20 } } },
+          { "t": 0.75, "bones": { "head": { "ry": -15 } } },
+          { "t": 1.0,  "bones": { "head": { "ry": 0 } } }
+        ],
+        "easing": "ease_in_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "kopf_neigen": {
+        "id": "MOT_HEAD_TILT",
+        "category": "expression",
+        "type": "static",
+        "duration_ms": 500,
+        "bones": {
+          "head": { "rx": -12, "rz": 8 },
+          "neck": { "rx": -5 }
+        },
+        "easing": "ease_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "kopf_heben": {
+        "id": "MOT_HEAD_UP",
+        "category": "expression",
+        "type": "static",
+        "duration_ms": 400,
+        "bones": {
+          "head": { "rx": 15 },
+          "neck": { "rx": 8 }
+        },
+        "easing": "ease_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "schultern_hochziehen": {
+        "id": "MOT_SHRUG",
+        "category": "gesture",
+        "type": "sequence",
+        "duration_ms": 900,
+        "keyframes": [
+          { "t": 0.0, "bones": { "shoulder_L": { "ry": 0 }, "shoulder_R": { "ry": 0 } } },
+          { "t": 0.3, "bones": { "shoulder_L": { "ry": 12 }, "shoulder_R": { "ry": 12 }, "hand_L": { "rz": 30 }, "hand_R": { "rz": -30 }, "upper_arm_L": { "rz": 25 }, "upper_arm_R": { "rz": -25 } } },
+          { "t": 0.7, "bones": { "shoulder_L": { "ry": 12 }, "shoulder_R": { "ry": 12 } } },
+          { "t": 1.0, "bones": { "shoulder_L": { "ry": 0 }, "shoulder_R": { "ry": 0 } } }
+        ],
+        "easing": "ease_in_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "winken": {
+        "id": "MOT_WAVE",
+        "category": "gesture",
+        "type": "sequence",
+        "duration_ms": 1200,
+        "keyframes": [
+          { "t": 0.0,  "bones": { "upper_arm_R": { "rz": -30 } } },
+          { "t": 0.15, "bones": { "upper_arm_R": { "rz": -140 }, "lower_arm_R": { "rx": 45 } } },
+          { "t": 0.35, "bones": { "upper_arm_R": { "rz": -140 }, "lower_arm_R": { "rx": 45 }, "hand_R": { "rz": -25 } } },
+          { "t": 0.5,  "bones": { "upper_arm_R": { "rz": -140 }, "lower_arm_R": { "rx": 45 }, "hand_R": { "rz": 25 } } },
+          { "t": 0.65, "bones": { "upper_arm_R": { "rz": -140 }, "lower_arm_R": { "rx": 45 }, "hand_R": { "rz": -20 } } },
+          { "t": 0.8,  "bones": { "upper_arm_R": { "rz": -140 }, "lower_arm_R": { "rx": 45 }, "hand_R": { "rz": 15 } } },
+          { "t": 1.0,  "bones": { "upper_arm_R": { "rz": -30 } } }
+        ],
+        "easing": "ease_in_out",
+        "loopable": false,
+        "blendable": false,
+        "glb_fallback": "greeting"
+      },
+
+      "zeigen": {
+        "id": "MOT_POINT",
+        "category": "gesture",
+        "type": "static",
+        "duration_ms": 600,
+        "bones": {
+          "upper_arm_R": { "rz": -80, "ry": 20 },
+          "lower_arm_R": { "rx": 15 },
+          "hand_R": { "rx": 0 }
+        },
+        "easing": "ease_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "arme_verschraenken": {
+        "id": "MOT_ARMS_CROSSED",
+        "category": "posture",
+        "type": "static",
+        "duration_ms": 700,
+        "bones": {
+          "upper_arm_L": { "rz": 40, "ry": -25 },
+          "lower_arm_L": { "rx": 120 },
+          "upper_arm_R": { "rz": -40, "ry": 25 },
+          "lower_arm_R": { "rx": 120 },
+          "hand_L": { "rx": 10 },
+          "hand_R": { "rx": 10 }
+        },
+        "easing": "ease_in_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "haende_huefte": {
+        "id": "MOT_HANDS_HIP",
+        "category": "posture",
+        "type": "static",
+        "duration_ms": 600,
+        "bones": {
+          "upper_arm_L": { "rz": 35, "ry": -30 },
+          "lower_arm_L": { "rx": 80 },
+          "upper_arm_R": { "rz": -35, "ry": 30 },
+          "lower_arm_R": { "rx": 80 }
+        },
+        "easing": "ease_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "kinn_beruehren": {
+        "id": "MOT_TOUCH_CHIN",
+        "category": "gesture",
+        "type": "static",
+        "duration_ms": 800,
+        "bones": {
+          "upper_arm_R": { "rz": -45, "rx": 30 },
+          "lower_arm_R": { "rx": 130 },
+          "hand_R": { "rx": -20 },
+          "head": { "rx": -8, "rz": 5 }
+        },
+        "easing": "ease_in_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": "thinking"
+      },
+
+      "kopf_kratzen": {
+        "id": "MOT_SCRATCH_HEAD",
+        "category": "gesture",
+        "type": "sequence",
+        "duration_ms": 1000,
+        "keyframes": [
+          { "t": 0.0,  "bones": {} },
+          { "t": 0.25, "bones": { "upper_arm_R": { "rz": -150 }, "lower_arm_R": { "rx": 140 }, "head": { "rz": 8 } } },
+          { "t": 0.5,  "bones": { "upper_arm_R": { "rz": -150 }, "lower_arm_R": { "rx": 135 }, "hand_R": { "ry": 10 } } },
+          { "t": 0.75, "bones": { "upper_arm_R": { "rz": -150 }, "lower_arm_R": { "rx": 140 }, "hand_R": { "ry": -10 } } },
+          { "t": 1.0,  "bones": {} }
+        ],
+        "easing": "ease_in_out",
+        "loopable": false,
+        "blendable": false,
+        "glb_fallback": "confused"
+      },
+
+      "jubeln": {
+        "id": "MOT_CELEBRATE",
+        "category": "expression",
+        "type": "sequence",
+        "duration_ms": 1500,
+        "keyframes": [
+          { "t": 0.0,  "bones": {} },
+          { "t": 0.2,  "bones": { "upper_arm_L": { "rz": 160 }, "upper_arm_R": { "rz": -160 }, "spine_2": { "rx": 10 }, "head": { "rx": 15 } } },
+          { "t": 0.5,  "bones": { "upper_arm_L": { "rz": 170 }, "upper_arm_R": { "rz": -170 }, "hand_L": { "rz": 20 }, "hand_R": { "rz": -20 }, "spine_2": { "rx": 12 }, "head": { "rx": 18 } } },
+          { "t": 0.75, "bones": { "upper_arm_L": { "rz": 155 }, "upper_arm_R": { "rz": -155 }, "spine_2": { "rx": 8 } } },
+          { "t": 1.0,  "bones": {} }
+        ],
+        "easing": "ease_out",
+        "loopable": false,
+        "blendable": false,
+        "glb_fallback": "celebrating"
+      },
+
+      "traurig_stehen": {
+        "id": "MOT_SAD_STAND",
+        "category": "expression",
+        "type": "static",
+        "duration_ms": 1000,
+        "bones": {
+          "head": { "rx": -25, "rz": -5 },
+          "neck": { "rx": -10 },
+          "spine_2": { "rx": -8 },
+          "spine_1": { "rx": -5 },
+          "shoulder_L": { "ry": -5, "rz": 3 },
+          "shoulder_R": { "ry": -5, "rz": -3 },
+          "upper_arm_L": { "rz": 5 },
+          "upper_arm_R": { "rz": -5 }
+        },
+        "easing": "ease_in",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": "sad"
+      },
+
+      "wuetend_stehen": {
+        "id": "MOT_ANGRY_STAND",
+        "category": "expression",
+        "type": "static",
+        "duration_ms": 500,
+        "bones": {
+          "head": { "rx": -5 },
+          "spine_2": { "rx": 5 },
+          "shoulder_L": { "ry": 8 },
+          "shoulder_R": { "ry": 8 },
+          "upper_arm_L": { "rz": 15, "ry": -10 },
+          "upper_arm_R": { "rz": -15, "ry": 10 },
+          "hand_L": { "rx": -40 },
+          "hand_R": { "rx": -40 }
+        },
+        "easing": "ease_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": "angry"
+      },
+
+      "lachen": {
+        "id": "MOT_LAUGH",
+        "category": "expression",
+        "type": "sequence",
+        "duration_ms": 1200,
+        "keyframes": [
+          { "t": 0.0,  "bones": { "spine_2": { "rx": 0 } } },
+          { "t": 0.15, "bones": { "spine_2": { "rx": 8 }, "head": { "rx": 10 }, "shoulder_L": { "ry": 5 }, "shoulder_R": { "ry": 5 } } },
+          { "t": 0.3,  "bones": { "spine_2": { "rx": 3 }, "head": { "rx": 5 } } },
+          { "t": 0.45, "bones": { "spine_2": { "rx": 7 }, "head": { "rx": 9 } } },
+          { "t": 0.6,  "bones": { "spine_2": { "rx": 2 }, "head": { "rx": 4 } } },
+          { "t": 0.8,  "bones": { "spine_2": { "rx": 5 }, "head": { "rx": 7 } } },
+          { "t": 1.0,  "bones": { "spine_2": { "rx": 0 }, "head": { "rx": 0 } } }
+        ],
+        "easing": "ease_out",
+        "loopable": false,
+        "blendable": false,
+        "glb_fallback": "laughing"
+      },
+
+      "ueberrascht": {
+        "id": "MOT_SURPRISED",
+        "category": "expression",
+        "type": "sequence",
+        "duration_ms": 800,
+        "keyframes": [
+          { "t": 0.0,  "bones": {} },
+          { "t": 0.15, "bones": { "head": { "rx": 12 }, "spine_2": { "rx": 5 }, "upper_arm_L": { "rz": 30 }, "upper_arm_R": { "rz": -30 }, "shoulder_L": { "ry": 8 }, "shoulder_R": { "ry": 8 } } },
+          { "t": 0.5,  "bones": { "head": { "rx": 10 }, "spine_2": { "rx": 4 }, "upper_arm_L": { "rz": 25 }, "upper_arm_R": { "rz": -25 } } },
+          { "t": 1.0,  "bones": {} }
+        ],
+        "easing": "ease_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": "surprised"
+      },
+
+      "verwirrt": {
+        "id": "MOT_CONFUSED",
+        "category": "expression",
+        "type": "static",
+        "duration_ms": 600,
+        "bones": {
+          "head": { "rz": 12, "rx": -5 },
+          "neck": { "rz": 5 }
+        },
+        "_note": "eye_L/eye_R umgeleitet auf head rz (bereits enthalten)",
+        "easing": "ease_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": "confused"
+      },
+
+      "sitzen": {
+        "id": "MOT_SIT",
+        "category": "posture",
+        "type": "static",
+        "duration_ms": 1200,
+        "bones": {
+          "hips": { "ty": -0.3 },
+          "upper_leg_L": { "rx": -90 },
+          "upper_leg_R": { "rx": -90 },
+          "lower_leg_L": { "rx": -90 },
+          "lower_leg_R": { "rx": -90 },
+          "spine_0": { "rx": 5 },
+          "upper_arm_L": { "rz": 10 },
+          "upper_arm_R": { "rz": -10 },
+          "lower_arm_L": { "rx": 70 },
+          "lower_arm_R": { "rx": 70 }
+        },
+        "easing": "ease_in_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "schlafen": {
+        "id": "MOT_SLEEP",
+        "category": "posture",
+        "type": "static",
+        "duration_ms": 2000,
+        "bones": {
+          "head": { "rx": -30, "rz": 15 },
+          "neck": { "rx": -15 },
+          "spine_2": { "rx": -10 },
+          "spine_1": { "rx": -8 },
+          "shoulder_L": { "ry": -8 },
+          "shoulder_R": { "ry": -8 },
+          "upper_arm_L": { "rz": 10 },
+          "upper_arm_R": { "rz": -10 }
+        },
+        "_note": "eye_L/eye_R rx:-25 umgeleitet — head rx:-30 deckt das bereits ab",
+        "easing": "ease_in",
+        "loopable": false,
+        "blendable": false,
+        "glb_fallback": "sleeping"
+      },
+
+      "aufwachen": {
+        "id": "MOT_WAKE",
+        "category": "gesture",
+        "type": "sequence",
+        "duration_ms": 2000,
+        "_ref_start": "schlafen",
+        "keyframes": [
+          { "t": 0.0,  "bones": { "head": { "rx": -30, "rz": 15 }, "neck": { "rx": -15 }, "spine_2": { "rx": -10 }, "spine_1": { "rx": -8 }, "shoulder_L": { "ry": -8 }, "shoulder_R": { "ry": -8 }, "upper_arm_L": { "rz": 10 }, "upper_arm_R": { "rz": -10 } } },
+          { "t": 0.3,  "bones": { "head": { "rx": -15 } } },
+          { "t": 0.5,  "bones": { "head": { "rx": 0 }, "spine_2": { "rx": 0 }, "upper_arm_L": { "rz": 60 }, "lower_arm_L": { "rx": 90 } } },
+          { "t": 0.7,  "bones": { "upper_arm_L": { "rz": 20 }, "head": { "rx": 5 } } },
+          { "t": 1.0,  "bones": {} }
+        ],
+        "easing": "ease_out",
+        "loopable": false,
+        "blendable": false,
+        "glb_fallback": null
+      },
+
+      "laufen": {
+        "id": "MOT_WALK",
+        "category": "locomotion",
+        "type": "sequence",
+        "duration_ms": 800,
+        "keyframes": [
+          { "t": 0.0, "bones": { "upper_leg_L": { "rx": -25 }, "upper_leg_R": { "rx": 15 }, "lower_leg_L": { "rx": -20 }, "lower_leg_R": { "rx": -40 }, "upper_arm_L": { "rz": -10 }, "upper_arm_R": { "rz": 15 }, "hips": { "ty": 0.02 } } },
+          { "t": 0.5, "bones": { "upper_leg_L": { "rx": 15 }, "upper_leg_R": { "rx": -25 }, "lower_leg_L": { "rx": -40 }, "lower_leg_R": { "rx": -20 }, "upper_arm_L": { "rz": 15 }, "upper_arm_R": { "rz": -10 }, "hips": { "ty": 0.02 } } },
+          { "t": 1.0, "bones": { "upper_leg_L": { "rx": -25 }, "upper_leg_R": { "rx": 15 }, "lower_leg_L": { "rx": -20 }, "lower_leg_R": { "rx": -40 }, "upper_arm_L": { "rz": -10 }, "upper_arm_R": { "rz": 15 }, "hips": { "ty": 0.02 } } }
+        ],
+        "easing": "linear",
+        "loopable": true,
+        "blendable": false,
+        "glb_fallback": "walking"
+      },
+
+      "blick_halten": {
+        "id": "MOT_GAZE_HOLD",
+        "category": "expression",
+        "type": "static",
+        "duration_ms": 300,
+        "bones": {
+          "head": { "ry": 0 }
+        },
+        "_note": "Dynamisch — wird vom IK-Solver ueberschrieben wenn ein Blickziel angegeben wird. eye-Bones auf head umgeleitet.",
+        "easing": "ease_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "blick_wegdrehen": {
+        "id": "MOT_LOOK_AWAY",
+        "category": "expression",
+        "type": "static",
+        "duration_ms": 500,
+        "bones": {
+          "head": { "ry": 35, "rx": -8 },
+          "neck": { "ry": 15 }
+        },
+        "_note": "eye_L/eye_R ry:20 umgeleitet — head ry:35 deckt Blickrichtung ab",
+        "easing": "ease_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "nach_vorn_lehnen": {
+        "id": "MOT_LEAN_FORWARD",
+        "category": "posture",
+        "type": "static",
+        "duration_ms": 600,
+        "bones": {
+          "spine_0": { "rx": 10 },
+          "spine_1": { "rx": 8 },
+          "spine_2": { "rx": 5 },
+          "head": { "rx": 5 }
+        },
+        "easing": "ease_in_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "zuruecklehnen": {
+        "id": "MOT_LEAN_BACK",
+        "category": "posture",
+        "type": "static",
+        "duration_ms": 600,
+        "bones": {
+          "spine_0": { "rx": -8 },
+          "spine_1": { "rx": -6 },
+          "spine_2": { "rx": -4 },
+          "hips": { "ty": -0.05 }
+        },
+        "easing": "ease_in_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "gewicht_links": {
+        "id": "MOT_WEIGHT_LEFT",
+        "category": "posture",
+        "type": "static",
+        "duration_ms": 500,
+        "bones": {
+          "hips": { "tx": -0.04, "rz": 3 },
+          "spine_0": { "rz": -2 },
+          "upper_leg_L": { "rx": -3 },
+          "upper_leg_R": { "rx": 3 }
+        },
+        "easing": "ease_in_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "gewicht_rechts": {
+        "id": "MOT_WEIGHT_RIGHT",
+        "category": "posture",
+        "type": "static",
+        "duration_ms": 500,
+        "bones": {
+          "hips": { "tx": 0.04, "rz": -3 },
+          "spine_0": { "rz": 2 },
+          "upper_leg_L": { "rx": 3 },
+          "upper_leg_R": { "rx": -3 }
+        },
+        "easing": "ease_in_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "wippen": {
+        "id": "MOT_SWAY",
+        "category": "posture",
+        "type": "sequence",
+        "duration_ms": 2000,
+        "_ref": ["gewicht_links", "gewicht_rechts"],
+        "keyframes": [
+          { "t": 0.0, "bones": { "hips": { "tx": -0.04, "rz": 3 }, "spine_0": { "rz": -2 }, "upper_leg_L": { "rx": -3 }, "upper_leg_R": { "rx": 3 } } },
+          { "t": 0.5, "bones": { "hips": { "tx": 0.04, "rz": -3 }, "spine_0": { "rz": 2 }, "upper_leg_L": { "rx": 3 }, "upper_leg_R": { "rx": -3 } } },
+          { "t": 1.0, "bones": { "hips": { "tx": -0.04, "rz": 3 }, "spine_0": { "rz": -2 }, "upper_leg_L": { "rx": -3 }, "upper_leg_R": { "rx": 3 } } }
+        ],
+        "easing": "ease_in_out",
+        "loopable": true,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "hand_heben": {
+        "id": "MOT_RAISE_HAND",
+        "category": "gesture",
+        "type": "static",
+        "duration_ms": 600,
+        "bones": {
+          "upper_arm_R": { "rz": -150 },
+          "lower_arm_R": { "rx": 20 },
+          "hand_R": { "rz": -10 }
+        },
+        "easing": "ease_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "beide_haende_heben": {
+        "id": "MOT_RAISE_BOTH",
+        "category": "gesture",
+        "type": "static",
+        "duration_ms": 700,
+        "bones": {
+          "upper_arm_L": { "rz": 130 },
+          "upper_arm_R": { "rz": -130 },
+          "lower_arm_L": { "rx": 20 },
+          "lower_arm_R": { "rx": 20 },
+          "hand_L": { "rz": 15 },
+          "hand_R": { "rz": -15 }
+        },
+        "easing": "ease_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "abwehr": {
+        "id": "MOT_DEFENSIVE",
+        "category": "gesture",
+        "type": "static",
+        "duration_ms": 400,
+        "bones": {
+          "upper_arm_L": { "rz": 50, "ry": -30 },
+          "upper_arm_R": { "rz": -50, "ry": 30 },
+          "lower_arm_L": { "rx": 90 },
+          "lower_arm_R": { "rx": 90 },
+          "hand_L": { "rx": 30 },
+          "hand_R": { "rx": 30 },
+          "spine_2": { "rx": -5 },
+          "head": { "rx": -5 }
+        },
+        "easing": "ease_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "verbeugen": {
+        "id": "MOT_BOW",
+        "category": "gesture",
+        "type": "sequence",
+        "duration_ms": 1800,
+        "keyframes": [
+          { "t": 0.0, "bones": {} },
+          { "t": 0.3, "bones": { "spine_0": { "rx": 20 }, "spine_1": { "rx": 15 }, "spine_2": { "rx": 10 }, "head": { "rx": -10 }, "upper_arm_L": { "rz": 5 }, "upper_arm_R": { "rz": -5 } } },
+          { "t": 0.7, "bones": { "spine_0": { "rx": 20 }, "spine_1": { "rx": 15 }, "spine_2": { "rx": 10 }, "head": { "rx": -10 } } },
+          { "t": 1.0, "bones": {} }
+        ],
+        "easing": "ease_in_out",
+        "loopable": false,
+        "blendable": false,
+        "glb_fallback": null
+      },
+
+      "arbeiten_tippen": {
+        "id": "MOT_WORK_TYPE",
+        "category": "posture",
+        "type": "sequence",
+        "duration_ms": 600,
+        "keyframes": [
+          { "t": 0.0, "bones": { "upper_arm_L": { "rz": 20, "ry": -15 }, "upper_arm_R": { "rz": -20, "ry": 15 }, "lower_arm_L": { "rx": 80 }, "lower_arm_R": { "rx": 80 }, "head": { "rx": -10 }, "spine_2": { "rx": -5 }, "hand_L": { "rx": -15 } } },
+          { "t": 0.5, "bones": { "upper_arm_L": { "rz": 20, "ry": -15 }, "upper_arm_R": { "rz": -20, "ry": 15 }, "lower_arm_L": { "rx": 80 }, "lower_arm_R": { "rx": 80 }, "head": { "rx": -10 }, "spine_2": { "rx": -5 }, "hand_R": { "rx": -15 } } },
+          { "t": 1.0, "bones": { "hand_L": { "rx": -15 } } }
+        ],
+        "easing": "linear",
+        "loopable": true,
+        "blendable": false,
+        "glb_fallback": "working_light"
+      },
+
+      "stolz_stehen": {
+        "id": "MOT_PROUD",
+        "category": "expression",
+        "type": "static",
+        "duration_ms": 800,
+        "bones": {
+          "spine_0": { "rx": -5 },
+          "spine_1": { "rx": -3 },
+          "spine_2": { "rx": -5 },
+          "head": { "rx": 10 },
+          "shoulder_L": { "ry": 3, "rz": -3 },
+          "shoulder_R": { "ry": 3, "rz": 3 }
+        },
+        "easing": "ease_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "erschoepft": {
+        "id": "MOT_EXHAUSTED",
+        "category": "expression",
+        "type": "static",
+        "duration_ms": 1000,
+        "bones": {
+          "spine_0": { "rx": 8 },
+          "spine_1": { "rx": 6 },
+          "spine_2": { "rx": 4 },
+          "head": { "rx": -20 },
+          "shoulder_L": { "ry": -10 },
+          "shoulder_R": { "ry": -10 },
+          "upper_arm_L": { "rz": 8 },
+          "upper_arm_R": { "rz": -8 }
+        },
+        "easing": "ease_in",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "aengstlich": {
+        "id": "MOT_ANXIOUS",
+        "category": "expression",
+        "type": "static",
+        "duration_ms": 600,
+        "bones": {
+          "shoulder_L": { "ry": 10 },
+          "shoulder_R": { "ry": 10 },
+          "spine_2": { "rx": -5 },
+          "head": { "rx": -8, "ry": -15 },
+          "upper_arm_L": { "rz": 15, "ry": -10 },
+          "upper_arm_R": { "rz": -15, "ry": 10 },
+          "lower_arm_L": { "rx": 40 },
+          "lower_arm_R": { "rx": 40 }
+        },
+        "easing": "ease_in",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      }
+    }
+  }
+}

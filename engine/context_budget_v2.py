@@ -22,7 +22,7 @@ BUDGET_TIER1 = {
     'dna_compressed': 1500,    # DNA ist WER ICH BIN — Persoenlichkeit, Sprechstil,
                                # Werte, Regeln. Wie Adams soul.md. MUSS gross sein.
     'ego': 200,                # Dynamische Persoenlichkeit (klein)
-    'egon_self_short': 150,    # Selbstbild: Nur erste 2 Abschnitte (gekuerzt)
+    'egon_self_short': 300,    # Selbstbild: Erste 2 Abschnitte (Wer ich bin + Wie ich aussehe)
     'state': 300,              # yaml_to_prompt Output (gekuerzt)
     'inner_voice': 300,        # Letzte 3-5 Eintraege (gekuerzt)
     'owner': 150,              # Owner-Portrait (kompakt)
@@ -33,6 +33,8 @@ BUDGET_TIER1 = {
     'sparks': 100,             # Letzte 2-3 Sparks (Einsichten)
     'skills': 100,             # Kompakte Skill-Liste (gekuerzt)
     'wallet': 80,              # Nur Kontostand (gekuerzt)
+    'body_md': 300,             # body.md — Koerper-Beschreibung + Bewegungs-Vokabular
+    'motor_instruction': 200,   # Motor-Instruktion (###BODY### Output-Format)
     'ecr_instruction': 150,    # ECR-Chain Anweisung
     'workspace_rules': 200,    # Workspace + Action Regeln
     'persona_rules': 100,      # Persona Refresher (alle 8 Messages)
@@ -60,6 +62,8 @@ BUDGET_TIER2 = {
     'wallet': 200,             # Kontostand + Transaktionen
     'network': 200,            # Netzwerk-Ueberblick
     'contacts': 300,           # Relevante Kontaktkarten
+    'body_md': 600,             # body.md — Volle Koerper-Beschreibung
+    'motor_instruction': 400,   # Motor-Instruktion (ausfuehrlicher)
     'ecr_instruction': 200,    # ECR-Chain ausfuehrlicher
     'workspace_rules': 300,    # Workspace + Action Regeln
     'persona_rules': 150,      # Persona Refresher

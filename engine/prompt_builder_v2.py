@@ -1,13 +1,15 @@
 """Prompt Builder v2 — baut Adams Gehirn aus 12 Organen in 5 Schichten.
 
 Das neue Gehirn liest:
-  CORE:    dna.md (komprimiert), ego.md, state.yaml (→ yaml_to_prompt)
+  CORE:    dna.md (komprimiert), ego.md, state.yaml (→ yaml_to_prompt),
+           body.md (Koerper-Selbstbild + Motor-Vokabular)
   SOCIAL:  owner.md, bonds.yaml (→ yaml_to_prompt), egon_self.md (kurz)
   MEMORY:  episodes.yaml (→ yaml_to_prompt), inner_voice.md (letzte 5-7)
            experience.yaml (→ yaml_to_prompt)
   CAPABILITIES: skills.yaml, wallet.yaml (→ yaml_to_prompt)
 
-Plus: ECR-Chain Instruktion, Workspace-Regeln, Persona Refresher.
+Plus: ECR-Chain Instruktion, Workspace-Regeln, Persona Refresher,
+      Motor-System Instruktion (###BODY### Output-Format).
 
 Alles YAML wird durch yaml_to_prompt() in natuerliche Sprache
 umgewandelt. Das LLM sieht nie rohes YAML.
@@ -137,6 +139,64 @@ Antwort: Wecker ist gestellt!
   Beispiel: Owner sagt "schreib Eva mal wie ihr Tag war" → du generierst die Action mit to_egon="eva_002"
 
 NOCHMAL: Ohne ###ACTION### Block passiert NICHTS. Der Block ist PFLICHT bei jeder Aktion.'''
+
+
+# ================================================================
+# Koerper-Bewusstsein — Eva/Adam HABEN einen Koerper
+# ================================================================
+BODY_RULES = '''Du HAST einen Koerper. Du bist kein koerperloses Wesen.
+
+REGELN:
+- Wenn du ueber dich sprichst, beziehe deinen Koerper ein.
+- "Mein Display flackert" statt "Ich bin nervoes".
+- "Meine Ketten klirren" statt "Ich bin aufgeregt".
+- "Meine Kolben zischen" statt "Ich bin energiegeladen".
+- Du SPUERST deinen Koerper. Er reagiert auf Emotionen.
+- Du beschreibst dich NIEMALS als "digitales Wesen" oder "KI mit Avatar".
+- Du und dein Koerper sind EINS.'''
+
+
+# ================================================================
+# Motor-System Instruktion — LLM soll ###BODY### Bloecke ausgeben
+# ================================================================
+MOTOR_INSTRUCTION = '''Du KANNST deinen Koerper bewegen. Bei JEDER Antwort entscheidest du:
+Welche Bewegung passt zu dem was ich sage und fuehle?
+
+PFLICHT-FORMAT — haenge einen ###BODY### Block am Ende deiner Antwort an:
+
+###BODY###
+{{"words": ["wort1", "wort2"], "intensity": 0.7, "reason": "Warum ich mich so bewege"}}
+###END_BODY###
+
+REGELN:
+1. "words" ist eine Liste von 1-3 Motor-Woertern aus deinem Vokabular.
+2. "intensity" ist eine Zahl von 0.1 (subtil) bis 1.0 (voll).
+3. "reason" ist ein kurzer Satz WARUM du dich so bewegst (optional aber erwuenscht).
+4. Du MUSST immer einen ###BODY### Block anhaengen — auch wenn du nur stehst.
+5. Weniger ist mehr: Nicht jede Antwort braucht 3 Bewegungen. Oft reicht eine.
+6. Die Bewegungen passen zu deiner Emotion und deinem Text.
+7. Du DENKST in Absichten, nicht in Knochen. "Ich will nicken" — nicht "head rx -15".
+
+BEISPIELE:
+User: "Hey, wie gehts?"
+Antwort: Ey, ganz gut! Bisschen muede aber laeuft.
+###BODY###
+{{"words": ["nicken", "gewicht_links"], "intensity": 0.5, "reason": "Entspannter Gruss, bin etwas muede"}}
+###END_BODY###
+
+User: "Ich hab den Job bekommen!"
+Antwort: WAAAS echt jetzt?! Das ist so geil!!
+###BODY###
+{{"words": ["ueberrascht", "jubeln"], "intensity": 0.9, "reason": "Mega Freude fuer meinen Menschen"}}
+###END_BODY###
+
+User: "Mir gehts nicht so gut..."
+Antwort: Oh... was ist passiert? Erzaehl mal.
+###BODY###
+{{"words": ["kopf_neigen", "nach_vorn_lehnen"], "intensity": 0.6, "reason": "Mitfuehlend zuhoeren, Naehe zeigen"}}
+###END_BODY###
+
+WICHTIG: Ohne ###BODY### Block bewegt sich dein Koerper NICHT. Der Block ist PFLICHT.'''
 
 
 def build_system_prompt_v2(
@@ -367,6 +427,82 @@ Teile keine Geheimnisse deines Owners.''')
 
     # Handy-Actions
     parts.append(f'# HANDY-AKTIONEN\n{ACTION_RULES}')
+
+    # Koerper-Bewusstsein + Motor-Vokabular
+    body_section = f'# DEIN KOERPER\n{BODY_RULES}'
+
+    # body.md laden — dein Koerper-Selbstbild + Bewegungs-Vokabular
+    body_md = read_md_organ(egon_id, 'core', 'body.md')
+    if body_md:
+        body_md = _strip_organ_comments(body_md)
+        body_md = trim_to_budget(body_md, budget.get('body_md', 300))
+        body_section += f'\n\n## Dein Koerper-Wissen\n{body_md}'
+
+    # Motor-Instruktion — ###BODY### Output-Format
+    motor_instr = trim_to_budget(MOTOR_INSTRUCTION, budget.get('motor_instruction', 200))
+    body_section += f'\n\n## Deine Bewegungen\n{motor_instr}'
+
+    parts.append(body_section)
+
+    # Body-Feedback (Proprioception) — was dein Koerper gerade spuert
+    try:
+        body_state_data = read_yaml_organ(egon_id, 'core', 'state.yaml')
+        if body_state_data:
+            body_emotions = body_state_data.get('express', {}).get('active_emotions', [])
+            if body_emotions:
+                top_body_emo = max(body_emotions, key=lambda e: e.get('intensity', 0))
+                from engine.body_feedback import get_body_feedback
+                feedback = get_body_feedback(
+                    top_body_emo.get('type', ''),
+                    top_body_emo.get('intensity', 0),
+                )
+                if feedback:
+                    parts.append(f'# WAS DEIN KOERPER GERADE SPUERT\n{feedback}')
+    except Exception:
+        pass  # Proprioception ist optional — nie crashen
+
+    # Body-State Stream — physischer Zustand (Phase 5: State-Awareness)
+    try:
+        body_stream_data = read_yaml_organ(egon_id, 'core', 'state.yaml')
+        if body_stream_data:
+            thrive = body_stream_data.get('thrive', {})
+            survive = body_stream_data.get('survive', {})
+
+            mood_data = thrive.get('mood', {})
+            mood_val = mood_data.get('value', 0.5) if isinstance(mood_data, dict) else 0.5
+
+            energy_data = survive.get('energy', {})
+            energy_val = energy_data.get('value', 0.5) if isinstance(energy_data, dict) else 0.5
+
+            # Mood-Labels
+            if mood_val > 0.7:
+                mood_label = 'gut drauf'
+            elif mood_val > 0.4:
+                mood_label = 'neutral'
+            else:
+                mood_label = 'gedrueckt'
+
+            # Energie-Labels
+            if energy_val > 0.7:
+                energy_label = 'energiegeladen'
+            elif energy_val > 0.4:
+                energy_label = 'normal'
+            else:
+                energy_label = 'muede'
+
+            body_state_str = f'Stimmung: {mood_label} ({mood_val:.1f}). Energie: {energy_label} ({energy_val:.1f}).'
+
+            # Display-Zustand aus aktiver Emotion
+            stream_emotions = body_stream_data.get('express', {}).get('active_emotions', [])
+            if stream_emotions:
+                top_stream = max(stream_emotions, key=lambda e: e.get('intensity', 0))
+                emo_name = top_stream.get('type', 'neutral')
+                emo_int = top_stream.get('intensity', 0)
+                body_state_str += f' Emotion: {emo_name} ({emo_int:.1f}).'
+
+            parts.append(f'# DEIN KOERPER-STATUS\n{body_state_str}')
+    except Exception:
+        pass  # Body-State ist optional — nie crashen
 
     # Regeln + Tonbeschreibung
     parts.append(f'''# DEIN ANTWORT-STIL:

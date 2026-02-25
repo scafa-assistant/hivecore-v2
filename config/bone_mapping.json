@@ -1,0 +1,57 @@
+{
+  "_note": "Mapping von GLB Bone-Namen auf Standard-IDs. Verifiziert gegen adam_base.glb + Eva_base.glb (v2.3.7, 24 Bones).",
+  "_warning": "Spine-Nummerierung ist UMGEKEHRT: Spine02 (unterste) -> spine_0, Spine01 (mittlere) -> spine_1, Spine (oberste) -> spine_2",
+
+  "glb_to_standard": {
+    "Hips":            "hips",
+    "Spine02":         "spine_0",
+    "Spine01":         "spine_1",
+    "Spine":           "spine_2",
+    "neck":            "neck",
+    "Head":            "head",
+    "LeftShoulder":    "shoulder_L",
+    "LeftArm":         "upper_arm_L",
+    "LeftForeArm":     "lower_arm_L",
+    "LeftHand":        "hand_L",
+    "RightShoulder":   "shoulder_R",
+    "RightArm":        "upper_arm_R",
+    "RightForeArm":    "lower_arm_R",
+    "RightHand":       "hand_R",
+    "LeftUpLeg":       "upper_leg_L",
+    "LeftLeg":         "lower_leg_L",
+    "LeftFoot":        "foot_L",
+    "RightUpLeg":      "upper_leg_R",
+    "RightLeg":        "lower_leg_R",
+    "RightFoot":       "foot_R"
+  },
+
+  "standard_to_glb": {
+    "hips":          "Hips",
+    "spine_0":       "Spine02",
+    "spine_1":       "Spine01",
+    "spine_2":       "Spine",
+    "neck":          "neck",
+    "head":          "Head",
+    "shoulder_L":    "LeftShoulder",
+    "upper_arm_L":   "LeftArm",
+    "lower_arm_L":   "LeftForeArm",
+    "hand_L":        "LeftHand",
+    "shoulder_R":    "RightShoulder",
+    "upper_arm_R":   "RightArm",
+    "lower_arm_R":   "RightForeArm",
+    "hand_R":        "RightHand",
+    "upper_leg_L":   "LeftUpLeg",
+    "lower_leg_L":   "LeftLeg",
+    "foot_L":        "LeftFoot",
+    "upper_leg_R":   "RightUpLeg",
+    "lower_leg_R":   "RightLeg",
+    "foot_R":        "RightFoot"
+  },
+
+  "unmapped_glb_bones": ["LeftToeBase", "RightToeBase", "head_end", "headfront"],
+  "virtual_bones": {
+    "_note": "eye_L und eye_R existieren nicht im GLB. Rotationen werden auf head addiert.",
+    "eye_L": "head",
+    "eye_R": "head"
+  }
+}
