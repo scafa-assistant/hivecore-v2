@@ -3,6 +3,16 @@
     "version": "1.0",
     "word_count": 40,
     "_note": "Alle eye_L/eye_R Referenzen auf head umgeleitet (GLBs haben keine Eye-Bones).",
+
+    "_achsen_map_upper_arm_R": {
+      "rx_negativ": "Arm HOCH",
+      "rx_positiv": "Arm RUNTER",
+      "ry_positiv": "Rotation Uhrzeigersinn (Handfläche nach oben)",
+      "ry_negativ": "Rotation gegen Uhrzeigersinn (Handfläche nach unten)",
+      "rz_positiv": "Arm nach HINTEN",
+      "rz_negativ": "Arm nach VORNE"
+    },
+
     "words": {
 
       "stehen": {
