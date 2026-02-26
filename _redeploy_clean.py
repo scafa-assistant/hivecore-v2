@@ -55,6 +55,7 @@ DEPLOY_FILES = [
     'engine/experience_v2.py',
     'engine/state_manager.py',
     'engine/pulse.py',
+    'api/brain.py',
     'api/chat.py',
     'api/profile.py',
     'api/profile_server.py',
