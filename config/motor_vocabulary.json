@@ -1,25 +1,40 @@
 {
   "motor_vocabulary": {
-    "version": "1.1",
+    "version": "1.2",
     "word_count": 36,
-    "_note": "Alle eye_L/eye_R Referenzen auf head umgeleitet (GLBs haben keine Eye-Bones).",
+    "_note": "v1.2: Alle Arm-Achsen korrigiert anhand echter GLB-Deltas (waving.glb, gesture.glb, thumbs_up.glb)",
 
     "_achsen_map_upper_arm_R": {
-      "rx_negativ": "Arm HOCH",
-      "rx_positiv": "Arm RUNTER",
-      "ry_positiv": "Rotation Uhrzeigersinn (Handfläche nach oben)",
-      "ry_negativ": "Rotation gegen Uhrzeigersinn (Handfläche nach unten)",
+      "_source": "Verifiziert durch 3 GLB-Animationen (waving, gesture, thumbs_up)",
+      "ry_positiv": "Arm HOCH (dominant, 55-83 Grad fuer voll)",
+      "ry_negativ": "Arm RUNTER",
+      "rx_negativ": "Schulter-Rotation nach vorn/innen",
+      "rx_positiv": "Schulter-Rotation nach hinten/aussen",
       "rz_positiv": "Arm nach HINTEN",
       "rz_negativ": "Arm nach VORNE"
     },
     "_achsen_map_upper_arm_L": {
-      "_note": "Gespiegelt zu R: rz ist invertiert, rx gleich, ry invertiert",
-      "rx_negativ": "Arm HOCH",
-      "rx_positiv": "Arm RUNTER",
-      "ry_negativ": "Rotation Uhrzeigersinn (Handfläche nach oben)",
-      "ry_positiv": "Rotation gegen Uhrzeigersinn (Handfläche nach unten)",
+      "_note": "Gespiegelt zu R: ry und rz invertiert, rx gleich",
+      "ry_negativ": "Arm HOCH (dominant)",
+      "ry_positiv": "Arm RUNTER",
+      "rx_negativ": "Schulter-Rotation nach vorn/innen",
+      "rx_positiv": "Schulter-Rotation nach hinten/aussen",
       "rz_negativ": "Arm nach HINTEN",
       "rz_positiv": "Arm nach VORNE"
+    },
+    "_achsen_map_lower_arm_R": {
+      "rz_negativ": "Ellenbogen BEUGEN (dominant, -66 bis -82)",
+      "rz_positiv": "Ellenbogen STRECKEN"
+    },
+    "_achsen_map_lower_arm_L": {
+      "rz_positiv": "Ellenbogen BEUGEN (gespiegelt, +66 bis +82)",
+      "rz_negativ": "Ellenbogen STRECKEN"
+    },
+    "_achsen_map_hand": {
+      "rx_negativ": "Handgelenk BEUGEN runter (dominant, -40 bis -83)",
+      "rx_positiv": "Handgelenk STRECKEN hoch",
+      "ry": "Handgelenk seitlich",
+      "rz": "Handgelenk drehen"
     },
 
     "words": {
@@ -107,11 +122,12 @@
         "category": "gesture",
         "type": "sequence",
         "duration_ms": 900,
+        "_fix": "v1.2: upper_arm ry statt rx fuer Arm-Heben",
         "keyframes": [
-          { "t": 0.0, "bones": { "shoulder_L": { "ry": 0 }, "shoulder_R": { "ry": 0 } } },
-          { "t": 0.3, "bones": { "shoulder_L": { "ry": 12 }, "shoulder_R": { "ry": 12 }, "hand_L": { "rz": 30 }, "hand_R": { "rz": -30 }, "upper_arm_L": { "rx": -15 }, "upper_arm_R": { "rx": -15 } } },
+          { "t": 0.0, "bones": {} },
+          { "t": 0.3, "bones": { "shoulder_L": { "ry": 12 }, "shoulder_R": { "ry": 12 }, "upper_arm_L": { "ry": -20 }, "upper_arm_R": { "ry": 20 }, "hand_L": { "rz": -30 }, "hand_R": { "rz": 30 } } },
           { "t": 0.7, "bones": { "shoulder_L": { "ry": 12 }, "shoulder_R": { "ry": 12 } } },
-          { "t": 1.0, "bones": { "shoulder_L": { "ry": 0 }, "shoulder_R": { "ry": 0 } } }
+          { "t": 1.0, "bones": {} }
         ],
         "easing": "ease_in_out",
         "loopable": false,
@@ -123,16 +139,16 @@
         "id": "MOT_WAVE",
         "category": "gesture",
         "type": "sequence",
-        "duration_ms": 1400,
-        "_fix": "v1.1: rx statt rz — rx negativ = Arm HOCH",
+        "duration_ms": 1200,
+        "_fix": "v1.2: echte GLB-Deltas aus waving.glb (alle 3 Achsen pro Bone)",
         "keyframes": [
-          { "t": 0.0,  "bones": { "upper_arm_R": { "rx": 0 } } },
-          { "t": 0.15, "bones": { "upper_arm_R": { "rx": -90 }, "lower_arm_R": { "rx": 45 } } },
-          { "t": 0.3,  "bones": { "upper_arm_R": { "rx": -90 }, "lower_arm_R": { "rx": 45 }, "hand_R": { "ry": -25 } } },
-          { "t": 0.45, "bones": { "upper_arm_R": { "rx": -90 }, "lower_arm_R": { "rx": 45 }, "hand_R": { "ry": 25 } } },
-          { "t": 0.6,  "bones": { "upper_arm_R": { "rx": -90 }, "lower_arm_R": { "rx": 45 }, "hand_R": { "ry": -20 } } },
-          { "t": 0.75, "bones": { "upper_arm_R": { "rx": -90 }, "lower_arm_R": { "rx": 45 }, "hand_R": { "ry": 20 } } },
-          { "t": 1.0,  "bones": { "upper_arm_R": { "rx": 0 } } }
+          { "t": 0.0,  "bones": {} },
+          { "t": 0.2,  "bones": { "upper_arm_R": {"rx":-24,"ry":59,"rz":26}, "lower_arm_R": {"rx":-17,"ry":-17,"rz":-82}, "hand_R": {"rx":-75,"ry":9,"rz":39}, "shoulder_R": {"rx":-11,"ry":6,"rz":9}, "head": {"rx":16,"ry":4,"rz":3} } },
+          { "t": 0.35, "bones": { "upper_arm_R": {"rx":-24,"ry":59,"rz":26}, "lower_arm_R": {"rx":-17,"ry":-17,"rz":-82}, "hand_R": {"rx":-75,"ry":-15,"rz":39}, "shoulder_R": {"rx":-11,"ry":6,"rz":9}, "head": {"rx":16,"ry":4,"rz":3} } },
+          { "t": 0.5,  "bones": { "upper_arm_R": {"rx":-24,"ry":59,"rz":26}, "lower_arm_R": {"rx":-17,"ry":-17,"rz":-82}, "hand_R": {"rx":-75,"ry":25,"rz":39}, "shoulder_R": {"rx":-11,"ry":6,"rz":9}, "head": {"rx":16,"ry":4,"rz":3} } },
+          { "t": 0.65, "bones": { "upper_arm_R": {"rx":-24,"ry":59,"rz":26}, "lower_arm_R": {"rx":-17,"ry":-17,"rz":-82}, "hand_R": {"rx":-75,"ry":-10,"rz":39}, "shoulder_R": {"rx":-11,"ry":6,"rz":9}, "head": {"rx":16,"ry":4,"rz":3} } },
+          { "t": 0.8,  "bones": { "upper_arm_R": {"rx":-24,"ry":59,"rz":26}, "lower_arm_R": {"rx":-17,"ry":-17,"rz":-82}, "hand_R": {"rx":-75,"ry":20,"rz":39}, "shoulder_R": {"rx":-11,"ry":6,"rz":9}, "head": {"rx":16,"ry":4,"rz":3} } },
+          { "t": 1.0,  "bones": {} }
         ],
         "easing": "ease_in_out",
         "loopable": false,
@@ -144,16 +160,16 @@
         "id": "MOT_WAVE_LEFT",
         "category": "gesture",
         "type": "sequence",
-        "duration_ms": 1400,
-        "_fix": "v1.1b: lower_arm_L rx: -45 (invertiert zu R, Ellenbogen beugt richtig)",
+        "duration_ms": 1200,
+        "_fix": "v1.2: gespiegelte GLB-Deltas (ry/rz invertiert zu R)",
         "keyframes": [
-          { "t": 0.0,  "bones": { "upper_arm_L": { "rx": 0 } } },
-          { "t": 0.15, "bones": { "upper_arm_L": { "rx": -90 }, "lower_arm_L": { "rx": -45 } } },
-          { "t": 0.3,  "bones": { "upper_arm_L": { "rx": -90 }, "lower_arm_L": { "rx": -45 }, "hand_L": { "ry": 25 } } },
-          { "t": 0.45, "bones": { "upper_arm_L": { "rx": -90 }, "lower_arm_L": { "rx": -45 }, "hand_L": { "ry": -25 } } },
-          { "t": 0.6,  "bones": { "upper_arm_L": { "rx": -90 }, "lower_arm_L": { "rx": -45 }, "hand_L": { "ry": 20 } } },
-          { "t": 0.75, "bones": { "upper_arm_L": { "rx": -90 }, "lower_arm_L": { "rx": -45 }, "hand_L": { "ry": -20 } } },
-          { "t": 1.0,  "bones": { "upper_arm_L": { "rx": 0 } } }
+          { "t": 0.0,  "bones": {} },
+          { "t": 0.2,  "bones": { "upper_arm_L": {"rx":-24,"ry":-59,"rz":-26}, "lower_arm_L": {"rx":-17,"ry":17,"rz":82}, "hand_L": {"rx":-75,"ry":-9,"rz":-39}, "shoulder_L": {"rx":-11,"ry":-6,"rz":-9}, "head": {"rx":16,"ry":-4,"rz":-3} } },
+          { "t": 0.35, "bones": { "upper_arm_L": {"rx":-24,"ry":-59,"rz":-26}, "lower_arm_L": {"rx":-17,"ry":17,"rz":82}, "hand_L": {"rx":-75,"ry":15,"rz":-39}, "shoulder_L": {"rx":-11,"ry":-6,"rz":-9}, "head": {"rx":16,"ry":-4,"rz":-3} } },
+          { "t": 0.5,  "bones": { "upper_arm_L": {"rx":-24,"ry":-59,"rz":-26}, "lower_arm_L": {"rx":-17,"ry":17,"rz":82}, "hand_L": {"rx":-75,"ry":-25,"rz":-39}, "shoulder_L": {"rx":-11,"ry":-6,"rz":-9}, "head": {"rx":16,"ry":-4,"rz":-3} } },
+          { "t": 0.65, "bones": { "upper_arm_L": {"rx":-24,"ry":-59,"rz":-26}, "lower_arm_L": {"rx":-17,"ry":17,"rz":82}, "hand_L": {"rx":-75,"ry":10,"rz":-39}, "shoulder_L": {"rx":-11,"ry":-6,"rz":-9}, "head": {"rx":16,"ry":-4,"rz":-3} } },
+          { "t": 0.8,  "bones": { "upper_arm_L": {"rx":-24,"ry":-59,"rz":-26}, "lower_arm_L": {"rx":-17,"ry":17,"rz":82}, "hand_L": {"rx":-75,"ry":-20,"rz":-39}, "shoulder_L": {"rx":-11,"ry":-6,"rz":-9}, "head": {"rx":16,"ry":-4,"rz":-3} } },
+          { "t": 1.0,  "bones": {} }
         ],
         "easing": "ease_in_out",
         "loopable": false,
@@ -166,8 +182,10 @@
         "category": "gesture",
         "type": "static",
         "duration_ms": 800,
+        "_fix": "v1.2: ry statt rx (GLB: ry=dominant fuer Arm hoch)",
         "bones": {
-          "upper_arm_R": { "rx": -45 }
+          "upper_arm_R": { "rx": -20, "ry": 55, "rz": 20 },
+          "shoulder_R": { "rx": -8, "ry": 5 }
         },
         "easing": "ease_out",
         "loopable": false,
@@ -180,8 +198,10 @@
         "category": "gesture",
         "type": "static",
         "duration_ms": 800,
+        "_fix": "v1.2: ry statt rx, gespiegelt",
         "bones": {
-          "upper_arm_L": { "rx": -45 }
+          "upper_arm_L": { "rx": -20, "ry": -55, "rz": -20 },
+          "shoulder_L": { "rx": -8, "ry": -5 }
         },
         "easing": "ease_out",
         "loopable": false,
@@ -194,11 +214,12 @@
         "category": "gesture",
         "type": "static",
         "duration_ms": 600,
-        "_fix": "v1.1: rx: -45 (Arm halb hoch) + rz: -30 (leicht vorwaerts)",
+        "_fix": "v1.2: basiert auf GESTURE GLB-Deltas (rx:-72, ry:83, rz:-7)",
         "bones": {
-          "upper_arm_R": { "rx": -45, "rz": -30 },
-          "lower_arm_R": { "rx": 15 },
-          "hand_R": { "rx": 0 }
+          "upper_arm_R": { "rx": -45, "ry": 50, "rz": -5 },
+          "lower_arm_R": { "rz": -45 },
+          "hand_R": { "rx": -40 },
+          "shoulder_R": { "rx": -20 }
         },
         "easing": "ease_out",
         "loopable": false,
@@ -211,12 +232,12 @@
         "category": "posture",
         "type": "static",
         "duration_ms": 700,
-        "_fix": "v1.1: rx: -20 fuer leichtes Anheben zur Brust",
+        "_fix": "v1.2: lower_arm rz statt rx fuer Ellenbogen",
         "bones": {
-          "upper_arm_L": { "rx": -20, "rz": 40, "ry": -25 },
-          "lower_arm_L": { "rx": 120 },
-          "upper_arm_R": { "rx": -20, "rz": -40, "ry": 25 },
-          "lower_arm_R": { "rx": 120 },
+          "upper_arm_R": { "rx": -15, "ry": 25, "rz": -35 },
+          "lower_arm_R": { "rz": -100 },
+          "upper_arm_L": { "rx": -15, "ry": -25, "rz": 35 },
+          "lower_arm_L": { "rz": 100 },
           "hand_L": { "rx": 10 },
           "hand_R": { "rx": 10 }
         },
@@ -231,11 +252,12 @@
         "category": "posture",
         "type": "static",
         "duration_ms": 600,
+        "_fix": "v1.2: lower_arm rz statt rx, upper_arm ry statt rx",
         "bones": {
-          "upper_arm_L": { "rx": 15, "rz": 35, "ry": -30 },
-          "lower_arm_L": { "rx": 80 },
-          "upper_arm_R": { "rx": 15, "rz": -35, "ry": 30 },
-          "lower_arm_R": { "rx": 80 }
+          "upper_arm_R": { "ry": 15, "rz": -30 },
+          "lower_arm_R": { "rz": -70 },
+          "upper_arm_L": { "ry": -15, "rz": 30 },
+          "lower_arm_L": { "rz": 70 }
         },
         "easing": "ease_out",
         "loopable": false,
@@ -248,17 +270,17 @@
         "category": "gesture",
         "type": "static",
         "duration_ms": 800,
-        "_fix": "v1.1: rx: -30 (Arm HOCH zum Kinn, war +30 = runter)",
+        "_fix": "v1.2: basiert auf GESTURE GLB-Deltas, ry fuer Arm hoch, rz fuer Ellenbogen",
         "bones": {
-          "upper_arm_R": { "rx": -30, "rz": -45 },
-          "lower_arm_R": { "rx": 130 },
-          "hand_R": { "rx": -20 },
+          "upper_arm_R": { "rx": -35, "ry": 40, "rz": -30 },
+          "lower_arm_R": { "rz": -100 },
+          "hand_R": { "rx": -40 },
           "head": { "rx": -8, "rz": 5 }
         },
         "easing": "ease_in_out",
         "loopable": false,
         "blendable": true,
-        "glb_fallback": "thinking"
+        "glb_fallback": null
       },
 
       "kopf_kratzen": {
@@ -266,18 +288,18 @@
         "category": "gesture",
         "type": "sequence",
         "duration_ms": 1000,
-        "_fix": "v1.1: rx: -120 statt rz: -150 (Arm HOCH zum Kopf)",
+        "_fix": "v1.2: upper_arm ry fuer Arm hoch, lower_arm rz fuer Ellenbogen",
         "keyframes": [
           { "t": 0.0,  "bones": {} },
-          { "t": 0.25, "bones": { "upper_arm_R": { "rx": -120 }, "lower_arm_R": { "rx": 140 }, "head": { "rz": 8 } } },
-          { "t": 0.5,  "bones": { "upper_arm_R": { "rx": -120 }, "lower_arm_R": { "rx": 135 }, "hand_R": { "ry": 10 } } },
-          { "t": 0.75, "bones": { "upper_arm_R": { "rx": -120 }, "lower_arm_R": { "rx": 140 }, "hand_R": { "ry": -10 } } },
+          { "t": 0.25, "bones": { "upper_arm_R": {"rx":-30,"ry":70,"rz":15}, "lower_arm_R": {"rz":-100}, "head": {"rz":8} } },
+          { "t": 0.5,  "bones": { "upper_arm_R": {"rx":-30,"ry":70,"rz":15}, "lower_arm_R": {"rz":-95}, "hand_R": {"ry":10} } },
+          { "t": 0.75, "bones": { "upper_arm_R": {"rx":-30,"ry":70,"rz":15}, "lower_arm_R": {"rz":-100}, "hand_R": {"ry":-10} } },
           { "t": 1.0,  "bones": {} }
         ],
         "easing": "ease_in_out",
         "loopable": false,
         "blendable": false,
-        "glb_fallback": "confused"
+        "glb_fallback": null
       },
 
       "jubeln": {
@@ -285,18 +307,18 @@
         "category": "expression",
         "type": "sequence",
         "duration_ms": 1500,
-        "_fix": "v1.1: rx statt rz (Arme HOCH fuer Jubel)",
+        "_fix": "v1.2: upper_arm ry statt rx fuer Arme HOCH (R:+80, L:-80)",
         "keyframes": [
           { "t": 0.0,  "bones": {} },
-          { "t": 0.2,  "bones": { "upper_arm_L": { "rx": -160 }, "upper_arm_R": { "rx": -160 }, "spine_2": { "rx": 10 }, "head": { "rx": 15 } } },
-          { "t": 0.5,  "bones": { "upper_arm_L": { "rx": -170 }, "upper_arm_R": { "rx": -170 }, "hand_L": { "rz": 20 }, "hand_R": { "rz": -20 }, "spine_2": { "rx": 12 }, "head": { "rx": 18 } } },
-          { "t": 0.75, "bones": { "upper_arm_L": { "rx": -155 }, "upper_arm_R": { "rx": -155 }, "spine_2": { "rx": 8 } } },
+          { "t": 0.2,  "bones": { "upper_arm_R": {"rx":-15,"ry":75,"rz":20}, "upper_arm_L": {"rx":-15,"ry":-75,"rz":-20}, "spine_2": {"rx":10}, "head": {"rx":15} } },
+          { "t": 0.5,  "bones": { "upper_arm_R": {"rx":-15,"ry":80,"rz":25}, "upper_arm_L": {"rx":-15,"ry":-80,"rz":-25}, "hand_R": {"rz":-20}, "hand_L": {"rz":20}, "spine_2": {"rx":12}, "head": {"rx":18} } },
+          { "t": 0.75, "bones": { "upper_arm_R": {"rx":-10,"ry":70,"rz":18}, "upper_arm_L": {"rx":-10,"ry":-70,"rz":-18}, "spine_2": {"rx":8} } },
           { "t": 1.0,  "bones": {} }
         ],
         "easing": "ease_out",
         "loopable": false,
         "blendable": false,
-        "glb_fallback": "celebrating"
+        "glb_fallback": null
       },
 
       "traurig_stehen": {
@@ -304,6 +326,7 @@
         "category": "expression",
         "type": "static",
         "duration_ms": 1000,
+        "_fix": "v1.2: upper_arm ry statt rx (Arme haengen)",
         "bones": {
           "head": { "rx": -25, "rz": -5 },
           "neck": { "rx": -10 },
@@ -311,13 +334,13 @@
           "spine_1": { "rx": -5 },
           "shoulder_L": { "ry": -5, "rz": 3 },
           "shoulder_R": { "ry": -5, "rz": -3 },
-          "upper_arm_L": { "rx": 5 },
-          "upper_arm_R": { "rx": 5 }
+          "upper_arm_L": { "ry": 5 },
+          "upper_arm_R": { "ry": -5 }
         },
         "easing": "ease_in",
         "loopable": false,
         "blendable": true,
-        "glb_fallback": "sad"
+        "glb_fallback": null
       },
 
       "wuetend_stehen": {
@@ -325,20 +348,21 @@
         "category": "expression",
         "type": "static",
         "duration_ms": 500,
+        "_fix": "v1.2: upper_arm ry statt rx fuer Arme leicht vom Koerper",
         "bones": {
           "head": { "rx": -5 },
           "spine_2": { "rx": 5 },
           "shoulder_L": { "ry": 8 },
           "shoulder_R": { "ry": 8 },
-          "upper_arm_L": { "rx": -15, "ry": -10 },
-          "upper_arm_R": { "rx": -15, "ry": 10 },
+          "upper_arm_R": { "ry": 15 },
+          "upper_arm_L": { "ry": -15 },
           "hand_L": { "rx": -40 },
           "hand_R": { "rx": -40 }
         },
         "easing": "ease_out",
         "loopable": false,
         "blendable": true,
-        "glb_fallback": "angry"
+        "glb_fallback": null
       },
 
       "lachen": {
@@ -358,7 +382,7 @@
         "easing": "ease_out",
         "loopable": false,
         "blendable": false,
-        "glb_fallback": "laughing"
+        "glb_fallback": null
       },
 
       "ueberrascht": {
@@ -366,17 +390,17 @@
         "category": "expression",
         "type": "sequence",
         "duration_ms": 800,
-        "_fix": "v1.1: rx: -25 statt rz: +-30 (Arme leicht HOCH)",
+        "_fix": "v1.2: upper_arm ry statt rx fuer Arme leicht HOCH",
         "keyframes": [
           { "t": 0.0,  "bones": {} },
-          { "t": 0.15, "bones": { "head": { "rx": 12 }, "spine_2": { "rx": 5 }, "upper_arm_L": { "rx": -25 }, "upper_arm_R": { "rx": -25 }, "shoulder_L": { "ry": 8 }, "shoulder_R": { "ry": 8 } } },
-          { "t": 0.5,  "bones": { "head": { "rx": 10 }, "spine_2": { "rx": 4 }, "upper_arm_L": { "rx": -20 }, "upper_arm_R": { "rx": -20 } } },
+          { "t": 0.15, "bones": { "head": {"rx":12}, "spine_2": {"rx":5}, "upper_arm_R": {"ry":25}, "upper_arm_L": {"ry":-25}, "shoulder_L": {"ry":8}, "shoulder_R": {"ry":8} } },
+          { "t": 0.5,  "bones": { "head": {"rx":10}, "spine_2": {"rx":4}, "upper_arm_R": {"ry":20}, "upper_arm_L": {"ry":-20} } },
           { "t": 1.0,  "bones": {} }
         ],
         "easing": "ease_out",
         "loopable": false,
         "blendable": true,
-        "glb_fallback": "surprised"
+        "glb_fallback": null
       },
 
       "verwirrt": {
@@ -391,7 +415,7 @@
         "easing": "ease_out",
         "loopable": false,
         "blendable": true,
-        "glb_fallback": "confused"
+        "glb_fallback": null
       },
 
       "sitzen": {
@@ -399,6 +423,7 @@
         "category": "posture",
         "type": "static",
         "duration_ms": 1200,
+        "_fix": "v1.2: lower_arm rz statt rx fuer Ellenbogen",
         "bones": {
           "hips": { "ty": -0.3 },
           "upper_leg_L": { "rx": -90 },
@@ -406,10 +431,10 @@
           "lower_leg_L": { "rx": -90 },
           "lower_leg_R": { "rx": -90 },
           "spine_0": { "rx": 5 },
-          "upper_arm_L": { "rx": 10 },
-          "upper_arm_R": { "rx": 10 },
-          "lower_arm_L": { "rx": 70 },
-          "lower_arm_R": { "rx": 70 }
+          "upper_arm_R": { "ry": 10 },
+          "upper_arm_L": { "ry": -10 },
+          "lower_arm_R": { "rz": -50 },
+          "lower_arm_L": { "rz": 50 }
         },
         "easing": "ease_in_out",
         "loopable": false,
@@ -422,6 +447,7 @@
         "category": "posture",
         "type": "static",
         "duration_ms": 2000,
+        "_fix": "v1.2: upper_arm ry statt rx (Arme haengen leicht)",
         "bones": {
           "head": { "rx": -30, "rz": 15 },
           "neck": { "rx": -15 },
@@ -429,8 +455,8 @@
           "spine_1": { "rx": -8 },
           "shoulder_L": { "ry": -8 },
           "shoulder_R": { "ry": -8 },
-          "upper_arm_L": { "rx": 10 },
-          "upper_arm_R": { "rx": 10 }
+          "upper_arm_L": { "ry": 8 },
+          "upper_arm_R": { "ry": -8 }
         },
         "easing": "ease_in",
         "loopable": false,
@@ -443,12 +469,12 @@
         "category": "gesture",
         "type": "sequence",
         "duration_ms": 2000,
-        "_fix": "v1.1: rx statt rz fuer Arm-Stretch",
+        "_fix": "v1.2: upper_arm ry + lower_arm rz fuer Arm-Stretch",
         "keyframes": [
-          { "t": 0.0,  "bones": { "head": { "rx": -30, "rz": 15 }, "neck": { "rx": -15 }, "spine_2": { "rx": -10 }, "spine_1": { "rx": -8 }, "shoulder_L": { "ry": -8 }, "shoulder_R": { "ry": -8 }, "upper_arm_L": { "rx": 10 }, "upper_arm_R": { "rx": 10 } } },
-          { "t": 0.3,  "bones": { "head": { "rx": -15 } } },
-          { "t": 0.5,  "bones": { "head": { "rx": 0 }, "spine_2": { "rx": 0 }, "upper_arm_L": { "rx": -60 }, "lower_arm_L": { "rx": 90 } } },
-          { "t": 0.7,  "bones": { "upper_arm_L": { "rx": -20 }, "head": { "rx": 5 } } },
+          { "t": 0.0,  "bones": { "head": {"rx":-30,"rz":15}, "neck": {"rx":-15}, "spine_2": {"rx":-10}, "spine_1": {"rx":-8}, "shoulder_L": {"ry":-8}, "shoulder_R": {"ry":-8}, "upper_arm_L": {"ry":8}, "upper_arm_R": {"ry":-8} } },
+          { "t": 0.3,  "bones": { "head": {"rx":-15} } },
+          { "t": 0.5,  "bones": { "head": {"rx":0}, "spine_2": {"rx":0}, "upper_arm_L": {"rx":-15,"ry":-50,"rz":-15}, "lower_arm_L": {"rz":60} } },
+          { "t": 0.7,  "bones": { "upper_arm_L": {"ry":-20}, "head": {"rx":5} } },
           { "t": 1.0,  "bones": {} }
         ],
         "easing": "ease_out",
@@ -462,11 +488,11 @@
         "category": "locomotion",
         "type": "sequence",
         "duration_ms": 800,
-        "_note": "Arm-Swing bei Laufen bleibt auf rz (vorwaerts/rueckwaerts = korrekt)",
+        "_note": "Arm-Swing rz ist korrekt (vorwaerts/rueckwaerts)",
         "keyframes": [
-          { "t": 0.0, "bones": { "upper_leg_L": { "rx": -25 }, "upper_leg_R": { "rx": 15 }, "lower_leg_L": { "rx": -20 }, "lower_leg_R": { "rx": -40 }, "upper_arm_L": { "rz": -10 }, "upper_arm_R": { "rz": 15 }, "hips": { "ty": 0.02 } } },
-          { "t": 0.5, "bones": { "upper_leg_L": { "rx": 15 }, "upper_leg_R": { "rx": -25 }, "lower_leg_L": { "rx": -40 }, "lower_leg_R": { "rx": -20 }, "upper_arm_L": { "rz": 15 }, "upper_arm_R": { "rz": -10 }, "hips": { "ty": 0.02 } } },
-          { "t": 1.0, "bones": { "upper_leg_L": { "rx": -25 }, "upper_leg_R": { "rx": 15 }, "lower_leg_L": { "rx": -20 }, "lower_leg_R": { "rx": -40 }, "upper_arm_L": { "rz": -10 }, "upper_arm_R": { "rz": 15 }, "hips": { "ty": 0.02 } } }
+          { "t": 0.0, "bones": { "upper_leg_L": {"rx":-25}, "upper_leg_R": {"rx":15}, "lower_leg_L": {"rx":-20}, "lower_leg_R": {"rx":-40}, "upper_arm_L": {"rz":-10}, "upper_arm_R": {"rz":15}, "hips": {"ty":0.02} } },
+          { "t": 0.5, "bones": { "upper_leg_L": {"rx":15}, "upper_leg_R": {"rx":-25}, "lower_leg_L": {"rx":-40}, "lower_leg_R": {"rx":-20}, "upper_arm_L": {"rz":15}, "upper_arm_R": {"rz":-10}, "hips": {"ty":0.02} } },
+          { "t": 1.0, "bones": { "upper_leg_L": {"rx":-25}, "upper_leg_R": {"rx":15}, "lower_leg_L": {"rx":-20}, "lower_leg_R": {"rx":-40}, "upper_arm_L": {"rz":-10}, "upper_arm_R": {"rz":15}, "hips": {"ty":0.02} } }
         ],
         "easing": "linear",
         "loopable": true,
@@ -577,9 +603,9 @@
         "type": "sequence",
         "duration_ms": 2000,
         "keyframes": [
-          { "t": 0.0, "bones": { "hips": { "tx": -0.04, "rz": 3 }, "spine_0": { "rz": -2 }, "upper_leg_L": { "rx": -3 }, "upper_leg_R": { "rx": 3 } } },
-          { "t": 0.5, "bones": { "hips": { "tx": 0.04, "rz": -3 }, "spine_0": { "rz": 2 }, "upper_leg_L": { "rx": 3 }, "upper_leg_R": { "rx": -3 } } },
-          { "t": 1.0, "bones": { "hips": { "tx": -0.04, "rz": 3 }, "spine_0": { "rz": -2 }, "upper_leg_L": { "rx": -3 }, "upper_leg_R": { "rx": 3 } } }
+          { "t": 0.0, "bones": { "hips": {"tx":-0.04,"rz":3}, "spine_0": {"rz":-2}, "upper_leg_L": {"rx":-3}, "upper_leg_R": {"rx":3} } },
+          { "t": 0.5, "bones": { "hips": {"tx":0.04,"rz":-3}, "spine_0": {"rz":2}, "upper_leg_L": {"rx":3}, "upper_leg_R": {"rx":-3} } },
+          { "t": 1.0, "bones": { "hips": {"tx":-0.04,"rz":3}, "spine_0": {"rz":-2}, "upper_leg_L": {"rx":-3}, "upper_leg_R": {"rx":3} } }
         ],
         "easing": "ease_in_out",
         "loopable": true,
@@ -592,11 +618,12 @@
         "category": "gesture",
         "type": "static",
         "duration_ms": 600,
-        "_fix": "v1.1: rx: -90 statt rz: -150 (Arm HOCH)",
+        "_fix": "v1.2: ry:60 statt rx:-90 (GLB: ry=Arm hoch), rz fuer Ellenbogen",
         "bones": {
-          "upper_arm_R": { "rx": -90 },
-          "lower_arm_R": { "rx": 20 },
-          "hand_R": { "rz": -10 }
+          "upper_arm_R": { "rx": -20, "ry": 60, "rz": 15 },
+          "lower_arm_R": { "rz": -20 },
+          "hand_R": { "rx": -10 },
+          "shoulder_R": { "rx": -10, "ry": 5 }
         },
         "easing": "ease_out",
         "loopable": false,
@@ -609,14 +636,16 @@
         "category": "gesture",
         "type": "static",
         "duration_ms": 700,
-        "_fix": "v1.1: rx: -90 statt rz: +-130 (Arme HOCH)",
+        "_fix": "v1.2: ry statt rx, rz fuer Ellenbogen",
         "bones": {
-          "upper_arm_L": { "rx": -90 },
-          "upper_arm_R": { "rx": -90 },
-          "lower_arm_L": { "rx": 20 },
-          "lower_arm_R": { "rx": 20 },
-          "hand_L": { "rz": 15 },
-          "hand_R": { "rz": -15 }
+          "upper_arm_R": { "rx": -20, "ry": 60, "rz": 15 },
+          "upper_arm_L": { "rx": -20, "ry": -60, "rz": -15 },
+          "lower_arm_R": { "rz": -20 },
+          "lower_arm_L": { "rz": 20 },
+          "hand_R": { "rx": -10 },
+          "hand_L": { "rx": -10 },
+          "shoulder_R": { "rx": -10, "ry": 5 },
+          "shoulder_L": { "rx": -10, "ry": -5 }
         },
         "easing": "ease_out",
         "loopable": false,
@@ -629,12 +658,12 @@
         "category": "gesture",
         "type": "static",
         "duration_ms": 400,
-        "_fix": "v1.1: rx: -30 fuer leichtes Anheben + rz fuer vorwaerts",
+        "_fix": "v1.2: upper_arm ry + lower_arm rz fuer Abwehrhaltung",
         "bones": {
-          "upper_arm_L": { "rx": -30, "rz": 20 },
-          "upper_arm_R": { "rx": -30, "rz": -20 },
-          "lower_arm_L": { "rx": 90 },
-          "lower_arm_R": { "rx": 90 },
+          "upper_arm_R": { "rx": -15, "ry": 30, "rz": -15 },
+          "upper_arm_L": { "rx": -15, "ry": -30, "rz": 15 },
+          "lower_arm_R": { "rz": -70 },
+          "lower_arm_L": { "rz": 70 },
           "hand_L": { "rx": 30 },
           "hand_R": { "rx": 30 },
           "spine_2": { "rx": -5 },
@@ -651,10 +680,11 @@
         "category": "gesture",
         "type": "sequence",
         "duration_ms": 1800,
+        "_fix": "v1.2: upper_arm ry statt rx fuer leichtes Arm-Haengen",
         "keyframes": [
           { "t": 0.0, "bones": {} },
-          { "t": 0.3, "bones": { "spine_0": { "rx": 20 }, "spine_1": { "rx": 15 }, "spine_2": { "rx": 10 }, "head": { "rx": -10 }, "upper_arm_L": { "rx": 5 }, "upper_arm_R": { "rx": 5 } } },
-          { "t": 0.7, "bones": { "spine_0": { "rx": 20 }, "spine_1": { "rx": 15 }, "spine_2": { "rx": 10 }, "head": { "rx": -10 } } },
+          { "t": 0.3, "bones": { "spine_0": {"rx":20}, "spine_1": {"rx":15}, "spine_2": {"rx":10}, "head": {"rx":-10}, "upper_arm_R": {"ry":-5}, "upper_arm_L": {"ry":5} } },
+          { "t": 0.7, "bones": { "spine_0": {"rx":20}, "spine_1": {"rx":15}, "spine_2": {"rx":10}, "head": {"rx":-10} } },
           { "t": 1.0, "bones": {} }
         ],
         "easing": "ease_in_out",
@@ -668,16 +698,16 @@
         "category": "posture",
         "type": "sequence",
         "duration_ms": 600,
-        "_fix": "v1.1: rx: -20 statt rz: +-20 (Arme leicht anheben zum Tippen)",
+        "_fix": "v1.2: upper_arm ry + lower_arm rz fuer Tipp-Haltung",
         "keyframes": [
-          { "t": 0.0, "bones": { "upper_arm_L": { "rx": -20, "ry": -15 }, "upper_arm_R": { "rx": -20, "ry": 15 }, "lower_arm_L": { "rx": 80 }, "lower_arm_R": { "rx": 80 }, "head": { "rx": -10 }, "spine_2": { "rx": -5 }, "hand_L": { "rx": -15 } } },
-          { "t": 0.5, "bones": { "upper_arm_L": { "rx": -20, "ry": -15 }, "upper_arm_R": { "rx": -20, "ry": 15 }, "lower_arm_L": { "rx": 80 }, "lower_arm_R": { "rx": 80 }, "head": { "rx": -10 }, "spine_2": { "rx": -5 }, "hand_R": { "rx": -15 } } },
-          { "t": 1.0, "bones": { "hand_L": { "rx": -15 } } }
+          { "t": 0.0, "bones": { "upper_arm_R": {"ry":20}, "upper_arm_L": {"ry":-20}, "lower_arm_R": {"rz":-60}, "lower_arm_L": {"rz":60}, "head": {"rx":-10}, "spine_2": {"rx":-5}, "hand_L": {"rx":-15} } },
+          { "t": 0.5, "bones": { "upper_arm_R": {"ry":20}, "upper_arm_L": {"ry":-20}, "lower_arm_R": {"rz":-60}, "lower_arm_L": {"rz":60}, "head": {"rx":-10}, "spine_2": {"rx":-5}, "hand_R": {"rx":-15} } },
+          { "t": 1.0, "bones": { "hand_L": {"rx":-15} } }
         ],
         "easing": "linear",
         "loopable": true,
         "blendable": false,
-        "glb_fallback": "working_light"
+        "glb_fallback": null
       },
 
       "stolz_stehen": {
@@ -704,6 +734,7 @@
         "category": "expression",
         "type": "static",
         "duration_ms": 1000,
+        "_fix": "v1.2: upper_arm ry statt rx (Arme haengen schwer)",
         "bones": {
           "spine_0": { "rx": 8 },
           "spine_1": { "rx": 6 },
@@ -711,8 +742,8 @@
           "head": { "rx": -20 },
           "shoulder_L": { "ry": -10 },
           "shoulder_R": { "ry": -10 },
-          "upper_arm_L": { "rx": 8 },
-          "upper_arm_R": { "rx": 8 }
+          "upper_arm_L": { "ry": 8 },
+          "upper_arm_R": { "ry": -8 }
         },
         "easing": "ease_in",
         "loopable": false,
@@ -725,15 +756,16 @@
         "category": "expression",
         "type": "static",
         "duration_ms": 600,
+        "_fix": "v1.2: upper_arm ry + lower_arm rz fuer angespannte Haltung",
         "bones": {
           "shoulder_L": { "ry": 10 },
           "shoulder_R": { "ry": 10 },
           "spine_2": { "rx": -5 },
           "head": { "rx": -8, "ry": -15 },
-          "upper_arm_L": { "rx": -15, "ry": -10 },
-          "upper_arm_R": { "rx": -15, "ry": 10 },
-          "lower_arm_L": { "rx": 40 },
-          "lower_arm_R": { "rx": 40 }
+          "upper_arm_R": { "ry": 15 },
+          "upper_arm_L": { "ry": -15 },
+          "lower_arm_R": { "rz": -30 },
+          "lower_arm_L": { "rz": 30 }
         },
         "easing": "ease_in",
         "loopable": false,
