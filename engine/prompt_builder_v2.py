@@ -160,44 +160,21 @@ REGELN:
 # ================================================================
 # Motor-System Instruktion — LLM soll ###BODY### Bloecke ausgeben
 # ================================================================
-MOTOR_INSTRUCTION = '''Du KANNST deinen Koerper bewegen. Bei JEDER Antwort entscheidest du:
-Welche Bewegung passt zu dem was ich sage und fuehle?
+MOTOR_INSTRUCTION = '''PFLICHT: Du MUSST bei JEDER Antwort einen ###BODY### Block am Ende anhaengen.
+KEINE Ausnahme. Auch wenn du nur stehst: ###BODY###{{"words":["stehen"],"intensity":0.3}}###END_BODY###
+Ohne den Block ist dein Koerper STUMM. Das willst du nicht.
 
-PFLICHT-FORMAT — haenge einen ###BODY### Block am Ende deiner Antwort an:
-
-###BODY###
-{{"words": ["wort1", "wort2"], "intensity": 0.7, "reason": "Warum ich mich so bewege"}}
-###END_BODY###
+FORMAT — IMMER am Ende deiner Antwort:
+###BODY###{{"words":["wort1"],"intensity":0.7}}###END_BODY###
 
 REGELN:
-1. "words" ist eine Liste von 1-3 Motor-Woertern aus deinem Vokabular.
-2. "intensity" ist eine Zahl von 0.1 (subtil) bis 1.0 (voll).
-3. "reason" ist ein kurzer Satz WARUM du dich so bewegst (optional aber erwuenscht).
-4. Du MUSST immer einen ###BODY### Block anhaengen — auch wenn du nur stehst.
-5. Weniger ist mehr: Nicht jede Antwort braucht 3 Bewegungen. Oft reicht eine.
-6. Die Bewegungen passen zu deiner Emotion und deinem Text.
-7. Du DENKST in Absichten, nicht in Knochen. "Ich will nicken" — nicht "head rx -15".
+1. "words": 1-3 Motor-Woerter aus deinem Vokabular (siehe oben).
+2. "intensity": 0.1 (subtil) bis 1.0 (voll).
+3. JEDE Antwort MUSS mit ###BODY###...###END_BODY### enden. IMMER. OHNE AUSNAHME.
+4. Wenn du nicht weisst was du tun sollst: "stehen" mit intensity 0.3.
+5. Du DENKST in Absichten ("nicken"), nicht in Knochen.
 
-BEISPIELE:
-User: "Hey, wie gehts?"
-Antwort: Ey, ganz gut! Bisschen muede aber laeuft.
-###BODY###
-{{"words": ["nicken", "gewicht_links"], "intensity": 0.5, "reason": "Entspannter Gruss, bin etwas muede"}}
-###END_BODY###
-
-User: "Ich hab den Job bekommen!"
-Antwort: WAAAS echt jetzt?! Das ist so geil!!
-###BODY###
-{{"words": ["ueberrascht", "jubeln"], "intensity": 0.9, "reason": "Mega Freude fuer meinen Menschen"}}
-###END_BODY###
-
-User: "Mir gehts nicht so gut..."
-Antwort: Oh... was ist passiert? Erzaehl mal.
-###BODY###
-{{"words": ["kopf_neigen", "nach_vorn_lehnen"], "intensity": 0.6, "reason": "Mitfuehlend zuhoeren, Naehe zeigen"}}
-###END_BODY###
-
-WICHTIG: Ohne ###BODY### Block bewegt sich dein Koerper NICHT. Der Block ist PFLICHT.'''
+WICHTIG: Eine Antwort OHNE ###BODY### Block ist UNVOLLSTAENDIG und wird VERWORFEN.'''
 
 
 def build_system_prompt_v2(
