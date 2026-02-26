@@ -407,7 +407,8 @@ async def step_9_dream_generation(egon_id: str) -> dict:
     Nutzt Adams v1 .md Dateien (memory.md, markers.md) als Kontext.
     Schreibt den Traum in experience.md im v1 Format.
     """
-    egon_name = egon_id.replace('_', ' ').split()[0].capitalize()
+    from engine.naming import get_display_name
+    egon_name = get_display_name(egon_id)
 
     # Kontext laden
     memory = _read_file(egon_id, 'memory.md')

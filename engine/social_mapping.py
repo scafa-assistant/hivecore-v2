@@ -67,10 +67,11 @@ def _social_map_path(egon_id: str, about_id: str) -> Path:
 
 def _default_social_map(about_id: str) -> dict:
     """Erstellt eine leere Social Map fuer einen noch unbekannten EGON."""
+    from engine.naming import get_display_name
     if about_id == 'owner':
         about_name = 'Mein Owner'
     else:
-        about_name = about_id.replace('_', ' ').split()[0].capitalize()
+        about_name = get_display_name(about_id, 'voll')
     return {
         'identitaet': {
             'id': about_id,
@@ -137,11 +138,12 @@ async def generate_social_map_update(
     Returns: aktualisierte Map.
     """
     current_map = read_social_map(egon_id, about_id)
-    egon_name = egon_id.replace('_', ' ').split()[0].capitalize()
+    from engine.naming import get_display_name
+    egon_name = get_display_name(egon_id)
     if about_id == 'owner':
         about_name = 'Mein Owner'
     else:
-        about_name = about_id.replace('_', ' ').split()[0].capitalize()
+        about_name = get_display_name(about_id, 'voll')
 
     # DNA-Profil laden (Patch 5 Phase 2)
     dna_profile = 'DEFAULT'

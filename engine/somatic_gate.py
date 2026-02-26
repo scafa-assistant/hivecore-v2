@@ -258,7 +258,8 @@ async def run_decision_gate(egon_id: str, impulse: dict) -> dict:
         _update_somatic_state(egon_id, state, impulse, decision)
         return decision
 
-    egon_name = egon_id.replace('_', ' ').split()[0].capitalize()
+    from engine.naming import get_display_name
+    egon_name = get_display_name(egon_id)
 
     # Kontext: aktueller Zustand + letzte Inner Voice
     from engine.yaml_to_prompt import state_to_prompt

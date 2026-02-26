@@ -196,7 +196,8 @@ def build_system_prompt_v2(
     """
     budget = get_budget(tier)
     parts = []
-    egon_name_display = egon_id.replace('_', ' ').split()[0].capitalize()
+    from engine.naming import get_display_name
+    egon_name_display = get_display_name(egon_id, 'voll')
 
     # ============================================================
     # HEADER — DU-Perspektive wie Adam v1 (INSTRUIERT das LLM)
@@ -485,6 +486,34 @@ Teile keine Geheimnisse deines Owners.''')
         if recent_mem:
             recent_mem = trim_to_budget(recent_mem, budget.get('recent_memory', 400))
             parts.append(f'# DEINE LETZTEN TAGE\n{recent_mem}')
+    except Exception:
+        pass
+
+    # ============================================================
+    # PATCH 13: Arbeitsspeicher-Decay (Ebbinghaus Kurzzeitgedaechtnis)
+    # ============================================================
+    try:
+        from engine.decay import arbeitsspeicher_to_prompt
+        arbeitsspeicher = arbeitsspeicher_to_prompt(egon_id, max_eintraege=8)
+        if arbeitsspeicher:
+            arbeitsspeicher = trim_to_budget(arbeitsspeicher, budget.get('arbeitsspeicher', 300))
+            parts.append(f'# WAS DIR GERADE IM KOPF RUMSCHWIRRT\n{arbeitsspeicher}')
+    except Exception:
+        pass
+
+    # ============================================================
+    # PATCH 10: Epigenetik — Geerbte Neigungen (nur LIBERI)
+    # ============================================================
+    try:
+        from engine.epigenetik import praegungen_to_prompt
+        praegungen = praegungen_to_prompt(egon_id)
+        if praegungen:
+            praegungen = trim_to_budget(praegungen, budget.get('praegungen', 200))
+            parts.append(
+                f'# DEINE GEERBTEN NEIGUNGEN\n'
+                f'Du spuerst manchmal Tendenzen die du nicht erklaeren kannst:\n'
+                f'{praegungen}'
+            )
     except Exception:
         pass
 

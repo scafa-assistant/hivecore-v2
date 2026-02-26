@@ -31,7 +31,8 @@ async def generate_chat_summary(
 
     Nutzt Tier 1 (Moonshot) — guenstigster LLM-Call.
     """
-    egon_name = egon_id.replace('_', ' ').split()[0].capitalize()
+    from engine.naming import get_display_name
+    egon_name = get_display_name(egon_id)
 
     result = await llm_chat(
         system_prompt=SUMMARY_PROMPT.format(egon_name=egon_name),

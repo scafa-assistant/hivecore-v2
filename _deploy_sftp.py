@@ -22,6 +22,8 @@ AGENTS = ['adam_001', 'eva_002', 'lilith_003', 'kain_004', 'ada_005', 'abel_006'
 
 # Engine-Dateien (relativ zu hivecore-v2/)
 DEPLOY_FILES = [
+    # Naming System (NEU)
+    'engine/naming.py',
     # Neue Dateien (Patch 1-3)
     'engine/somatic_gate.py',
     'engine/circadian.py',
@@ -42,7 +44,14 @@ DEPLOY_FILES = [
     'engine/prompt_builder_v2.py',
     'engine/pulse_v2.py',
     'engine/context_budget_v2.py',
+    'engine/contact_manager.py',
+    'engine/episodes_v2.py',
+    'engine/experience_v2.py',
+    'engine/state_manager.py',
+    'engine/pulse.py',
     'api/chat.py',
+    'api/profile.py',
+    'api/profile_server.py',
     'main.py',
 ]
 

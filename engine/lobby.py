@@ -95,8 +95,9 @@ def write_lobby(egon_id: str, message: str, emotional_context: str = '') -> dict
 
     data = _read_lobby_data()
 
-    # EGON-Name aus ID ableiten
-    egon_name = egon_id.replace('_', ' ').split()[0].capitalize()
+    # EGON-Name aus identitaet-Block (mit Fallback auf ID)
+    from engine.naming import get_display_name
+    egon_name = get_display_name(egon_id)
 
     msg = {
         'id': _next_lobby_id(data),

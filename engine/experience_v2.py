@@ -87,7 +87,8 @@ async def maybe_extract_experience(
 
     Wird nach jedem Chat aufgerufen (api/chat.py Post-Processing).
     """
-    egon_name = egon_id.replace('_', ' ').split()[0].capitalize()
+    from engine.naming import get_display_name
+    egon_name = get_display_name(egon_id)
 
     # 1. Significance Check
     try:
@@ -220,7 +221,8 @@ async def generate_dream(egon_id: str) -> dict | None:
 
     Wird im Pulse (Step 11) aufgerufen, einmal taeglich.
     """
-    egon_name = egon_id.replace('_', ' ').split()[0].capitalize()
+    from engine.naming import get_display_name
+    egon_name = get_display_name(egon_id)
 
     # 1. Load context
     episodes_data = read_yaml_organ(egon_id, 'memory', 'episodes.yaml')
@@ -364,7 +366,8 @@ async def maybe_generate_spark(egon_id: str) -> dict | None:
     Wird im Pulse (Step 12) aufgerufen, nach Dream Generation.
     Produziert meistens nichts — Sparks sind selten und wertvoll.
     """
-    egon_name = egon_id.replace('_', ' ').split()[0].capitalize()
+    from engine.naming import get_display_name
+    egon_name = get_display_name(egon_id)
 
     exp_data = _load_experience_data(egon_id)
     experiences = exp_data.get('experiences', [])
@@ -499,7 +502,8 @@ async def generate_mental_time_travel(egon_id: str) -> dict | None:
 
     Wird im Pulse (Step 13) aufgerufen, woechentlich.
     """
-    egon_name = egon_id.replace('_', ' ').split()[0].capitalize()
+    from engine.naming import get_display_name
+    egon_name = get_display_name(egon_id)
 
     exp_data = _load_experience_data(egon_id)
     mtt_entries = exp_data.get('mental_time_travel', [])

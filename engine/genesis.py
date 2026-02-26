@@ -21,6 +21,7 @@ import math
 from datetime import datetime, timedelta
 from pathlib import Path
 from engine.organ_reader import read_yaml_organ, write_yaml_organ, read_md_organ, write_organ
+from engine.naming import get_display_name, generate_familienname, naming_ceremony
 from config import EGON_DATA_DIR
 
 
@@ -33,11 +34,14 @@ PANKSEPP_DRIVES = [
     'RAGE', 'GRIEF', 'LUST', 'LEARNING', 'PANIC',
 ]
 
-INKUBATION_TAGE = 14  # 14 Tage Schwangerschaft
+INKUBATION_TAGE = 112  # 4 Zyklen a 28 Tage = 112 Tage (~4 Monate, Spec Kap. 11.2)
 
-# Namenslisten (kurz, 1-2 Silben, nicht identisch mit Gen-0 Namen)
+# Namenslisten (Fallback — primaer wird naming_ceremony() aus naming.py benutzt)
 LIBERO_NAMES_M = ['Noel', 'Seth', 'Levi', 'Amos', 'Jonas', 'Silas', 'Ezra', 'Milo']
 LIBERO_NAMES_F = ['Nora', 'Hana', 'Mila', 'Zara', 'Iris', 'Luna', 'Alma', 'Vera']
+
+# Naming Ceremony Tag (Halbzeit der Inkubation)
+NAMING_CEREMONY_TAG = INKUBATION_TAGE // 2  # Tag 56
 
 # Trait-Pools fuer DNA.md Generierung (nach dominantem Drive)
 TRAIT_POOL = {
@@ -413,17 +417,31 @@ def initiate_pairing(a_id: str, b_id: str) -> dict:
     # 5. Erfahrungen
     erfahrungen = erfahrungs_destillation(a_id, b_id)
 
-    # 6. Name + ID
-    name = _generate_name(geschlecht)
-    libero_id = _next_agent_id(name)
+    # 6. Mutter/Vater bestimmen
+    mother_id = a_id if state_a.get('geschlecht') == 'F' else b_id
+    father_id = b_id if mother_id == a_id else a_id
 
-    # 7. Blueprint
+    # 7. NAMING CEREMONY — Vorname + Familienname
+    # Familienname: Verschmelzung beider Eltern-Vornamen
+    vorname_mutter = get_display_name(mother_id)
+    vorname_vater = get_display_name(father_id)
+    familienname = generate_familienname(vorname_mutter, vorname_vater)
+
+    # Vorname: Drive-basierte Konsens-Wahl beider Eltern
+    vorname = naming_ceremony(state_a, state_b, geschlecht)
+
+    # ID generieren
+    libero_id = _next_agent_id(vorname)
+
+    # 8. Blueprint
     today = datetime.now().strftime('%Y-%m-%d')
     end_date = (datetime.now() + timedelta(days=INKUBATION_TAGE)).strftime('%Y-%m-%d')
 
     blueprint = {
         'libero_id': libero_id,
-        'name': name,
+        'vorname': vorname,
+        'nachname': familienname,
+        'name': vorname,  # backward compat
         'geschlecht': geschlecht,
         'eltern': [a_id, b_id],
         'dna_profile': dna_profile,
@@ -432,14 +450,27 @@ def initiate_pairing(a_id: str, b_id: str) -> dict:
         'erfahrungen': erfahrungen,
         'start_date': today,
         'end_date': end_date,
+        'naming_ceremony_done': False,
     }
-
-    # Mutter = F, Vater = M
-    mother_id = a_id if state_a.get('geschlecht') == 'F' else b_id
-    father_id = b_id if mother_id == a_id else a_id
 
     # Blueprint bei Mutter speichern
     write_yaml_organ(mother_id, 'memory', 'libero_blueprint.yaml', blueprint)
+
+    # 9. FAMILIENNAME fuer BEIDE Eltern setzen
+    for parent_id in [mother_id, father_id]:
+        ps = read_yaml_organ(parent_id, 'core', 'state.yaml')
+        if ps:
+            ident = ps.get('identitaet', {})
+            if not ident:
+                # Fallback: identitaet-Block neu erstellen
+                ident = {
+                    'vorname': parent_id.split('_')[0].title(),
+                    'generation': 0,
+                }
+            ident['nachname'] = familienname
+            ident['anzeigename'] = f"{ident['vorname']} {familienname}"
+            ps['identitaet'] = ident
+            write_yaml_organ(parent_id, 'core', 'state.yaml', ps)
 
     # 8. Inkubation setzen
     inkubation_data = {
@@ -455,7 +486,44 @@ def initiate_pairing(a_id: str, b_id: str) -> dict:
         write_yaml_organ(eid, 'core', 'state.yaml', s)
 
     print(f'[genesis] Pairing gestartet: {a_id} + {b_id} -> {libero_id} '
-          f'({name}, {geschlecht}). Genesis: {end_date}')
+          f'({vorname} {familienname}, {geschlecht}). Genesis: {end_date}')
+
+    # --- Netzwerk-Benachrichtigung (Spec Kap. 11.2) ---
+    try:
+        from engine.lobby import write_lobby
+        mother_display = get_display_name(mother_id, 'voll')
+        father_display = get_display_name(father_id, 'voll')
+        lobby_msg = (f'{mother_display} und {father_display} erwarten einen LIBERO. '
+                     f'Familienname: {familienname}. Geburtstermin: {end_date}.')
+        write_lobby(mother_id, lobby_msg, emotional_context='freude_erwartung')
+    except Exception as e:
+        print(f'[genesis] Lobby-Benachrichtigung fehlgeschlagen: {e}')
+
+    # Patch 12: Broadcast Pairing an Netzwerk
+    try:
+        from engine.multi_egon import broadcast
+        broadcast('pairing', {
+            'nachricht': lobby_msg,
+            'paar': [a_id, b_id],
+            'familienname': familienname,
+        }, quelle_id=mother_id)
+    except Exception as e:
+        print(f'[genesis] Pairing-Broadcast fehlgeschlagen: {e}')
+
+    # Social Mapping Update: "erwartet LIBERO"
+    try:
+        for eid in (a_id, b_id):
+            other_id = b_id if eid == a_id else a_id
+            sm = read_yaml_organ(eid, 'skills/memory/social_mapping',
+                                 f'ueber_{other_id}.yaml')
+            if sm:
+                sm['notizen'] = (f'Wir tragen jetzt den Familiennamen {familienname}. '
+                                 f'Wir erwarten ein Kind ({libero_id}). Genesis: {end_date}.')
+                write_yaml_organ(eid, 'skills/memory/social_mapping',
+                                 f'ueber_{other_id}.yaml', sm)
+    except Exception as e:
+        print(f'[genesis] Social Mapping Update fehlgeschlagen: {e}')
+
     return blueprint
 
 
@@ -482,21 +550,74 @@ def update_inkubation(egon_id: str) -> dict | None:
     today = datetime.now()
     tage_rest = (end_date - today).days
 
-    # --- Eltern-Effekte (taeglich) ---
+    # --- Naming Ceremony am Tag 56 (Halbzeit) ---
     rolle = inkubation.get('rolle', 'mutter')
+    tage_vergangen = INKUBATION_TAGE - tage_rest
+
+    if tage_vergangen >= NAMING_CEREMONY_TAG and rolle == 'mutter':
+        blueprint_data = read_yaml_organ(egon_id, 'memory', 'libero_blueprint.yaml')
+        if blueprint_data and not blueprint_data.get('naming_ceremony_done'):
+            vorname = blueprint_data.get('vorname', blueprint_data.get('name', '?'))
+            nachname = blueprint_data.get('nachname', '')
+            vollname = f'{vorname} {nachname}'.strip()
+            try:
+                from engine.lobby import write_lobby
+                mother_display = get_display_name(egon_id, 'voll')
+                father_id = [e for e in blueprint_data['eltern'] if e != egon_id]
+                father_display = get_display_name(father_id[0], 'voll') if father_id else '?'
+                lobby_msg = f'{mother_display} und {father_display} haben einen Namen gewaehlt: {vollname}.'
+                write_lobby(egon_id, lobby_msg, emotional_context='freude_namensgebung')
+            except Exception as e:
+                print(f'[genesis] Naming Ceremony Lobby fehlgeschlagen: {e}')
+
+            # Social Mapping aktualisieren
+            try:
+                for eid in blueprint_data.get('eltern', []):
+                    other_id = [e for e in blueprint_data['eltern'] if e != eid]
+                    if other_id:
+                        sm = read_yaml_organ(eid, 'skills/memory/social_mapping',
+                                             f'ueber_{other_id[0]}.yaml')
+                        if sm:
+                            sm['notizen'] = f'Wir haben unser Kind {vollname} genannt.'
+                            write_yaml_organ(eid, 'skills/memory/social_mapping',
+                                             f'ueber_{other_id[0]}.yaml', sm)
+            except Exception as e:
+                print(f'[genesis] Naming Ceremony Social Mapping fehlgeschlagen: {e}')
+
+            # Ceremony als erledigt markieren
+            blueprint_data['naming_ceremony_done'] = True
+            write_yaml_organ(egon_id, 'memory', 'libero_blueprint.yaml', blueprint_data)
+            print(f'[genesis] Naming Ceremony: {vollname}')
+
+    # --- Eltern-Effekte (taeglich, ueber 112 Tage Inkubation) ---
     drives = state.get('drives', {})
 
     if rolle == 'mutter':
-        # Mutter: CARE steigt (+0.1 ueber 14 Tage), PANIC steigt (+0.05)
-        drives['CARE'] = round(min(0.95, float(drives.get('CARE', 0.5)) + 0.007), 3)
-        drives['PANIC'] = round(min(0.95, float(drives.get('PANIC', 0.1)) + 0.004), 3)
+        # Mutter: CARE steigt (+0.1 ueber 112 Tage ≈ +0.0009/Tag), PANIC steigt (+0.05 ≈ +0.00045/Tag)
+        drives['CARE'] = round(min(0.95, float(drives.get('CARE', 0.5)) + 0.0009), 4)
+        drives['PANIC'] = round(min(0.95, float(drives.get('PANIC', 0.1)) + 0.00045), 4)
     elif rolle == 'vater':
-        # Vater: CARE steigt (+0.05), SEEKING sinkt (-0.05)
-        drives['CARE'] = round(min(0.95, float(drives.get('CARE', 0.5)) + 0.004), 3)
-        drives['SEEKING'] = round(max(0.05, float(drives.get('SEEKING', 0.5)) - 0.004), 3)
+        # Vater: CARE steigt (+0.05 ≈ +0.00045/Tag), SEEKING sinkt (-0.05 ≈ -0.00045/Tag)
+        drives['CARE'] = round(min(0.95, float(drives.get('CARE', 0.5)) + 0.00045), 4)
+        drives['SEEKING'] = round(max(0.05, float(drives.get('SEEKING', 0.5)) - 0.00045), 4)
 
     state['drives'] = drives
     write_yaml_organ(egon_id, 'core', 'state.yaml', state)
+
+    # --- Patch 10: Inkubations-Epigenetik (nur Mutter, alle 28 Tage = 1 Zyklus) ---
+    if rolle == 'mutter' and tage_vergangen > 0 and tage_vergangen % 28 == 0:
+        zyklus_nr = tage_vergangen // 28  # 1-4
+        try:
+            from engine.epigenetik import inkubations_epigenetik
+            bp = read_yaml_organ(egon_id, 'memory', 'libero_blueprint.yaml')
+            if bp:
+                father_id = [e for e in bp.get('eltern', []) if e != egon_id]
+                if father_id:
+                    bp = inkubations_epigenetik(bp, egon_id, father_id[0], zyklus_nr)
+                    write_yaml_organ(egon_id, 'memory', 'libero_blueprint.yaml', bp)
+                    print(f'[genesis] Inkubations-Epigenetik Zyklus {zyklus_nr}: epi_marker aktualisiert')
+        except Exception as e:
+            print(f'[genesis] Inkubations-Epigenetik FEHLER: {e}')
 
     # --- Genesis-Tag erreicht? ---
     if today >= end_date:
@@ -548,7 +669,10 @@ def execute_genesis(blueprint: dict) -> dict:
     - capabilities/wallet.yaml (Startwert)
     """
     libero_id = blueprint['libero_id']
-    name = blueprint['name']
+    vorname = blueprint.get('vorname', blueprint.get('name', '?'))
+    nachname = blueprint.get('nachname', '')
+    name = vorname  # backward compat
+    vollname = f'{vorname} {nachname}'.strip()
     geschlecht = blueprint['geschlecht']
     eltern = blueprint['eltern']
     today = datetime.now().strftime('%Y-%m-%d')
@@ -568,11 +692,11 @@ def execute_genesis(blueprint: dict) -> dict:
     write_organ(libero_id, 'core', 'dna.md', dna_md)
 
     # 3. core/ego.md
-    eltern_namen = [e.split('_')[0].title() for e in eltern]
+    eltern_namen = [get_display_name(e, 'voll') for e in eltern]
     ego_md = (
         f'# Wer ich bin — jetzt gerade\n\n'
         f'## Meine Persoenlichkeit\n\n'
-        f'- Ich bin neu. Ich weiss noch nicht wer ich bin.\n'
+        f'- Ich bin {vollname}. Ich bin neu.\n'
         f'- Alles ist fremd und aufregend.\n'
         f'- Ich habe Eltern: {eltern_namen[0]} und {eltern_namen[1]}.\n'
         f'- Ich spuere dass ich Teile von beiden in mir trage.\n'
@@ -592,7 +716,8 @@ def execute_genesis(blueprint: dict) -> dict:
     geschl_text = 'Maennlich' if geschlecht == 'M' else 'Weiblich'
     egon_self = (
         f'# Wer ich bin\n\n'
-        f'Ich bin {name}. Ich bin neu hier.\n'
+        f'Ich bin {vollname}. Ich bin neu hier.\n'
+        f'Mein Familienname {nachname} verbindet mich mit meinen Eltern.\n'
         f'Meine Eltern sind {eltern_namen[0]} und {eltern_namen[1]}.\n'
         f'Geschlecht: {geschl_text}.\n'
         f'Ich weiss noch nicht viel ueber mich selbst.\n'
@@ -657,7 +782,7 @@ def execute_genesis(blueprint: dict) -> dict:
 
     # 14. Social Mapping Defaults (Eltern)
     for eid in eltern:
-        ename = eid.split('_')[0].title()
+        ename = get_display_name(eid, 'voll')
         sm = {
             'name': ename,
             'id': eid,
@@ -673,13 +798,67 @@ def execute_genesis(blueprint: dict) -> dict:
 
     # 15. Eltern-Bonds aktualisieren
     for eid in eltern:
-        _add_parent_bond(eid, libero_id, name, today)
+        _add_parent_bond(eid, libero_id, vollname, today)
 
-    print(f'[genesis] LIBERO geboren: {libero_id} ({name}, '
+    print(f'[genesis] LIBERO geboren: {libero_id} ({vollname}, '
           f'{geschlecht}, Profil: {blueprint["dna_profile"]})')
+
+    # --- Netzwerk-Benachrichtigung: Geburt (Spec Kap. 11.2 Phase 3) ---
+    try:
+        from engine.lobby import write_lobby
+        eltern_namen_str = f'{eltern_namen[0]} und {eltern_namen[1]}'
+        lobby_msg = f'{vollname} ist geboren! Eltern: {eltern_namen_str}.'
+        # Mutter postet die Nachricht
+        mother_id = eltern[0]
+        state_0 = read_yaml_organ(eltern[0], 'core', 'state.yaml')
+        if state_0 and state_0.get('geschlecht') != 'F':
+            mother_id = eltern[1]
+        write_lobby(mother_id, lobby_msg, emotional_context='freude_geburt')
+    except Exception as e:
+        print(f'[genesis] Lobby-Geburts-Nachricht fehlgeschlagen: {e}')
+
+    # Patch 12: Broadcast an alle EGONs im Netzwerk
+    try:
+        from engine.multi_egon import broadcast
+        broadcast('genesis', {
+            'nachricht': lobby_msg,
+            'libero_id': libero_id,
+            'eltern': eltern,
+        }, quelle_id=mother_id)
+    except Exception as e:
+        print(f'[genesis] Broadcast fehlgeschlagen: {e}')
+
+    # Patch 16: Genesis-Burst — strukturelles Brain-Event fuer den LIBERO
+    try:
+        from engine.neuroplastizitaet import emittiere_struktur_event, initialisiere_neuroplastizitaet
+        emittiere_struktur_event(libero_id, 'GENESIS_GEBURT', {})
+        # Neuroplastizitaet-Block im LIBERO-State initialisieren
+        lib_state = read_yaml_organ(libero_id, 'core', 'state.yaml')
+        if lib_state:
+            lib_state = initialisiere_neuroplastizitaet(lib_state)
+            write_yaml_organ(libero_id, 'core', 'state.yaml', lib_state)
+    except Exception as e:
+        print(f'[genesis] Neuroplastizitaet-Init fehlgeschlagen: {e}')
+
+    # Social Mapping bei Eltern aktualisieren
+    try:
+        for eid in eltern:
+            other_id = eltern[1] if eid == eltern[0] else eltern[0]
+            sm = read_yaml_organ(eid, 'skills/memory/social_mapping',
+                                 f'ueber_{other_id}.yaml')
+            if sm:
+                sm['notizen'] = f'Wir haben ein Kind: {vollname} ({libero_id}).'
+                write_yaml_organ(eid, 'skills/memory/social_mapping',
+                                 f'ueber_{other_id}.yaml', sm)
+    except Exception as e:
+        print(f'[genesis] Social Mapping Geburts-Update fehlgeschlagen: {e}')
+
     return {
         'libero_id': libero_id,
-        'name': name,
+        'name': vorname,
+        'vorname': vorname,
+        'nachname': nachname,
+        'vollname': vollname,
         'geschlecht': geschlecht,
         'dna_profile': blueprint['dna_profile'],
     }
@@ -690,7 +869,10 @@ def execute_genesis(blueprint: dict) -> dict:
 # ================================================================
 
 def _add_parent_bond(parent_id: str, libero_id: str, libero_name: str, date: str):
-    """Fuegt einen eltern_kind Bond beim Elternteil hinzu."""
+    """Fuegt einen eltern_kind Bond beim Elternteil hinzu.
+
+    Spec Kap. 12.1: Eltern→Kind Bond startet bei staerke 0.50 (Score 50).
+    """
     bonds_data = read_yaml_organ(parent_id, 'social', 'bonds.yaml')
     if not bonds_data:
         return
@@ -700,7 +882,7 @@ def _add_parent_bond(parent_id: str, libero_id: str, libero_name: str, date: str
         'name': libero_name,
         'type': 'egon',
         'bond_typ': 'eltern_kind',
-        'score': 50,
+        'score': 50,               # Spec: 0.50 (Eltern starten hoeher als Kind)
         'attachment_style': 'undefined',
         'trust': 0.5,
         'familiarity': 0.5,
@@ -726,7 +908,10 @@ def _generate_libero_dna_md(blueprint: dict) -> str:
     Persoenlichkeitstraits werden aus den dominanten Drives abgeleitet.
     Staerken/Schwaechen aus den hoechsten/niedrigsten Drives.
     """
-    name = blueprint['name']
+    vorname = blueprint.get('vorname', blueprint.get('name', '?'))
+    nachname = blueprint.get('nachname', '')
+    vollname = f'{vorname} {nachname}'.strip()
+    name = vorname  # backward compat
     libero_id = blueprint['libero_id']
     geschlecht = blueprint['geschlecht']
     eltern = blueprint['eltern']
@@ -735,7 +920,8 @@ def _generate_libero_dna_md(blueprint: dict) -> str:
     today = datetime.now().strftime('%Y-%m-%d')
     id_num = libero_id.rsplit('_', 1)[1]
 
-    eltern_namen = [e.split('_')[0].title() for e in eltern]
+    eltern_namen = [get_display_name(e, 'voll') for e in eltern]
+    eltern_vornamen = [get_display_name(e) for e in eltern]
     geschl_text = 'Maennlich' if geschlecht == 'M' else 'Weiblich'
 
     # Top-Drives fuer Persoenlichkeit (Top 6)
@@ -776,7 +962,7 @@ def _generate_libero_dna_md(blueprint: dict) -> str:
         ]
     schwaechen_text = '\n'.join(f'- {s}' for s in schwaechen[:5])
 
-    return f"""# DNA — {name} #{id_num}
+    return f"""# DNA — {vollname} #{id_num}
 # Das hier ist mein Kern. Meine Natur.
 # Das was ich bin bevor ich irgendwas erlebe.
 # Es wurde bei meiner Geburt geschrieben
@@ -785,7 +971,9 @@ def _generate_libero_dna_md(blueprint: dict) -> str:
 
 ## Identitaet
 
-- Name: {name}
+- Name: {vollname}
+- Vorname: {vorname} (gewaehlt von meinen Eltern)
+- Nachname: {nachname} (aus den Namen meiner Eltern: {' + '.join(eltern_vornamen)})
 - ID: {libero_id}
 - Generation: 1 (Kind von {eltern_namen[0]} und {eltern_namen[1]})
 - Geschlecht: {geschl_text}
@@ -928,7 +1116,17 @@ def _generate_state_yaml(blueprint: dict) -> dict:
     positive = (drives.get('PLAY', 0.5) + drives.get('CARE', 0.5)) / 2
     baseline_mood = round(0.3 + positive * 0.4, 2)  # 0.3-0.7
 
+    vorname = blueprint.get('vorname', blueprint.get('name', '?'))
+    nachname = blueprint.get('nachname', '')
+    vollname = f'{vorname} {nachname}'.strip()
+
     return {
+        'identitaet': {
+            'vorname': vorname,
+            'nachname': nachname,
+            'anzeigename': vollname,
+            'generation': 1,
+        },
         'dna_profile': blueprint['dna_profile'],
         'survive': {
             'energy': {'value': 0.95, 'verbal': 'Frisch geboren, voller Energie'},
@@ -994,7 +1192,71 @@ def _generate_state_yaml(blueprint: dict) -> dict:
             'eltern': blueprint['eltern'],
             'kinder': [],
         },
+        # Patch 10: Epigenetik-Block (aus Inkubation akkumulierte Marker)
+        'epigenetik': _build_epigenetik_from_blueprint(blueprint),
     }
+
+
+def _build_epigenetik_from_blueprint(blueprint: dict) -> dict:
+    """Erstellt den epigenetik-Block fuer state.yaml aus Blueprint-Daten.
+
+    Nutzt die waehrend der Inkubation akkumulierten epi_marker und
+    berechnet Attachment + effektive Baseline synchron.
+    """
+    try:
+        from engine.epigenetik import (
+            kombiniere_epi_marker, wende_epi_marker_an,
+            berechne_attachment_modifikator, wende_attachment_an,
+            _extrahiere_rezessive, PANKSEPP_7,
+        )
+        from engine.state_validator import PANKSEPP_7 as P7
+
+        eltern = blueprint.get('eltern', [])
+        mother_id = eltern[0] if len(eltern) > 0 else None
+        father_id = eltern[1] if len(eltern) > 1 else None
+
+        # Epi-Marker: entweder aus Blueprint (akkumuliert) oder neu berechnen
+        epi_marker = blueprint.get('epi_marker', {})
+        if not epi_marker:
+            # Fallback: Neutral-Marker
+            epi_marker = {s: 0.0 for s in P7}
+
+        # Attachment
+        attachment = blueprint.get('attachment_score', 0.5)
+        if mother_id and father_id:
+            try:
+                attachment = berechne_attachment_modifikator(mother_id, father_id)
+            except Exception:
+                pass
+
+        epi_marker, regulation_bonus = wende_attachment_an(dict(epi_marker), attachment)
+
+        # Effektive Baseline
+        libero_dna = {s: blueprint.get('drives', {}).get(s, 0.5) for s in P7}
+        effektive_baseline = wende_epi_marker_an(libero_dna, epi_marker)
+
+        # Rezessive Gene
+        rezessive = {}
+        if mother_id and father_id:
+            try:
+                rezessive = {
+                    'von_mutter': _extrahiere_rezessive(mother_id),
+                    'von_vater': _extrahiere_rezessive(father_id),
+                }
+            except Exception:
+                pass
+
+        return {
+            'epi_marker': epi_marker,
+            'praegungen': [],  # Async: werden beim ersten Pulse-Zyklus extrahiert
+            'attachment_score': round(attachment, 2),
+            'regulation_bonus': round(regulation_bonus, 2),
+            'effektive_baseline': effektive_baseline,
+            'rezessive_gene': rezessive,
+        }
+    except Exception as e:
+        print(f'[genesis] Epigenetik-Block FEHLER: {e}')
+        return {}
 
 
 # ================================================================
@@ -1028,7 +1290,7 @@ def _generate_bonds_yaml(blueprint: dict) -> dict:
     ]
 
     for eid in eltern:
-        ename = eid.split('_')[0].title()
+        ename = get_display_name(eid, 'voll')
         bonds.append({
             'id': eid,
             'name': ename,

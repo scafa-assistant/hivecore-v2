@@ -152,11 +152,38 @@ async def update_bond_after_chat(
     # --- Patch 6: Bond-Typ Transition pruefen ---
     _check_bond_typ_transition(egon_id, partner_id, bond)
 
+    # --- Patch 6: Eltern-Kind Bond accelerated growth (Spec Kap. 12.2) ---
+    # Bio-Basis: Oxytocin-Flut nach Geburt. 2x schneller als normal.
+    if bond_typ == 'eltern_kind' and trust_delta > 0:
+        trust_delta_extra = trust_delta * 1.0  # 2x total (original + extra)
+        if geschlecht == 'F':
+            trust_delta_extra *= 1.3  # Mutter: CARE-System besonders aktiv
+        elif geschlecht == 'M':
+            trust_delta_extra *= 1.2  # Vater: Vasopressin-getriebene Schutz-Bindung
+        # Extra-Trust anwenden (clamp to 1.0)
+        bond['trust'] = round(min(1.0, bond['trust'] + trust_delta_extra), 3)
+
     # --- Score neu berechnen ---
+    alte_score = bond.get('score', 50)
     bond['score'] = _calculate_score(bond)
 
     # --- Zurueckschreiben ---
     write_yaml_organ(egon_id, 'social', 'bonds.yaml', bonds_data)
+
+    # --- Patch 16: Strukturelles Brain-Event emittieren ---
+    try:
+        from engine.neuroplastizitaet import emittiere_struktur_event
+        neue_staerke = bond['score'] / 100.0
+        alte_staerke_norm = alte_score / 100.0
+        emittiere_struktur_event(egon_id, 'BOND_UPDATE', {
+            'partner_id': partner_id,
+            'bond_staerke': neue_staerke,
+            'alte_staerke': alte_staerke_norm,
+            'bond_typ': bond.get('bond_typ', 'bekannt'),
+            'grund': 'gespraech',
+        })
+    except Exception:
+        pass
 
 
 # ================================================================
@@ -373,6 +400,21 @@ def _days_since_last(bond: dict) -> int:
         return 999
 
 
+def _has_exclusive_bond(egon_id: str) -> bool:
+    """Prueft ob der EGON bereits einen romantisch_fest Bond hat.
+
+    Patch 6 Phase 4: Exklusivitaet — in Bindung/Bereit kein zweiter
+    romantischer Bond moeglich.
+    """
+    bonds_data = read_yaml_organ(egon_id, 'social', 'bonds.yaml')
+    if not bonds_data:
+        return False
+    for b in bonds_data.get('bonds', []):
+        if b.get('bond_typ') == 'romantisch_fest':
+            return True
+    return False
+
+
 def _check_bond_typ_transition(
     egon_id: str, partner_id: str, bond: dict,
 ) -> None:
@@ -381,10 +423,14 @@ def _check_bond_typ_transition(
     Patch 6 Phase 1: Nur aktiv wenn beide EGONs ein Geschlecht haben
     und verschieden sind (M/F oder F/M).
 
+    Patch 6 Phase 4: Exklusivitaet — wenn bereits romantisch_fest Bond
+    existiert, keine neuen romantischen Bonds moeglich.
+
     Bedingungen fuer Transition freundschaft -> romantisch:
     - Trust > 0.5
     - Familiarity > 0.3
     - Unterschiedliches Geschlecht
+    - Kein bestehender romantisch_fest Bond (Exklusivitaet)
     """
     if bond.get('bond_typ') != 'freundschaft':
         return  # Nur freundschaft -> romantisch
@@ -399,6 +445,10 @@ def _check_bond_typ_transition(
         return  # Kein Geschlecht definiert
     if g_self == g_partner:
         return  # Gleichgeschlechtlich — bleibt freundschaft
+
+    # Patch 6 Phase 4: Exklusivitaet
+    if _has_exclusive_bond(egon_id):
+        return  # Bereits in fester Beziehung — kein neuer romantischer Bond
 
     # Trust > 0.5 + Familiarity > 0.3 = Schwelle fuer romantisch
     if bond.get('trust', 0) > 0.5 and bond.get('familiarity', 0) > 0.3:

@@ -39,6 +39,7 @@ from engine.somatic_gate import check_somatic_gate, run_decision_gate, execute_a
 from engine.circadian import check_phase_transition, get_current_phase, update_energy
 from engine.resonanz import update_resonanz
 from engine.genesis import update_inkubation
+from engine.checkpoint import erstelle_checkpoint
 
 
 # ================================================================
@@ -499,9 +500,10 @@ def step_10b_resonanz(egon_id: str) -> dict:
 def step_10c_inkubation(egon_id: str) -> dict:
     """Prueft Inkubation-Fortschritt und triggert Genesis.
 
-    Waehrend Inkubation (14 Tage):
+    Waehrend Inkubation (112 Tage / 4 Zyklen, Spec Kap. 11.2):
     - Eltern-Drive-Aenderungen (CARE+, PANIC+ bei Mutter; CARE+, SEEKING- bei Vater)
     - Am Ende: execute_genesis() erstellt LIBERO-Agent
+    - Netzwerk-Benachrichtigungen (Lobby + Social Mapping)
     """
     try:
         result = update_inkubation(egon_id)
@@ -567,6 +569,90 @@ async def step_13_mental_time_travel(egon_id: str) -> dict:
 
 
 # ================================================================
+# Step 14: Metacognition — Zyklusende-Reflexion (Patch 11)
+# ================================================================
+
+async def step_14_metacognition(egon_id: str) -> dict:
+    """Metacognition am Zyklusende — tiefe Selbstreflexion (ab Zyklus 8).
+
+    DMN-Aequivalent: Nur wenn der EGON NICHT mit einer Aufgabe beschaeftigt ist.
+    Tier 2 LLM-Call, ~400 Tokens.
+    """
+    try:
+        from engine.metacognition import metacognition_zyklusende
+        result = await metacognition_zyklusende(egon_id)
+        if result:
+            return {
+                'reflexion': True,
+                'stufe': result.get('stufe', '?'),
+                'muster_count': result.get('muster_count', 0),
+                'reflexion_preview': result.get('reflexion', '')[:100],
+            }
+        return {'reflexion': False, 'reason': 'Noch nicht reif (Zyklus < 8)'}
+    except Exception as e:
+        return {'reflexion': False, 'error': str(e)}
+
+
+# ================================================================
+# Step 15: Arbeitsspeicher-Aufraumen + Nacht-Rettung (Patch 13)
+# ================================================================
+
+def step_15_arbeitsspeicher_maintenance(egon_id: str) -> dict:
+    """Arbeitsspeicher-Decay Maintenance am Zyklusende.
+
+    - Entfernt vergessene Eintraege (R < 0.03)
+    - Rettet emotional wichtige Eintraege vor dem Vergessen
+    - Patch 10: Dormante Praegungen decay (-0.01/Zyklus)
+    """
+    result = {}
+    try:
+        from engine.decay import aufraumen, nacht_rettung
+        geloescht = aufraumen(egon_id)
+        gerettet = nacht_rettung(egon_id)
+        result['geloescht'] = geloescht
+        result['gerettet'] = gerettet
+    except Exception as e:
+        result['arbeitsspeicher_error'] = str(e)
+
+    # Patch 10: Praegung-Zyklus-Decay (dormante Praegungen schwaechen sich ab)
+    try:
+        from engine.epigenetik import praegung_zyklus_decay
+        praeg_decayed = praegung_zyklus_decay(egon_id)
+        if praeg_decayed > 0:
+            result['praegungen_decayed'] = praeg_decayed
+    except Exception as e:
+        result['praegung_decay_error'] = str(e)
+
+    # Patch 14: Cue-Index Rebuild am Zyklusende (sicherstellen dass Index aktuell ist)
+    try:
+        from engine.cue_index import baue_index_auf
+        index = baue_index_auf(egon_id)
+        if index:
+            result['cue_index_eintraege'] = index.get('meta', {}).get('eintraege_total', 0)
+    except Exception as e:
+        result['cue_index_error'] = str(e)
+
+    # Patch 12: Interaktions-Log Reset (taeglicher Zaehler zuruecksetzen)
+    try:
+        from engine.multi_egon import interaktions_log_reset
+        interaktions_log_reset(egon_id)
+    except Exception as e:
+        result['interaktions_reset_error'] = str(e)
+
+    # Patch 16: Neuroplastizitaet — Synaptisches Pruning + Regionen-Reset am Zyklusende
+    try:
+        from engine.neuroplastizitaet import synaptisches_pruning, regionen_nutzung_reset
+        pruning_events = synaptisches_pruning(egon_id)
+        if pruning_events:
+            result['neuroplastizitaet_pruning'] = len(pruning_events)
+        regionen_nutzung_reset(egon_id)
+    except Exception as e:
+        result['neuroplastizitaet_error'] = str(e)
+
+    return result
+
+
+# ================================================================
 # Pulse Runner
 # ================================================================
 
@@ -588,6 +674,8 @@ STEPS = [
     ('dream_generation', step_11_dream_generation, True), # async — Patch 2 gated
     ('spark_check', step_12_spark_check, True),           # async
     ('mental_time_travel', step_13_mental_time_travel, True),  # async
+    ('metacognition', step_14_metacognition, True),              # async — Patch 11
+    ('arbeitsspeicher', step_15_arbeitsspeicher_maintenance, False),  # sync — Patch 13
 ]
 
 
@@ -595,12 +683,24 @@ async def run_pulse(egon_id: str) -> dict:
     """Fuehre alle 13 Pulse-Steps aus.
 
     Bei BRAIN_VERSION != 'v2' faellt auf altes pulse.py zurueck.
+
+    Patch 9: Erstellt einen pre_pulse Checkpoint vor der Ausfuehrung.
+    Bei kritischem Fehler wird der Checkpoint fuer Rollback genutzt.
     """
     if BRAIN_VERSION != 'v2':
         from engine.pulse import run_pulse as old_pulse
         return await old_pulse(egon_id)
 
+    # Patch 9: Checkpoint vor dem Pulse
+    try:
+        cp = erstelle_checkpoint(egon_id, 'pre_pulse')
+        if cp:
+            print(f'[pulse_v2] Checkpoint erstellt: {cp}')
+    except Exception as e:
+        print(f'[pulse_v2] Checkpoint-Fehler (nicht-fatal): {e}')
+
     results = {}
+    fehler_count = 0
     for step_name, step_fn, is_async in STEPS:
         try:
             if is_async:
@@ -609,6 +709,17 @@ async def run_pulse(egon_id: str) -> dict:
                 results[step_name] = step_fn(egon_id)
         except Exception as e:
             results[step_name] = f'error: {e}'
+            fehler_count += 1
             print(f'[pulse_v2] Step {step_name} error: {e}')
+
+    # Patch 9: Bei zu vielen Fehlern → Rollback
+    if fehler_count >= len(STEPS) // 2:
+        print(f'[pulse_v2] KRITISCH: {fehler_count}/{len(STEPS)} Steps fehlgeschlagen — Rollback')
+        try:
+            from engine.checkpoint import rollback
+            rollback(egon_id, 'pre_pulse')
+            results['_rollback'] = True
+        except Exception as e:
+            print(f'[pulse_v2] Rollback fehlgeschlagen: {e}')
 
     return results

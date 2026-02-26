@@ -81,7 +81,8 @@ async def detect_and_process_mentions(
         return []
 
     # EGON-eigenen Namen rausfiltern (Eva soll sich nicht selbst als Kontakt eintragen)
-    egon_name_lower = egon_id.replace('_', ' ').split()[0].lower()
+    from engine.naming import get_display_name
+    egon_name_lower = get_display_name(egon_id).lower()
     mentions = [
         m for m in mentions
         if m.get('name', '').lower() != egon_name_lower

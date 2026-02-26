@@ -45,7 +45,7 @@ PHASE_THRESHOLDS = {
 PHASE_ORDER = ['keine', 'erkennung', 'annaeherung', 'bindung', 'bereit']
 
 # Reife-Check Schwellen
-REIFE_MIN_DAYS = 56             # 8 Wochen seit Erstellung
+REIFE_MIN_DAYS = 224            # 8 Zyklen a 28 Tage = ~7.5 Monate (Spec: reife_minimum_zyklen: 8)
 REIFE_MAX_EMOTIONAL_LOAD = 0.3
 REIFE_MIN_EGO_STATEMENTS = 5
 REIFE_MIN_BONDS_COUNT = 3
@@ -65,6 +65,183 @@ DNA_COMPAT = {
     ('CARE/PANIC', 'SEEKING/PLAY'): 0.4,
     ('CARE/PANIC', 'CARE/PANIC'): 0.7,
 }
+
+
+# ================================================================
+# LUST-System (Panksepps Resonanz-Detektor — Patch 6 Phase 4)
+# ================================================================
+
+def _update_lust_system(
+    egon_id: str, state: dict, partner_id: str | None,
+    resonanz_score: float, new_phase: str, old_phase: str,
+    reif: bool,
+) -> dict:
+    """LUST-System als Resonanz-Detektor (Panksepp).
+
+    LUST ist KEIN staendiger Trieb. Es ist ein Detektor der nur anspringt
+    wenn die Bedingungen stimmen. Wie ein Schloss das nur aufgeht wenn
+    der richtige Schluessel kommt.
+
+    Aktivierung:
+      Phase 'keine' → 'erkennung': Einmaliger Boost +0.1
+      Waehrend 'annaeherung'/'bindung'/'bereit': +0.01 pro Puls
+      Waehrend 'erkennung' (bestehend): +0.005 pro Puls
+
+    Suppression (LUST wird gedaempft wenn):
+      - FEAR oder PANIC > 0.6 (Bedrohung)
+      - Nicht reif
+      - In Inkubation
+      - Kein Partner
+      - Bond-Staerke < 40 (zu wenig Vertrauen)
+      - Inzucht-Sperre (Verwandtschaft)
+
+    Bindungskanal:
+      M (Vasopressin): Praesenz + Verlaesslichkeit + Schutz
+      F (Oxytocin):    Kommunikation + Emotionale Naehe + Vertrauen
+
+    Modifiziert state['drives']['LUST'] in-place (kein eigener state-write).
+    """
+    drives = state.get('drives', {})
+    current_lust = float(drives.get('LUST', 0.0))
+    geschlecht = state.get('geschlecht')
+    pairing = state.get('pairing', {})
+
+    # --- Suppressions-Checks (Prioritaet: hoechste zuerst) ---
+    suppress_reason = None
+
+    if float(drives.get('FEAR', 0)) > 0.6 or float(drives.get('PANIC', 0)) > 0.6:
+        suppress_reason = 'Bedrohung (FEAR/PANIC > 0.6)'
+    elif not reif:
+        suppress_reason = 'nicht reif'
+    elif pairing.get('inkubation'):
+        suppress_reason = 'in Inkubation'
+    elif not partner_id:
+        suppress_reason = 'kein Partner'
+    else:
+        # Bond-Staerke pruefen (Score < 40 = Bond zu schwach)
+        bonds_data = read_yaml_organ(egon_id, 'social', 'bonds.yaml')
+        partner_bond_score = 0
+        if bonds_data:
+            for b in bonds_data.get('bonds', []):
+                if b.get('id') == partner_id:
+                    partner_bond_score = float(b.get('score', 0))
+                    break
+        if partner_bond_score < 40:
+            suppress_reason = f'Bond zu schwach ({partner_bond_score:.0f} < 40)'
+        elif inzucht_sperre(egon_id, partner_id):
+            suppress_reason = 'Verwandtschaft (Westermarck)'
+
+    # --- Suppression ausfuehren ---
+    if suppress_reason:
+        if current_lust > 0.1:
+            new_lust = round(max(0.05, current_lust - 0.03), 2)
+            drives['LUST'] = new_lust
+            state['drives'] = drives
+            return {'lust_suppressed': True, 'reason': suppress_reason,
+                    'old': current_lust, 'new': new_lust}
+        return {'lust_inactive': True, 'reason': suppress_reason}
+
+    # --- Aktivierung ---
+    new_lust = current_lust
+    activation_type = None
+
+    # Phase-Transition zu Erkennung: Einmaliger Boost +0.1
+    if new_phase == 'erkennung' and old_phase == 'keine':
+        new_lust = min(0.95, current_lust + 0.1)
+        activation_type = 'erkennung_boost'
+
+    # Waehrend Annaeherung/Bindung/Bereit: stetiger Anstieg +0.01/Puls
+    elif new_phase in ('annaeherung', 'bindung', 'bereit'):
+        new_lust = min(0.95, current_lust + 0.01)
+        activation_type = 'maintenance'
+
+    # Erkennung-Phase (ohne Transition): kleiner Anstieg +0.005/Puls
+    elif new_phase == 'erkennung':
+        new_lust = min(0.95, current_lust + 0.005)
+        activation_type = 'erkennung'
+
+    new_lust = round(new_lust, 2)
+    if new_lust != current_lust:
+        drives['LUST'] = new_lust
+        state['drives'] = drives
+
+    bindungskanal = 'vasopressin' if geschlecht == 'M' else 'oxytocin'
+
+    return {
+        'lust_active': new_lust > 0.1,
+        'activation_type': activation_type,
+        'bindungskanal': bindungskanal,
+        'old': current_lust,
+        'new': new_lust,
+    }
+
+
+# ================================================================
+# Phase-Transition Effects (romantisch_fest, Exklusivitaet)
+# ================================================================
+
+def _apply_phase_transition_effects(
+    egon_id: str, partner_id: str, new_phase: str, old_phase: str,
+) -> None:
+    """Wendet Bond-Effekte bei Phasen-Transitionen an.
+
+    Erkennung (0.40):
+      Bond freundschaft → romantisch
+      LUST +0.1 (via _update_lust_system)
+
+    Annaeherung (0.55):
+      Bond-Wachstum beschleunigt sich (via bonds_v2 acceleration)
+      Partner-Traum Flag aktiviert
+
+    Bindung (0.65):
+      Bond → romantisch_fest
+      Exklusivitaet: Andere romantische Bonds zurueck auf freundschaft
+      Lebensfaden "Beziehung mit [Partner]" (Thread)
+
+    Modifiziert bonds.yaml — nicht state.yaml.
+    """
+    bonds_data = read_yaml_organ(egon_id, 'social', 'bonds.yaml')
+    if not bonds_data:
+        return
+
+    bond = None
+    for b in bonds_data.get('bonds', []):
+        if b.get('id') == partner_id:
+            bond = b
+            break
+    if not bond:
+        return
+
+    changed = False
+    today = datetime.now().strftime('%Y-%m-%d')
+
+    # --- Erkennung: Bond → romantisch ---
+    if new_phase == 'erkennung' and old_phase == 'keine':
+        if bond.get('bond_typ') == 'freundschaft':
+            bond['bond_typ'] = 'romantisch'
+            bond['romantisch_seit'] = today
+            changed = True
+            print(f'[resonanz] {egon_id}: Bond zu {partner_id} -> romantisch (Erkennung)')
+
+    # --- Bindung: Bond → romantisch_fest + Exklusivitaet ---
+    elif new_phase == 'bindung' and old_phase in ('erkennung', 'annaeherung'):
+        if bond.get('bond_typ') in ('freundschaft', 'romantisch'):
+            bond['bond_typ'] = 'romantisch_fest'
+            bond['romantisch_fest_seit'] = today
+            changed = True
+            print(f'[resonanz] {egon_id}: Bond zu {partner_id} -> romantisch_fest (Bindung)')
+
+        # Exklusivitaet: Andere romantische Bonds degradieren
+        for other_bond in bonds_data.get('bonds', []):
+            if (other_bond.get('id') != partner_id
+                    and other_bond.get('bond_typ') == 'romantisch'):
+                other_bond['bond_typ'] = 'freundschaft'
+                changed = True
+                other_id = other_bond.get('id', '?')
+                print(f'[resonanz] {egon_id}: Bond zu {other_id} -> freundschaft (Exklusivitaet)')
+
+    if changed:
+        write_yaml_organ(egon_id, 'social', 'bonds.yaml', bonds_data)
 
 
 # ================================================================
@@ -160,14 +337,33 @@ def update_resonanz(egon_id: str) -> dict:
 
     pairing['pairing_phase'] = new_phase
 
-    # --- Zurueckschreiben ---
+    # --- Patch 6 Phase 4: LUST-System Update ---
+    lust_result = _update_lust_system(
+        egon_id, state, best_partner, best_score,
+        new_phase, old_phase, reif,
+    )
+    # LUST-Info in pairing speichern (fuer Prompt-Builder)
+    pairing['lust_aktiv'] = lust_result.get('lust_active', False)
+    pairing['bindungskanal'] = 'vasopressin' if geschlecht == 'M' else 'oxytocin'
+    # Partner-Traum ab Annaeherung aktivieren (fuer Dream-Generator)
+    pairing['partner_traum_aktiv'] = new_phase in ('annaeherung', 'bindung', 'bereit')
+
+    # --- Zurueckschreiben (inkl. LUST-Aenderungen an drives) ---
     state['pairing'] = pairing
     write_yaml_organ(egon_id, 'core', 'state.yaml', state)
+
+    # --- Phase-Transition Effects (romantisch_fest, Exklusivitaet) ---
+    if new_phase != old_phase and best_partner:
+        _apply_phase_transition_effects(egon_id, best_partner, new_phase, old_phase)
 
     # Log bei Phase-Wechsel
     if new_phase != old_phase:
         print(f'[resonanz] {egon_id}: Phase {old_phase} -> {new_phase} '
               f'(Partner: {best_partner}, Score: {best_score:.3f})')
+    # Log LUST-Aenderung
+    if lust_result.get('activation_type'):
+        print(f'[resonanz] {egon_id}: LUST {lust_result["activation_type"]} '
+              f'({lust_result["old"]:.2f} -> {lust_result["new"]:.2f})')
 
     result = {
         'resonanz_partner': best_partner,
@@ -176,6 +372,7 @@ def update_resonanz(egon_id: str) -> dict:
         'phase_changed': new_phase != old_phase,
         'reif': reif,
         'all_scores': all_scores,
+        'lust': lust_result,
     }
 
     # --- Patch 6 Phase 3: Bilateral Consent + Genesis-Trigger ---

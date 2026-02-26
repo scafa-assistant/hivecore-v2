@@ -8,6 +8,9 @@ Jedes Organ hat einen Platz in der neuen Ordnerstruktur:
   capabilities/ → skills.yaml, wallet.yaml
 
 Fallback: Wenn die neue Datei nicht existiert, sucht in der alten Stelle.
+
+Patch 9: state.yaml wird beim Laden validiert und bei Bedarf
+         automatisch repariert (Auto-Repair mit DNA-Baseline).
 """
 
 import os
@@ -48,6 +51,11 @@ def read_organ(egon_id: str, layer: str, filename: str) -> str:
 def read_yaml_organ(egon_id: str, layer: str, filename: str) -> dict:
     """Liest ein YAML-Organ und parsed es.
 
+    Patch 9: Wenn layer='core' und filename='state.yaml',
+    wird der State nach dem Laden validiert und bei Bedarf
+    automatisch repariert. Bei nicht-reparierbaren Fehlern
+    wird ein Kaskaden-Rollback versucht.
+
     Returns:
         Parsed YAML als dict, oder {} bei Fehler/nicht gefunden.
     """
@@ -57,10 +65,50 @@ def read_yaml_organ(egon_id: str, layer: str, filename: str) -> dict:
 
     try:
         data = yaml.safe_load(text)
-        return data if isinstance(data, dict) else {}
+        if not isinstance(data, dict):
+            return {}
     except yaml.YAMLError as e:
         print(f'[organ_reader] YAML Parse Error in {layer}/{filename}: {e}')
+        # Patch 9: Bei state.yaml YAML-Fehler → Rollback versuchen
+        if layer == 'core' and filename == 'state.yaml':
+            try:
+                from engine.checkpoint import kaskaden_rollback
+                print(f'[organ_reader] state.yaml korrupt — starte Kaskaden-Rollback')
+                if kaskaden_rollback(egon_id):
+                    # Erneut lesen nach Rollback
+                    text2 = read_organ(egon_id, layer, filename)
+                    if text2:
+                        data2 = yaml.safe_load(text2)
+                        if isinstance(data2, dict):
+                            return data2
+            except Exception as e2:
+                print(f'[organ_reader] Kaskaden-Rollback fehlgeschlagen: {e2}')
         return {}
+
+    # Patch 9: State-Validierung fuer core/state.yaml
+    if layer == 'core' and filename == 'state.yaml' and data:
+        try:
+            from engine.state_validator import lade_und_validiere
+            data = lade_und_validiere(data, egon_id)
+        except ImportError:
+            pass  # Validator noch nicht deployed — weiter ohne
+        except Exception as e:
+            print(f'[organ_reader] State-Validierung fehlgeschlagen fuer {egon_id}: {e}')
+            # Rollback versuchen
+            try:
+                from engine.checkpoint import kaskaden_rollback
+                if kaskaden_rollback(egon_id):
+                    text2 = read_organ(egon_id, layer, filename)
+                    if text2:
+                        data2 = yaml.safe_load(text2)
+                        if isinstance(data2, dict):
+                            return data2
+            except Exception as e2:
+                print(f'[organ_reader] Kaskaden-Rollback fehlgeschlagen: {e2}')
+            # Wenn alles fehlschlaegt: leeres dict zurueckgeben
+            return {}
+
+    return data
 
 
 def read_md_organ(egon_id: str, layer: str, filename: str) -> str:
@@ -82,19 +130,47 @@ def write_yaml_organ(egon_id: str, layer: str, filename: str, data: dict) -> Non
     """Schreibt ein YAML-Organ zurueck.
 
     Nutzt allow_unicode=True damit deutsche Umlaute sauber bleiben.
+
+    Patch 9: Fuer state.yaml wird vor dem Schreiben validiert.
+    Schreibt ueber Temp-Datei + Rename fuer Atomaritaet.
     """
     path = _egon_path(egon_id) / layer / filename
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(path, 'w', encoding='utf-8') as f:
-        yaml.dump(
-            data,
-            f,
-            allow_unicode=True,
-            default_flow_style=False,
-            sort_keys=False,
-            width=120,
-        )
+    # Patch 9: Validierung vor dem Schreiben (nur state.yaml)
+    if layer == 'core' and filename == 'state.yaml':
+        try:
+            from engine.state_validator import quick_validate
+            fehler = quick_validate(data)
+            if fehler:
+                fatale = [f for f in fehler if not f.startswith('KONSISTENZ:')]
+                if fatale:
+                    print(f'[organ_reader] BLOCKIERT: state.yaml Write fuer {egon_id} '
+                          f'hat {len(fatale)} fatale Fehler: {fatale}')
+                    return  # Write blockieren
+        except ImportError:
+            pass  # Validator noch nicht deployed
+
+    # Patch 9: Atomarer Write via Temp-Datei + Rename
+    temp_path = path.with_suffix('.yaml.tmp')
+    try:
+        with open(temp_path, 'w', encoding='utf-8') as f:
+            yaml.dump(
+                data,
+                f,
+                allow_unicode=True,
+                default_flow_style=False,
+                sort_keys=False,
+                width=120,
+            )
+        # Atomar ersetzen (rename ist atomar auf POSIX)
+        temp_path.replace(path)
+    except Exception as e:
+        print(f'[organ_reader] Write-Fehler {layer}/{filename}: {e}')
+        # Temp-Datei aufraumen
+        if temp_path.exists():
+            temp_path.unlink()
+        raise
 
 
 def list_contact_cards(egon_id: str, folder: str = 'active') -> list[dict]:

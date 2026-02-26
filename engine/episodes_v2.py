@@ -83,8 +83,9 @@ async def maybe_create_episode(
     3. Thread Detection (Keyword-Overlap)
     4. Episode in episodes.yaml schreiben
     """
-    # EGON-Name ableiten (adam_001 -> Adam, eva_002 -> Eva)
-    egon_name = egon_id.replace('_', ' ').split()[0].capitalize()
+    # EGON-Name aus identitaet-Block
+    from engine.naming import get_display_name
+    egon_name = get_display_name(egon_id)
 
     # --- Pre-Check: War das bedeutsam? ---
     try:

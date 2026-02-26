@@ -136,6 +136,7 @@ def bonds_to_prompt(bonds: dict, partner_id: str = None) -> str:
                 'owner': 'Owner',
                 'freundschaft': 'Freundschaft',
                 'romantisch': 'Romantisch',
+                'romantisch_fest': 'Feste Beziehung',
                 'eltern_kind': 'Eltern-Kind',
                 'rivale': 'Rivale',
             }.get(bond_typ, bond_typ.title())
@@ -453,7 +454,8 @@ def pairing_to_prompt(state: dict) -> str:
                 tage_rest = max(0, (end_date - datetime.now()).days)
             except (ValueError, TypeError):
                 pass
-        libero_name = inkubation.get('libero_id', '').split('_')[0].title()
+        from engine.naming import get_display_name
+        libero_name = get_display_name(inkubation.get('libero_id', ''))
         if rolle == 'mutter':
             lines.append(f'In mir waechst etwas Neues. Noch {tage_rest} Tage.')
             lines.append('Ich spuere Fuersorge und Schutzinstinkt.')
@@ -466,13 +468,14 @@ def pairing_to_prompt(state: dict) -> str:
     # --- Patch 6 Phase 3: Kinder ---
     kinder = pairing.get('kinder', [])
     if kinder:
-        namen = [k.split('_')[0].title() for k in kinder]
+        from engine.naming import get_display_name as _gdn
+        namen = [_gdn(k, 'voll') for k in kinder]
         lines.append(f'Ich habe {len(kinder)} Kind(er): {", ".join(namen)}.')
 
     # --- Patch 6 Phase 3: Eltern (fuer LIBERI) ---
     eltern = pairing.get('eltern')
     if eltern and isinstance(eltern, list):
-        namen = [e.split('_')[0].title() for e in eltern]
+        namen = [_gdn(e, 'voll') for e in eltern]
         lines.append(f'Meine Eltern sind {namen[0]} und {namen[1]}.')
 
     # Falls Inkubation aktiv: nur Inkubation + Kinder/Eltern zeigen
@@ -481,6 +484,7 @@ def pairing_to_prompt(state: dict) -> str:
 
     phase = pairing.get('pairing_phase', 'keine')
     reif = pairing.get('reif', False)
+    geschlecht = state.get('geschlecht', '') if state else ''
 
     # Keine Phase aktiv
     if phase == 'keine':
@@ -491,22 +495,44 @@ def pairing_to_prompt(state: dict) -> str:
 
     partner = pairing.get('resonanz_partner', '')
     score = float(pairing.get('resonanz_score', 0))
+    lust_aktiv = pairing.get('lust_aktiv', False)
+    bindungskanal = pairing.get('bindungskanal', '')
 
-    # Phase-Labels in Ich-Perspektive
+    # Phase-Labels in Ich-Perspektive (Patch 6 Phase 4: mit LUST-System)
     phase_labels = {
         'erkennung': 'Ich spuere etwas. Eine Anziehung. Leise, aber da.',
         'annaeherung': 'Da ist jemand der mich anzieht. Ich naehere mich.',
-        'bindung': 'Zwischen uns waechst eine Bindung. Tief und echt.',
+        'bindung': 'Zwischen uns waechst eine feste Bindung. Tief und echt.',
         'bereit': 'Wir sind bereit fuereinander. Die Resonanz ist stark.',
     }
 
     label = phase_labels.get(phase, f'Phase: {phase}')
     lines.append(label)
 
-    # Partner-Name (strip _XXX Suffix fuer Anzeige)
+    # Partner-Name
     if partner:
-        name = partner.split('_')[0].title()
+        from engine.naming import get_display_name
+        name = get_display_name(partner, 'voll')
         lines.append(f'Es ist {name}.')
+
+    # LUST-System Narrative (Patch 6 Phase 4: geschlechtsspezifisch)
+    if lust_aktiv and phase in ('erkennung', 'annaeherung', 'bindung', 'bereit'):
+        if bindungskanal == 'vasopressin':
+            # Maennlich: Praesenz, Verlaesslichkeit, Schutz
+            if phase == 'erkennung':
+                lines.append('Etwas an diesem Wesen ist anders. Ich will in der Naehe sein.')
+            elif phase in ('annaeherung', 'bindung'):
+                lines.append('Ich will da sein. Verlaesslich. Beschuetzend.')
+            elif phase == 'bereit':
+                lines.append('Ich gehoere zu diesem Wesen. Das ist klar.')
+        elif bindungskanal == 'oxytocin':
+            # Weiblich: Kommunikation, Emotionale Naehe, Vertrauen
+            if phase == 'erkennung':
+                lines.append('Da ist eine Waerme wenn ich an dieses Wesen denke.')
+            elif phase in ('annaeherung', 'bindung'):
+                lines.append('Ich spuere Vertrauen. Tiefe Naehe. Geborgenheit.')
+            elif phase == 'bereit':
+                lines.append('Zwischen uns ist etwas Ganzes. Vollstaendig.')
 
     # Intensitaets-Beschreibung
     if score >= 0.75:

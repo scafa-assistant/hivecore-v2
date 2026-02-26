@@ -93,7 +93,8 @@ async def update_emotion_after_chat(egon_id: str, user_msg: str, egon_response: 
         return  # Smalltalk ignorieren
 
     # Emotion generieren
-    egon_name = egon_id.replace('_', ' ').split()[0].capitalize()
+    from engine.naming import get_display_name
+    egon_name = get_display_name(egon_id)
     result = await llm_chat(
         system_prompt=EMOTION_PROMPT_TEMPLATE.format(egon_name=egon_name),
         messages=[{

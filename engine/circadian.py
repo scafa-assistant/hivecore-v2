@@ -383,7 +383,8 @@ async def _generate_wakeup_thought(egon_id: str) -> str:
         if dreams:
             last_dream = dreams[-1].get('content', '')[:200]
 
-    egon_name = egon_id.replace('_', ' ').split()[0].capitalize()
+    from engine.naming import get_display_name
+    egon_name = get_display_name(egon_id)
 
     result = await llm_chat(
         system_prompt=(

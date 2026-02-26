@@ -43,8 +43,9 @@ async def get_profile(egon_id: str):
     bonds = _read_file(egon_id, 'bonds.md') if 'bonds.md' in visible else ''
     skills = _read_file(egon_id, 'skills.md') if 'skills.md' in visible else ''
 
-    # Name aus soul.md/dna.md extrahieren, Fallback: aus egon_id ableiten
-    name = egon_id.split('_')[0].capitalize() if egon_id else 'Unknown'
+    # Name aus identitaet-Block, dna.md, oder ID-Fallback
+    from engine.naming import get_display_name
+    name = get_display_name(egon_id, 'voll') if egon_id else 'Unknown'
     agent_id = egon_id or '#001'
     name_match = re.search(r'Name:\s*(.+)', soul)
     id_match = re.search(r'ID:\s*(.+)', soul)
