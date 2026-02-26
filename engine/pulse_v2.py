@@ -15,6 +15,8 @@ Ersetzt das alte pulse.py (8 Steps) fuer BRAIN_VERSION v2.
   8.  Egon-Self Review (alle 7-14 Tage: Selbstbild aktualisieren)
   9.  Inner Voice Reflexion (Tagesreflexion + Lobby + Social Maps)
  10.  State Update (Survive/Thrive Werte neu berechnen)
+ 10b. Resonanz Check (Pairing-Berechnung — Patch 6)
+ 10c. Inkubation Check (Schwangerschaft + Genesis — Patch 6 Phase 3)
  11.  Dream Generation (Naechtliche Verarbeitung — nur RUHE Phase)
  12.  Spark Check (Konvergierende Erinnerungen → Einsicht)
  13.  Mental Time Travel (Retrospektion/Prospektion — woechentlich)
@@ -35,6 +37,8 @@ from engine.ledger import log_transaction
 from llm.router import llm_chat
 from engine.somatic_gate import check_somatic_gate, run_decision_gate, execute_autonomous_action
 from engine.circadian import check_phase_transition, get_current_phase, update_energy
+from engine.resonanz import update_resonanz
+from engine.genesis import update_inkubation
 
 
 # ================================================================
@@ -472,6 +476,42 @@ def step_10_state_update(egon_id: str) -> dict:
 
 
 # ================================================================
+# Step 10b: Resonanz Check (Patch 6 Phase 2)
+# ================================================================
+
+def step_10b_resonanz(egon_id: str) -> dict:
+    """Berechnet Resonanz zu allen gegengeschlechtlichen EGONs.
+
+    Reine Mathematik — kein LLM-Aufruf.
+    Laeuft nach state_update damit Drives aktuell sind.
+    """
+    try:
+        return update_resonanz(egon_id)
+    except Exception as e:
+        print(f'[pulse_v2] Resonanz error: {e}')
+        return {'error': str(e)}
+
+
+# ================================================================
+# Step 10c: Inkubation Check (Patch 6 Phase 3)
+# ================================================================
+
+def step_10c_inkubation(egon_id: str) -> dict:
+    """Prueft Inkubation-Fortschritt und triggert Genesis.
+
+    Waehrend Inkubation (14 Tage):
+    - Eltern-Drive-Aenderungen (CARE+, PANIC+ bei Mutter; CARE+, SEEKING- bei Vater)
+    - Am Ende: execute_genesis() erstellt LIBERO-Agent
+    """
+    try:
+        result = update_inkubation(egon_id)
+        return result or {'inkubation': False}
+    except Exception as e:
+        print(f'[pulse_v2] Inkubation error: {e}')
+        return {'error': str(e)}
+
+
+# ================================================================
 # Step 11: Dream Generation
 # ================================================================
 
@@ -543,6 +583,8 @@ STEPS = [
     ('egon_self_review', step_8_egon_self_review, True),  # async
     ('inner_voice', step_9_inner_voice_reflection, True), # async — Patch 3 erweitert
     ('state_update', step_10_state_update, False),        # sync
+    ('resonanz', step_10b_resonanz, False),               # sync — Patch 6 Phase 2
+    ('inkubation', step_10c_inkubation, False),            # sync — Patch 6 Phase 3
     ('dream_generation', step_11_dream_generation, True), # async — Patch 2 gated
     ('spark_check', step_12_spark_check, True),           # async
     ('mental_time_travel', step_13_mental_time_travel, True),  # async

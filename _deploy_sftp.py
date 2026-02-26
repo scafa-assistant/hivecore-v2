@@ -33,6 +33,10 @@ DEPLOY_FILES = [
     # Patch 6 Phase 1: Geschlechtsspezifisches Bond-Wachstum
     'engine/bonds_v2.py',
     'engine/yaml_to_prompt.py',
+    # Patch 6 Phase 2: Resonanz-Engine
+    'engine/resonanz.py',
+    # Patch 6 Phase 3: Genesis (Merge + Inkubation + LIBERI)
+    'engine/genesis.py',
     # Modifizierte Dateien
     'engine/prompt_builder.py',
     'engine/prompt_builder_v2.py',

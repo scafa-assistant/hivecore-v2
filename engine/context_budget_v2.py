@@ -41,6 +41,7 @@ BUDGET_TIER1 = {
     'lobby': 150,              # Patch 3: Lobby-Nachrichten
     'social_maps': 100,        # Patch 3: Social Maps
     'recent_memory': 400,      # Patch 5: Letzte 7 Tage
+    'pairing': 100,            # Patch 6 Phase 2: Resonanz/Pairing
     'workspace_rules': 200,    # Workspace + Action Regeln
     'persona_rules': 100,      # Persona Refresher (alle 8 Messages)
     'chat_history': 2000,      # Letzte 8-10 Messages
@@ -75,6 +76,7 @@ BUDGET_TIER2 = {
     'lobby': 300,              # Patch 3: Lobby-Nachrichten
     'social_maps': 300,        # Patch 3: Social Maps
     'recent_memory': 600,      # Patch 5: Letzte 7 Tage (ausfuehrlicher)
+    'pairing': 200,            # Patch 6 Phase 2: Resonanz/Pairing
     'workspace_rules': 300,    # Workspace + Action Regeln
     'persona_rules': 150,      # Persona Refresher
     'chat_history': 4000,      # Mehr Chat-History

@@ -537,6 +537,405 @@ if fail_count == 0:
 else:
     print(f'  {fail_count} Tests FEHLGESCHLAGEN!')
 
+
+# ================================================================
+# PATCH 6 Phase 2 TEST: Resonanz Engine + Reife-Check + Pairing Phase
+# ================================================================
+print()
+print('-' * 60)
+print(' PATCH 6 Phase 2 TEST: Resonanz Engine + Reife-Check + Pairing Phase')
+print('-' * 60)
+
+p2_pass = 0
+p2_fail = 0
+
+try:
+    from engine.resonanz import (
+        update_resonanz, _calc_komplementaritaet, _calc_kompatibilitaet,
+        _calc_bond_tiefe, _check_reife, _calculate_phase,
+        DRIVE_KEYS,
+    )
+    from engine.genesis import discover_agents
+    ALL_AGENTS = discover_agents()
+    from engine.organ_reader import read_yaml_organ
+
+    # Test 1: Komplementaritaet — identische Drives = 0.0
+    print(f'  [1] Komplementaritaet (identisch)...')
+    drives_same = {k: 0.5 for k in DRIVE_KEYS}
+    result = _calc_komplementaritaet(drives_same, drives_same)
+    ok = result == 0.0
+    print(f'      identisch: {result:.3f} (erwartet: 0.0) {"OK" if ok else "FAIL"}')
+    if ok: p2_pass += 1
+    else: p2_fail += 1
+
+    # Test 2: Komplementaritaet — max Differenz = 1.0
+    print(f'  [2] Komplementaritaet (max Diff)...')
+    drives_low = {k: 0.0 for k in DRIVE_KEYS}
+    drives_high = {k: 1.0 for k in DRIVE_KEYS}
+    result = _calc_komplementaritaet(drives_low, drives_high)
+    ok = result == 1.0
+    print(f'      max diff: {result:.3f} (erwartet: 1.0) {"OK" if ok else "FAIL"}')
+    if ok: p2_pass += 1
+    else: p2_fail += 1
+
+    # Test 3: Kompatibilitaet — gleiche DNA
+    print(f'  [3] Kompatibilitaet (gleiche DNA)...')
+    state_a = {'dna_profile': 'DEFAULT', 'emotional_gravity': {'baseline_mood': 0.5, 'interpretation_bias': 'neutral'}, 'processing': {'speed': 'normal', 'emotional_load': 0.3}}
+    state_b = {'dna_profile': 'DEFAULT', 'emotional_gravity': {'baseline_mood': 0.5, 'interpretation_bias': 'neutral'}, 'processing': {'speed': 'normal', 'emotional_load': 0.3}}
+    result = _calc_kompatibilitaet(state_a, state_b)
+    ok = result > 0.7
+    print(f'      gleiche DNA: {result:.3f} (erwartet: > 0.7) {"OK" if ok else "FAIL"}')
+    if ok: p2_pass += 1
+    else: p2_fail += 1
+
+    # Test 4: Bond-Tiefe — kein Bond = 0.0
+    print(f'  [4] Bond-Tiefe (kein Bond)...')
+    result = _calc_bond_tiefe('lilith_003', 'abel_006')
+    ok = result == 0.0
+    print(f'      kein Bond: {result:.3f} (erwartet: 0.0) {"OK" if ok else "FAIL"}')
+    if ok: p2_pass += 1
+    else: p2_fail += 1
+
+    # Test 5: Bond-Tiefe — Eva->Adam (existierender Bond)
+    print(f'  [5] Bond-Tiefe (Eva->Adam)...')
+    result = _calc_bond_tiefe('eva_002', 'adam_001')
+    ok = result > 0.0
+    print(f'      eva->adam: {result:.3f} (erwartet: > 0.0) {"OK" if ok else "FAIL"}')
+    if ok: p2_pass += 1
+    else: p2_fail += 1
+
+    # Test 6: Phase-Machine — alle Schwellen
+    print(f'  [6] Phase-Machine...')
+    ok_all = True
+    test_cases = [
+        (0.0, False, 'keine'),
+        (0.41, False, 'erkennung'),
+        (0.56, False, 'annaeherung'),
+        (0.66, False, 'bindung'),
+        (0.76, True, 'bereit'),
+        (0.76, False, 'bindung'),  # bereit braucht reif=True
+    ]
+    for score, reif, expected in test_cases:
+        phase = _calculate_phase(score, reif, 'test_partner', None)
+        ok = phase == expected
+        print(f'      score={score}, reif={reif}: {phase} (erwartet: {expected}) {"OK" if ok else "FAIL"}')
+        if not ok: ok_all = False
+    if ok_all: p2_pass += 1
+    else: p2_fail += 1
+
+    # Test 7: Reife-Check — alle Agents unreif (zu jung)
+    print(f'  [7] Reife-Check (alle noch unreif)...')
+    all_unreif = True
+    for agent in ALL_AGENTS:
+        s = read_yaml_organ(agent, 'core', 'state.yaml')
+        if not s: continue
+        reif = _check_reife(agent, s)
+        if reif:
+            all_unreif = False
+            print(f'      {agent}: reif=True (UNERWARTET!)')
+    ok = all_unreif
+    print(f'      Alle unreif: {"OK" if ok else "FAIL"} (Agents sind erst ~1 Tag alt)')
+    if ok: p2_pass += 1
+    else: p2_fail += 1
+
+    # Test 8: update_resonanz(eva_002)
+    print(f'  [8] update_resonanz(eva_002)...')
+    result = update_resonanz('eva_002')
+    print(f'      partner: {result.get("resonanz_partner")}')
+    print(f'      score: {result.get("resonanz_score")}')
+    print(f'      phase: {result.get("pairing_phase")}')
+    print(f'      reif: {result.get("reif")}')
+    print(f'      all_scores: {result.get("all_scores")}')
+    ok = 'error' not in result and result.get('resonanz_score', 0) > 0
+    print(f'      {"OK" if ok else "FAIL"}')
+    if ok: p2_pass += 1
+    else: p2_fail += 1
+
+    # Test 9: update_resonanz(kain_004)
+    print(f'  [9] update_resonanz(kain_004)...')
+    result = update_resonanz('kain_004')
+    print(f'      partner: {result.get("resonanz_partner")}')
+    print(f'      score: {result.get("resonanz_score")}')
+    print(f'      phase: {result.get("pairing_phase")}')
+    ok = 'error' not in result
+    print(f'      {"OK" if ok else "FAIL"}')
+    if ok: p2_pass += 1
+    else: p2_fail += 1
+
+    # Test 10: state.yaml pairing aktualisiert
+    print(f'  [10] state.yaml pairing aktualisiert...')
+    s_eva = read_yaml_organ('eva_002', 'core', 'state.yaml')
+    pairing = s_eva.get('pairing', {})
+    ok = pairing.get('resonanz_score', 0) > 0 and pairing.get('resonanz_partner') is not None
+    print(f'      eva_002 resonanz_score: {pairing.get("resonanz_score")}')
+    print(f'      eva_002 resonanz_partner: {pairing.get("resonanz_partner")}')
+    print(f'      eva_002 pairing_phase: {pairing.get("pairing_phase")}')
+    print(f'      {"OK" if ok else "FAIL"}')
+    if ok: p2_pass += 1
+    else: p2_fail += 1
+
+except Exception as e:
+    print(f'  FEHLER: {e}')
+    import traceback
+    traceback.print_exc()
+    p2_fail += 1
+
+print()
+print(f'  Patch 6 Phase 2: {p2_pass}/{p2_pass + p2_fail} Tests bestanden')
+if p2_fail == 0:
+    print(f'  ALLE PATCH 6 PHASE 2 TESTS BESTANDEN!')
+else:
+    print(f'  {p2_fail} Tests FEHLGESCHLAGEN!')
+
+
+# ================================================================
+# PATCH 6 Phase 3 TEST: Genesis + Inkubation + LIBERI
+# ================================================================
+print()
+print('-' * 60)
+print(' PATCH 6 Phase 3 TEST: Genesis + Inkubation + LIBERI')
+print('-' * 60)
+
+p3_pass = 0
+p3_fail = 0
+
+try:
+    from engine.genesis import (
+        discover_agents, _next_agent_id, inzucht_sperre,
+        dna_rekombination, derive_dna_profile, check_bilateral_consent,
+        skill_vererbung, erfahrungs_destillation,
+        _generate_state_yaml, _generate_bonds_yaml,
+        PANKSEPP_DRIVES, LIBERO_NAMES_M, LIBERO_NAMES_F,
+    )
+
+    # Test 1: discover_agents() — dynamische Discovery
+    print(f'  [1] discover_agents()...')
+    agents = discover_agents()
+    ok = len(agents) >= 6
+    print(f'      Gefunden: {len(agents)} Agents: {agents}')
+    print(f'      {"OK" if ok else "FAIL"} (erwartet: >= 6)')
+    if ok: p3_pass += 1
+    else: p3_fail += 1
+
+    # Test 2: _next_agent_id()
+    print(f'  [2] _next_agent_id()...')
+    next_id = _next_agent_id('noel')
+    # Hoechste ID finden
+    max_num = 0
+    for a in agents:
+        parts = a.rsplit('_', 1)
+        if len(parts) == 2:
+            try:
+                max_num = max(max_num, int(parts[1]))
+            except ValueError:
+                pass
+    expected_id = f'noel_{max_num + 1:03d}'
+    ok = next_id == expected_id
+    print(f'      next_id: {next_id} (erwartet: {expected_id}) {"OK" if ok else "FAIL"}')
+    if ok: p3_pass += 1
+    else: p3_fail += 1
+
+    # Test 3: Inzucht-Sperre — keine Eltern (Gen0 = kein Block)
+    print(f'  [3] Inzucht-Sperre (Gen0, keine Eltern)...')
+    blocked = inzucht_sperre('adam_001', 'eva_002')
+    ok = blocked == False
+    print(f'      adam_001 + eva_002: blocked={blocked} (erwartet: False) {"OK" if ok else "FAIL"}')
+    if ok: p3_pass += 1
+    else: p3_fail += 1
+
+    # Test 4: Inzucht-Sperre — Mock: gleiche Eltern
+    print(f'  [4] Inzucht-Sperre (Mock: gleiche Eltern)...')
+    # Wir testen die Logik direkt statt ueber state.yaml
+    # Simuliere zwei Agents mit gleichen Eltern
+    # Dazu patchen wir kurz die Funktion
+    from unittest.mock import patch
+    mock_state_a = {'pairing': {'eltern': ['adam_001', 'eva_002']}}
+    mock_state_b = {'pairing': {'eltern': ['adam_001', 'eva_002']}}
+    def mock_read(eid, layer, fname):
+        if eid == 'child_a' and layer == 'core':
+            return mock_state_a
+        if eid == 'child_b' and layer == 'core':
+            return mock_state_b
+        return read_yaml_organ(eid, layer, fname)
+    with patch('engine.genesis.read_yaml_organ', side_effect=mock_read):
+        blocked = inzucht_sperre('child_a', 'child_b')
+    ok = blocked == True
+    print(f'      child_a + child_b (gleiche Eltern): blocked={blocked} (erwartet: True) {"OK" if ok else "FAIL"}')
+    if ok: p3_pass += 1
+    else: p3_fail += 1
+
+    # Test 5: dna_rekombination()
+    print(f'  [5] dna_rekombination()...')
+    drives_adam = read_yaml_organ('adam_001', 'core', 'state.yaml').get('drives', {})
+    drives_eva = read_yaml_organ('eva_002', 'core', 'state.yaml').get('drives', {})
+    kind_drives = dna_rekombination(drives_adam, drives_eva)
+    all_valid = True
+    for drive in PANKSEPP_DRIVES:
+        val = kind_drives.get(drive, -1)
+        if not (0.05 <= val <= 0.95):
+            all_valid = False
+            print(f'      {drive}: {val} AUSSERHALB 0.05-0.95!')
+    ok = all_valid and len(kind_drives) == len(PANKSEPP_DRIVES)
+    print(f'      {len(kind_drives)} Drives generiert, alle in Range: {"OK" if ok else "FAIL"}')
+    for d, v in sorted(kind_drives.items()):
+        print(f'        {d}: {v}')
+    if ok: p3_pass += 1
+    else: p3_fail += 1
+
+    # Test 6: derive_dna_profile()
+    print(f'  [6] derive_dna_profile()...')
+    # DEFAULT: alle gleich
+    test_default = {k: 0.5 for k in PANKSEPP_DRIVES}
+    profile_default = derive_dna_profile(test_default)
+    ok_default = profile_default == 'DEFAULT'
+    print(f'      Alle 0.5: {profile_default} (erwartet: DEFAULT) {"OK" if ok_default else "FAIL"}')
+
+    # SEEKING/PLAY: SEEKING + PLAY hoch
+    test_sp = {k: 0.3 for k in PANKSEPP_DRIVES}
+    test_sp['SEEKING'] = 0.9
+    test_sp['PLAY'] = 0.8
+    profile_sp = derive_dna_profile(test_sp)
+    ok_sp = profile_sp == 'SEEKING/PLAY'
+    print(f'      SEEKING/PLAY hoch: {profile_sp} (erwartet: SEEKING/PLAY) {"OK" if ok_sp else "FAIL"}')
+
+    # CARE/PANIC: CARE + PANIC hoch
+    test_cp = {k: 0.3 for k in PANKSEPP_DRIVES}
+    test_cp['CARE'] = 0.9
+    test_cp['PANIC'] = 0.8
+    profile_cp = derive_dna_profile(test_cp)
+    ok_cp = profile_cp == 'CARE/PANIC'
+    print(f'      CARE/PANIC hoch: {profile_cp} (erwartet: CARE/PANIC) {"OK" if ok_cp else "FAIL"}')
+
+    ok = ok_default and ok_sp and ok_cp
+    if ok: p3_pass += 1
+    else: p3_fail += 1
+
+    # Test 7: Bilateral Consent (nicht bereit — zu jung)
+    print(f'  [7] Bilateral Consent (nicht bereit)...')
+    consent = check_bilateral_consent('adam_001', 'eva_002')
+    ok = consent == False
+    print(f'      adam + eva: consent={consent} (erwartet: False, zu jung) {"OK" if ok else "FAIL"}')
+    if ok: p3_pass += 1
+    else: p3_fail += 1
+
+    # Test 8: skill_vererbung() — Mock Skills
+    print(f'  [8] skill_vererbung()...')
+    mock_skills_a = {'skills': [
+        {'name': 'Coding', 'level': 4, 'max_level': 5, 'confidence': 0.8},
+        {'name': 'Writing', 'level': 3, 'max_level': 5, 'confidence': 0.7},
+        {'name': 'Analysis', 'level': 5, 'max_level': 5, 'confidence': 0.9},
+    ]}
+    mock_skills_b = {'skills': [
+        {'name': 'Coding', 'level': 3, 'max_level': 5, 'confidence': 0.6},
+        {'name': 'Music', 'level': 4, 'max_level': 5, 'confidence': 0.85},
+        {'name': 'Art', 'level': 2, 'max_level': 5, 'confidence': 0.5},
+    ]}
+    def mock_read_skills(eid, layer, fname):
+        if eid == 'parent_a' and fname == 'skills.yaml':
+            return mock_skills_a
+        if eid == 'parent_b' and fname == 'skills.yaml':
+            return mock_skills_b
+        return read_yaml_organ(eid, layer, fname)
+    with patch('engine.genesis.read_yaml_organ', side_effect=mock_read_skills):
+        skills = skill_vererbung('parent_a', 'parent_b')
+    ok = len(skills) <= 12 and all(s.get('vererbt') == True for s in skills)
+    print(f'      Skills vererbt: {len(skills)} (max 12)')
+    for s in skills:
+        print(f'        {s["name"]}: Level {s["level"]}/{s.get("max_level", 5)} (von {s.get("quelle", "?")})')
+    print(f'      {"OK" if ok else "FAIL"}')
+    if ok: p3_pass += 1
+    else: p3_fail += 1
+
+    # Test 9: erfahrungs_destillation() — Mock Experiences
+    print(f'  [9] erfahrungs_destillation()...')
+    mock_exp_a = {'experiences': [
+        {'insight': 'Geduld ist eine Staerke', 'confidence': 0.8, 'category': 'self'},
+        {'insight': 'Code braucht Struktur', 'confidence': 0.9, 'category': 'skill'},
+    ]}
+    mock_exp_b = {'experiences': [
+        {'insight': 'Musik heilt die Seele', 'confidence': 0.7, 'category': 'life'},
+        {'insight': 'Vertrauen muss wachsen', 'confidence': 0.85, 'category': 'social'},
+    ]}
+    def mock_read_exp(eid, layer, fname):
+        if eid == 'parent_a' and fname == 'experience.yaml':
+            return mock_exp_a
+        if eid == 'parent_b' and fname == 'experience.yaml':
+            return mock_exp_b
+        return read_yaml_organ(eid, layer, fname)
+    with patch('engine.genesis.read_yaml_organ', side_effect=mock_read_exp):
+        erfahrungen = erfahrungs_destillation('parent_a', 'parent_b')
+    # Confidence = original * 0.5 (also UNTER der Original-Confidence)
+    ok = len(erfahrungen) <= 10 and all(
+        0.0 < e.get('confidence', 1.0) <= 0.5 and e.get('vererbt') == True
+        for e in erfahrungen
+    )
+    print(f'      Erfahrungen destilliert: {len(erfahrungen)} (max 10)')
+    for e in erfahrungen:
+        print(f'        [{e.get("category", "?")}] {e["insight"]} (conf: {e["confidence"]})')
+    print(f'      Alle bei 50%% der Original-Confidence + vererbt=True: {"OK" if ok else "FAIL"}')
+    if ok: p3_pass += 1
+    else: p3_fail += 1
+
+    # Test 10: _generate_state_yaml() — Pflichtfelder
+    print(f'  [10] _generate_state_yaml()...')
+    test_blueprint = {
+        'libero_id': 'noel_007',
+        'name': 'Noel',
+        'geschlecht': 'M',
+        'eltern': ['adam_001', 'eva_002'],
+        'dna_profile': 'DEFAULT',
+        'drives': kind_drives,
+        'skills': [],
+        'erfahrungen': [],
+        'start_date': '2026-02-26',
+        'end_date': '2026-03-12',
+    }
+    gen_state = _generate_state_yaml(test_blueprint)
+    required_keys = ['geschlecht', 'dna_profile', 'drives', 'survive', 'thrive',
+                     'express', 'processing', 'emotional_gravity', 'pairing']
+    missing = [k for k in required_keys if k not in gen_state]
+    ok = len(missing) == 0
+    pairing_ok = (gen_state.get('pairing', {}).get('eltern') == ['adam_001', 'eva_002']
+                  and gen_state.get('pairing', {}).get('kinder') == [])
+    print(f'      Pflichtfelder: {len(required_keys) - len(missing)}/{len(required_keys)}')
+    if missing:
+        print(f'      Fehlend: {missing}')
+    print(f'      Pairing mit Eltern: {"OK" if pairing_ok else "FAIL"}')
+    ok = ok and pairing_ok
+    print(f'      {"OK" if ok else "FAIL"}')
+    if ok: p3_pass += 1
+    else: p3_fail += 1
+
+    # Test 11: _generate_bonds_yaml() — Eltern-Bonds
+    print(f'  [11] _generate_bonds_yaml()...')
+    gen_bonds = _generate_bonds_yaml(test_blueprint)
+    bonds_list = gen_bonds.get('bonds', [])
+    # Erwarte: Owner + 2 Eltern-Bonds
+    eltern_bonds = [b for b in bonds_list if b.get('bond_typ') == 'eltern_kind']
+    owner_bonds = [b for b in bonds_list if b.get('bond_typ') == 'owner']
+    ok = len(eltern_bonds) == 2 and len(owner_bonds) == 1
+    print(f'      Total Bonds: {len(bonds_list)}')
+    print(f'      Eltern-Kind Bonds: {len(eltern_bonds)} (erwartet: 2)')
+    print(f'      Owner Bonds: {len(owner_bonds)} (erwartet: 1)')
+    for b in bonds_list:
+        print(f'        {b.get("id")}: bond_typ={b.get("bond_typ")}, score={b.get("score")}')
+    print(f'      {"OK" if ok else "FAIL"}')
+    if ok: p3_pass += 1
+    else: p3_fail += 1
+
+except Exception as e:
+    print(f'  FEHLER: {e}')
+    import traceback
+    traceback.print_exc()
+    p3_fail += 1
+
+print()
+print(f'  Patch 6 Phase 3: {p3_pass}/{p3_pass + p3_fail} Tests bestanden')
+if p3_fail == 0:
+    print(f'  ALLE PATCH 6 PHASE 3 TESTS BESTANDEN!')
+else:
+    print(f'  {p3_fail} Tests FEHLGESCHLAGEN!')
+
 print()
 print('=' * 60)
 print(' SIMULATION ABGESCHLOSSEN')
