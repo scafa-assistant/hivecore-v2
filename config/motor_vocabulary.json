@@ -161,7 +161,7 @@
         "category": "gesture",
         "type": "sequence",
         "duration_ms": 1200,
-        "_fix": "v1.2: gespiegelte GLB-Deltas (ry/rz invertiert zu R)",
+        "_fix": "v1.3: GLB-Fallback (gespiegelte waving_right Animation)",
         "keyframes": [
           { "t": 0.0,  "bones": {} },
           { "t": 0.2,  "bones": { "upper_arm_L": {"rx":-24,"ry":-59,"rz":-26}, "lower_arm_L": {"rx":-17,"ry":17,"rz":82}, "hand_L": {"rx":-75,"ry":-9,"rz":-39}, "shoulder_L": {"rx":-11,"ry":-6,"rz":-9}, "head": {"rx":16,"ry":-4,"rz":-3} } },
@@ -174,7 +174,7 @@
         "easing": "ease_in_out",
         "loopable": false,
         "blendable": false,
-        "glb_fallback": null
+        "glb_fallback": "waving_left"
       },
 
       "arm_heben_rechts": {
