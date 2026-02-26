@@ -160,6 +160,26 @@ def get_lobby_count_this_phase(egon_id: str) -> int:
     return count
 
 
+def get_active_lobby_participants(
+    max_messages: int = 10,
+    exclude_id: str | None = None,
+) -> list[str]:
+    """Gibt EGON-IDs zurueck die kuerzlich in der Lobby geschrieben haben.
+
+    Sortiert nach Aktualitaet (neueste zuerst).
+    Nutzt die letzten max_messages Nachrichten.
+    """
+    messages = read_lobby(max_messages)
+    participants: list[str] = []
+    seen: set[str] = set()
+    for msg in reversed(messages):
+        from_id = msg.get('from', '')
+        if from_id and from_id not in seen and from_id != exclude_id:
+            participants.append(from_id)
+            seen.add(from_id)
+    return participants
+
+
 def lobby_to_prompt(max_messages: int = 5) -> str:
     """Formatiert Lobby-Nachrichten als natuerliche Sprache fuer den System-Prompt."""
     messages = read_lobby(max_messages)

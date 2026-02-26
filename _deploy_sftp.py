@@ -162,16 +162,20 @@ for agent in AGENTS:
     else:
         print(f'  [SKIP] {agent}/core/state.yaml (lokal nicht gefunden)')
 
-# 4b: social_mapping Dateien
+# 4b: social_mapping Dateien (Patch 5 Phase 2: neuer Pfad skills/memory/social_mapping/)
 for agent in AGENTS:
-    sm_dir = f'{LOCAL_DATA}/{agent}/social_mapping'
+    # Neuer Pfad hat Prioritaet
+    sm_dir_new = f'{LOCAL_DATA}/{agent}/skills/memory/social_mapping'
+    sm_dir_old = f'{LOCAL_DATA}/{agent}/social_mapping'
+    sm_dir = sm_dir_new if os.path.isdir(sm_dir_new) else sm_dir_old
     if os.path.isdir(sm_dir):
         files = glob.glob(f'{sm_dir}/ueber_*.yaml')
         for f in files:
             fname = os.path.basename(f)
-            remote = f'{REMOTE_EGONS}/{agent}/social_mapping/{fname}'
+            # Immer in neuen Pfad auf Server hochladen
+            remote = f'{REMOTE_EGONS}/{agent}/skills/memory/social_mapping/{fname}'
             sftp_upload(f.replace('\\', '/'), remote)
-        print(f'  [OK] {agent}/social_mapping/ ({len(files)} Dateien)')
+        print(f'  [OK] {agent}/skills/memory/social_mapping/ ({len(files)} Dateien)')
 
 # 4c: shared/lobby_chat.yaml
 lobby_local = f'{LOCAL_DATA}/shared/lobby_chat.yaml'
@@ -247,10 +251,13 @@ for a in agents:
     energy_s = d.get("survive", {}).get("energy", {}).get("value", "?")
     energy_z = d.get("zirkadian", {}).get("energy", "?")
     sync = "OK" if energy_s == energy_z else f"MISMATCH ({energy_s} vs {energy_z})"
-    sm_dir = EGONS_DIR / a / "social_mapping"
+    sm_dir_new = EGONS_DIR / a / "skills" / "memory" / "social_mapping"
+    sm_dir_old = EGONS_DIR / a / "social_mapping"
+    sm_dir = sm_dir_new if sm_dir_new.exists() else sm_dir_old
     sm_count = len(list(sm_dir.glob("ueber_*.yaml"))) if sm_dir.exists() else 0
+    sm_path = "NEW" if sm_dir == sm_dir_new else "OLD"
     rm = "OK" if (EGONS_DIR / a / "skills" / "memory" / "recent_memory.md").exists() else "FEHLT"
-    print(f"  {a}: dna={dna} zirk={zirk} som={som} energy_sync={sync} social_maps={sm_count} recent_mem={rm}")
+    print(f"  {a}: dna={dna} zirk={zirk} som={som} energy_sync={sync} social_maps={sm_count}({sm_path}) recent_mem={rm}")
 
 lobby = EGONS_DIR / "shared" / "lobby_chat.yaml"
 print(f"  lobby_chat.yaml: {'OK' if lobby.exists() else 'FEHLT'}")

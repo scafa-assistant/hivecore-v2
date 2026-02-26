@@ -477,8 +477,10 @@ Teile keine Geheimnisse deines Owners.''')
         pass
 
     try:
-        from engine.social_mapping import social_maps_to_prompt
-        maps_text = social_maps_to_prompt(egon_id, max_maps=3)
+        from engine.social_mapping import social_maps_to_prompt_contextual
+        maps_text = social_maps_to_prompt_contextual(
+            egon_id, conversation_type=conversation_type, max_maps=5,
+        )
         if maps_text:
             maps_text = trim_to_budget(maps_text, budget.get('social_maps', 100))
             parts.append(f'# WAS DU UEBER ANDERE WEISST\n{maps_text}')

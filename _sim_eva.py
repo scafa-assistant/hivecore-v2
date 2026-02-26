@@ -268,6 +268,91 @@ except Exception as e:
     import traceback
     traceback.print_exc()
 
+# ================================================================
+# PATCH 5 Phase 2 TEST: Social Mapping Enhancement
+# ================================================================
+print()
+print('-' * 60)
+print(' PATCH 5 Phase 2 TEST: Social Mapping Enhancement')
+print('-' * 60)
+
+try:
+    from engine.social_mapping import (
+        _social_map_dir, read_social_map, get_all_social_maps,
+        social_maps_to_prompt, social_maps_to_prompt_contextual,
+        DNA_FOCUS, DNA_DELTA_WEIGHTS,
+    )
+    from engine.lobby import get_active_lobby_participants
+    from pathlib import Path
+
+    # Test 1: Pfad-Migration (neuer Pfad?)
+    sm_dir = _social_map_dir(EGON_ID)
+    print(f'  [1] Social Map Dir: {sm_dir}')
+    print(f'      Existiert: {sm_dir.exists()}')
+    new_path = 'skills/memory/social_mapping' in str(sm_dir)
+    old_path = str(sm_dir).endswith('social_mapping') and 'skills' not in str(sm_dir)
+    print(f'      Neuer Pfad: {"JA" if new_path else "NEIN (alter Pfad)"}')
+
+    # Test 2: Alle Maps laden
+    all_maps = get_all_social_maps(EGON_ID)
+    print(f'  [2] Geladene Maps: {len(all_maps)} Stueck')
+    for about_id, data in sorted(all_maps.items()):
+        name = data.get('identitaet', {}).get('name', about_id)
+        inter = data.get('identitaet', {}).get('interaktionen_gesamt', 0)
+        vertr = data.get('emotionale_bewertung', {}).get('vertrauen', '?')
+        print(f'      - ueber_{about_id}: {name} (Interaktionen: {inter}, Vertrauen: {vertr})')
+
+    # Test 3: DNA-Awareness (Konstanten vorhanden?)
+    print(f'  [3] DNA_FOCUS Profile: {list(DNA_FOCUS.keys())}')
+    print(f'      DNA_DELTA_WEIGHTS: {DNA_DELTA_WEIGHTS}')
+
+    # Test 4: Default Social Map fuer Owner
+    from engine.social_mapping import _default_social_map
+    owner_default = _default_social_map('owner')
+    print(f'  [4] Default Owner Map: name={owner_default["identitaet"]["name"]}')
+
+    # Test 5: Kontextbezogene Selektion — owner_chat
+    prompt_owner = social_maps_to_prompt_contextual(
+        EGON_ID, conversation_type='owner_chat', max_maps=5,
+    )
+    print(f'  [5] Contextual (owner_chat): {len(prompt_owner)} Zeichen')
+    for line in prompt_owner.strip().split('\\n')[:5]:
+        print(f'      {line}')
+
+    # Test 6: Kontextbezogene Selektion — egon_chat mit Partner
+    prompt_egon = social_maps_to_prompt_contextual(
+        EGON_ID, conversation_type='egon_chat', partner_id='adam_001', max_maps=5,
+    )
+    print(f'  [6] Contextual (egon_chat, partner=adam_001): {len(prompt_egon)} Zeichen')
+    if 'Adam' in prompt_egon:
+        print(f'      Adam ist im Prompt: JA')
+    else:
+        print(f'      Adam ist im Prompt: NEIN (FEHLER!)')
+
+    # Test 7: Lobby-Participant Detection
+    lobby_parts = get_active_lobby_participants(max_messages=10, exclude_id=EGON_ID)
+    print(f'  [7] Lobby-Participants (excl. {EGON_ID}): {lobby_parts}')
+
+    # Test 8: Alte Funktion funktioniert noch (v1-Kompatibilitaet)
+    old_prompt = social_maps_to_prompt(EGON_ID, max_maps=3)
+    print(f'  [8] Alte social_maps_to_prompt: {len(old_prompt)} Zeichen (v1-Kompatibilitaet)')
+
+    # Test 9: Prompt mit kontextbezogener Selektion
+    prompt3 = build_system_prompt_v2(EGON_ID, conversation_type='owner_chat')
+    if 'WAS DU UEBER ANDERE WEISST' in prompt3:
+        idx = prompt3.index('WAS DU UEBER ANDERE WEISST')
+        end = min(idx + 300, len(prompt3))
+        snippet = prompt3[idx:end].replace('\\n', '\\n      ')
+        print(f'  [9] Prompt "WAS DU UEBER ANDERE WEISST": GEFUNDEN')
+        print(f'      {snippet}')
+    else:
+        print(f'  [9] Prompt "WAS DU UEBER ANDERE WEISST": nicht im Prompt (Maps leer?)')
+
+except Exception as e:
+    print(f'  FEHLER: {e}')
+    import traceback
+    traceback.print_exc()
+
 print()
 print('=' * 60)
 print(' SIMULATION ABGESCHLOSSEN')

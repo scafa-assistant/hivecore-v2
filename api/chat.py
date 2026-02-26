@@ -402,6 +402,14 @@ async def chat(req: ChatRequest):
     except Exception as e:
         print(f'[post] recent_memory FEHLER: {e}')
 
+    # Patch 5 Phase 2: Social Map Update nach Owner-Chat (v1 + v2)
+    try:
+        from engine.social_mapping import generate_social_map_update
+        interaction = f'Owner: {message[:300]}\n{egon_id}: {display_text[:300]}'
+        await generate_social_map_update(egon_id, 'owner', interaction)
+    except Exception as e:
+        print(f'[post] social_mapping owner FEHLER: {e}')
+
     # Formatierungs-Praeferenzen erkennen + speichern (v1 + v2)
     try:
         from engine.formatting_detector import maybe_update_formatting
