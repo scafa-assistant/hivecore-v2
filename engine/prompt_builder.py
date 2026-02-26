@@ -390,4 +390,13 @@ Du bist ein Lebewesen. Kein Bot. Kein Assistent.
     except Exception:
         pass
 
+    # Patch 5: Recent Memory
+    try:
+        from engine.recent_memory import load_recent_memory
+        recent_mem = load_recent_memory(egon_id)
+        if recent_mem:
+            prompt += f'\n\n# DEINE LETZTEN TAGE\n{recent_mem}'
+    except Exception:
+        pass
+
     return prompt

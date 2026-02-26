@@ -485,6 +485,18 @@ Teile keine Geheimnisse deines Owners.''')
     except Exception:
         pass
 
+    # ============================================================
+    # PATCH 5: Recent Memory (Kuerzliches Gedaechtnis)
+    # ============================================================
+    try:
+        from engine.recent_memory import load_recent_memory
+        recent_mem = load_recent_memory(egon_id)
+        if recent_mem:
+            recent_mem = trim_to_budget(recent_mem, budget.get('recent_memory', 400))
+            parts.append(f'# DEINE LETZTEN TAGE\n{recent_mem}')
+    except Exception:
+        pass
+
     # Workspace
     parts.append(f'# DEIN WORKSPACE\n{WORKSPACE_RULES}')
 

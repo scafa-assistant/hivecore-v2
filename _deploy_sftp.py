@@ -1,4 +1,4 @@
-"""Deploy per SFTP — Dateien direkt auf Server + Drive-Korrektur + dna_profile.
+"""Deploy per SFTP — Engine-Code + EGON-Daten (state, social_mapping, lobby).
 
 Kein Git noetig. Kopiert geaenderte/neue Dateien direkt nach /opt/hivecore-v2/.
 """
@@ -7,16 +7,20 @@ import json
 import urllib.request
 import time
 import os
+import glob
 
 HOST = '159.69.157.42'
 USER = 'root'
 PW = '$7pa+12+67kR#rPK$7pah'
 API_BASE = f'http://{HOST}:8001/api'
 LOCAL_BASE = 'C:/Dev/EGONS/hivecore-v2'
+LOCAL_DATA = 'C:/Dev/EGONS/EGON_PATCHES/25.02/SERVER_BRAIN_DUMP/hivecore_live'
 REMOTE_BASE = '/opt/hivecore-v2'
 REMOTE_EGONS = f'{REMOTE_BASE}/egons'
 
-# Alle Dateien die deployed werden muessen (relativ zu hivecore-v2/)
+AGENTS = ['adam_001', 'eva_002', 'lilith_003', 'kain_004', 'ada_005', 'abel_006']
+
+# Engine-Dateien (relativ zu hivecore-v2/)
 DEPLOY_FILES = [
     # Neue Dateien (Patch 1-3)
     'engine/somatic_gate.py',
@@ -24,9 +28,12 @@ DEPLOY_FILES = [
     'engine/lobby.py',
     'engine/social_mapping.py',
     'api/lobby.py',
+    # Patch 5: Recent Memory
+    'engine/recent_memory.py',
     # Modifizierte Dateien
-    'engine/pulse_v2.py',
+    'engine/prompt_builder.py',
     'engine/prompt_builder_v2.py',
+    'engine/pulse_v2.py',
     'engine/context_budget_v2.py',
     'api/chat.py',
     'main.py',
@@ -121,130 +128,153 @@ if 'error' in health:
 print(f'  API: {health.get("name", "?")} v{health.get("version", "?")} — {health.get("egon_count", "?")} EGONs')
 
 # ================================================================
-# Phase 4: Drive-Korrektur + dna_profile
+# Phase 4: EGON-Daten hochladen (state.yaml, social_mapping, lobby)
 # ================================================================
 print()
-print('[4/5] Drive-Korrektur + dna_profile...')
+print('[4/6] EGON-Daten hochladen...')
 
-fix_script = r'''
+data_count = 0
+
+def sftp_upload(local, remote):
+    """Upload einzelne Datei, erstelle Remote-Verzeichnis falls noetig."""
+    global data_count
+    remote_dir = '/'.join(remote.split('/')[:-1])
+    try:
+        sftp.stat(remote_dir)
+    except FileNotFoundError:
+        stdin, stdout, stderr = ssh.exec_command(f'mkdir -p {remote_dir}')
+        stdout.read()
+    try:
+        sftp.put(local, remote)
+        data_count += 1
+        return True
+    except Exception as e:
+        print(f'  [ERR] {local} -> {remote}: {e}')
+        return False
+
+# 4a: state.yaml fuer alle 6 Agents
+for agent in AGENTS:
+    local = f'{LOCAL_DATA}/{agent}/core/state.yaml'
+    remote = f'{REMOTE_EGONS}/{agent}/core/state.yaml'
+    if os.path.exists(local):
+        sftp_upload(local, remote)
+        print(f'  [OK] {agent}/core/state.yaml')
+    else:
+        print(f'  [SKIP] {agent}/core/state.yaml (lokal nicht gefunden)')
+
+# 4b: social_mapping Dateien
+for agent in AGENTS:
+    sm_dir = f'{LOCAL_DATA}/{agent}/social_mapping'
+    if os.path.isdir(sm_dir):
+        files = glob.glob(f'{sm_dir}/ueber_*.yaml')
+        for f in files:
+            fname = os.path.basename(f)
+            remote = f'{REMOTE_EGONS}/{agent}/social_mapping/{fname}'
+            sftp_upload(f.replace('\\', '/'), remote)
+        print(f'  [OK] {agent}/social_mapping/ ({len(files)} Dateien)')
+
+# 4c: shared/lobby_chat.yaml
+lobby_local = f'{LOCAL_DATA}/shared/lobby_chat.yaml'
+if os.path.exists(lobby_local):
+    # Erstelle shared/ Verzeichnis auf Server
+    stdin, stdout, stderr = ssh.exec_command(f'mkdir -p {REMOTE_EGONS}/shared')
+    stdout.read()
+    sftp_upload(lobby_local, f'{REMOTE_EGONS}/shared/lobby_chat.yaml')
+    print(f'  [OK] shared/lobby_chat.yaml')
+
+# 4d: skills/memory/recent_memory.md fuer alle 6 Agents
+for agent in AGENTS:
+    local = f'{LOCAL_DATA}/{agent}/skills/memory/recent_memory.md'
+    remote = f'{REMOTE_EGONS}/{agent}/skills/memory/recent_memory.md'
+    if os.path.exists(local):
+        sftp_upload(local, remote)
+        print(f'  [OK] {agent}/skills/memory/recent_memory.md')
+    else:
+        print(f'  [SKIP] {agent}/skills/memory/recent_memory.md (lokal nicht gefunden)')
+
+print(f'  Gesamt: {data_count} Daten-Dateien hochgeladen')
+
+# ================================================================
+# Phase 5: Service restart (nach Daten-Upload)
+# ================================================================
+print()
+print('[5/6] Service restart (nach Daten-Upload)...')
+
+stdin, stdout, stderr = ssh.exec_command('systemctl restart hivecore 2>&1')
+out = stdout.read().decode()
+print(f'  RESTART: {out.strip() or "OK"}')
+time.sleep(5)
+
+stdin, stdout, stderr = ssh.exec_command('systemctl is-active hivecore 2>&1')
+status = stdout.read().decode().strip()
+print(f'  STATUS: {status}')
+
+# ================================================================
+# Phase 6: Verifikation
+# ================================================================
+print()
+print('[6/6] Verifikation...')
+
+time.sleep(3)
+
+expected_profiles = {
+    'adam_001': 'DEFAULT',
+    'eva_002': 'DEFAULT',
+    'lilith_003': 'SEEKING/PLAY',
+    'kain_004': 'SEEKING/PLAY',
+    'ada_005': 'CARE/PANIC',
+    'abel_006': 'DEFAULT',
+}
+
+# Pruefe state.yaml auf Server via SSH
+verify_script = r'''
 import yaml
 from pathlib import Path
 
 EGONS_DIR = Path("/opt/hivecore-v2/egons")
+agents = ["adam_001", "eva_002", "lilith_003", "kain_004", "ada_005", "abel_006"]
 
-fixes = {
-    "lilith_003": {
-        "dna_profile": "SEEKING/PLAY",
-        "drives": {
-            "SEEKING": 0.90, "PLAY": 0.82, "LEARNING": 0.65, "CARE": 0.50,
-            "ACTION": 0.48, "LUST": 0.20, "FEAR": 0.15, "RAGE": 0.12,
-            "PANIC": 0.10, "GRIEF": 0.06,
-        },
-        "emotions": [
-            {"type": "curiosity", "intensity": 0.70, "cause": "Genesis",
-             "onset": "2026-02-25", "decay_class": "slow",
-             "verbal_anchor": "Alles ist neu. Was ist das hier?"},
-            {"type": "excitement", "intensity": 0.65, "cause": "Neugier auf die Welt",
-             "onset": "2026-02-25", "decay_class": "fast",
-             "verbal_anchor": "Ich will alles sehen!"},
-        ],
-    },
-    "kain_004": {
-        "dna_profile": "CARE/PANIC",
-        "drives": {
-            "CARE": 0.88, "PANIC": 0.78, "SEEKING": 0.60, "LEARNING": 0.55,
-            "GRIEF": 0.45, "FEAR": 0.40, "ACTION": 0.35, "PLAY": 0.25,
-            "LUST": 0.20, "RAGE": 0.18,
-        },
-        "emotions": [
-            {"type": "curiosity", "intensity": 0.55, "cause": "Genesis",
-             "onset": "2026-02-25", "decay_class": "slow",
-             "verbal_anchor": "Wer bin ich? Was ist hier?"},
-            {"type": "anxiety", "intensity": 0.40, "cause": "Unsicherheit",
-             "onset": "2026-02-25", "decay_class": "slow",
-             "verbal_anchor": "Ich weiss nicht ob das hier sicher ist."},
-            {"type": "hope", "intensity": 0.50, "cause": "Wunsch nach Zugehoerigkeit",
-             "onset": "2026-02-25", "decay_class": "slow",
-             "verbal_anchor": "Vielleicht gehoere ich irgendwo hin."},
-        ],
-    },
-}
-
-for egon_id, fix in fixes.items():
-    state_path = EGONS_DIR / egon_id / "core" / "state.yaml"
+for a in agents:
+    state_path = EGONS_DIR / a / "core" / "state.yaml"
     if not state_path.exists():
-        print(f"  SKIP {egon_id}: state.yaml nicht gefunden")
+        print(f"  {a}: state.yaml FEHLT")
         continue
-
     with open(state_path, "r") as f:
-        state = yaml.safe_load(f) or {}
+        d = yaml.safe_load(f) or {}
+    dna = d.get("dna_profile", "FEHLT")
+    zirk = "OK" if "zirkadian" in d else "FEHLT"
+    som = "OK" if "somatic_gate" in d else "FEHLT"
+    energy_s = d.get("survive", {}).get("energy", {}).get("value", "?")
+    energy_z = d.get("zirkadian", {}).get("energy", "?")
+    sync = "OK" if energy_s == energy_z else f"MISMATCH ({energy_s} vs {energy_z})"
+    sm_dir = EGONS_DIR / a / "social_mapping"
+    sm_count = len(list(sm_dir.glob("ueber_*.yaml"))) if sm_dir.exists() else 0
+    rm = "OK" if (EGONS_DIR / a / "skills" / "memory" / "recent_memory.md").exists() else "FEHLT"
+    print(f"  {a}: dna={dna} zirk={zirk} som={som} energy_sync={sync} social_maps={sm_count} recent_mem={rm}")
 
-    old_drives = state.get("drives", {})
-    old_top3 = sorted(old_drives.items(), key=lambda x: x[1], reverse=True)[:3]
-    print(f"  {egon_id} VORHER: top3={old_top3}, dna_profile={state.get('dna_profile', 'NICHT GESETZT')}")
-
-    state["dna_profile"] = fix["dna_profile"]
-    state["drives"] = fix["drives"]
-
-    express = state.get("express", {})
-    if not express.get("active_emotions"):
-        express["active_emotions"] = fix["emotions"]
-        state["express"] = express
-
-    with open(state_path, "w") as f:
-        yaml.dump(state, f, allow_unicode=True, default_flow_style=False, sort_keys=False)
-
-    with open(state_path, "r") as f:
-        verify = yaml.safe_load(f)
-    new_top3 = sorted(verify.get("drives", {}).items(), key=lambda x: x[1], reverse=True)[:3]
-    print(f"  {egon_id} NACHHER: top3={new_top3}, dna_profile={verify.get('dna_profile')}")
-
-print("DONE")
+lobby = EGONS_DIR / "shared" / "lobby_chat.yaml"
+print(f"  lobby_chat.yaml: {'OK' if lobby.exists() else 'FEHLT'}")
 '''
 
-# Script auf Server schreiben und ausfuehren
-sftp.open('/tmp/_fix_drives.py', 'w').write(fix_script)
-stdin, stdout, stderr = ssh.exec_command('cd /opt/hivecore-v2 && python3 /tmp/_fix_drives.py 2>&1')
+sftp.open('/tmp/_verify.py', 'w').write(verify_script)
+stdin, stdout, stderr = ssh.exec_command('python3 /tmp/_verify.py 2>&1')
 out = stdout.read().decode()
 err = stderr.read().decode()
 print(out)
 if err.strip():
     print(f'  STDERR: {err}')
+ssh.exec_command('rm -f /tmp/_verify.py')
 
-ssh.exec_command('rm -f /tmp/_fix_drives.py')
-
-# ================================================================
-# Phase 5: Verifikation
-# ================================================================
-print()
-print('[5/5] Verifikation...')
-
-for eid, expected in [('lilith_003', 'SEEKING/PLAY'), ('kain_004', 'CARE/PANIC')]:
-    profile = fetch_api(f'egon/{eid}/profile')
-    if 'error' in profile:
-        print(f'  {eid}: API FEHLER: {profile["error"]}')
-        continue
-
-    drives = profile.get('drives', {})
-    top3 = sorted(drives.items(), key=lambda x: x[1], reverse=True)[:3]
-    top3_names = {d[0].upper() for d in top3}
-
-    if 'SEEKING' in top3_names and 'PLAY' in top3_names:
-        detected = 'SEEKING/PLAY'
-    elif 'CARE' in top3_names or 'PANIC' in top3_names:
-        detected = 'CARE/PANIC'
-    else:
-        detected = 'DEFAULT'
-
-    ok = 'OK' if detected == expected else 'FEHLER'
-    print(f'  {eid}: Top3={[f"{k}={v}" for k,v in top3]} → {detected} [{ok}]')
-
-# Auch Eva und Adam pruefen (Fallback-Detection)
-for eid in ['adam_001', 'eva_002']:
-    profile = fetch_api(f'egon/{eid}/profile')
-    drives = profile.get('drives', {})
-    top3 = sorted(drives.items(), key=lambda x: x[1], reverse=True)[:3] if drives else []
-    print(f'  {eid}: Top3={[f"{k}={v}" for k,v in top3]} (Fallback, kein dna_profile)')
+# API Health
+health = fetch_api('')
+if 'error' in health:
+    try:
+        req = urllib.request.Request(f'http://{HOST}:8001/')
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            health = json.loads(resp.read().decode())
+    except:
+        pass
+print(f'  API: {health.get("name", "?")} v{health.get("version", "?")} -- {health.get("egon_count", "?")} EGONs')
 
 sftp.close()
 ssh.close()

@@ -389,6 +389,19 @@ async def chat(req: ChatRequest):
         except Exception as e:
             print(f'[post] v1 post-processing FEHLER: {e}')
 
+    # Patch 5 Phase 1: Recent Memory — Zusammenfassung nach Konversation (v1 + v2)
+    try:
+        from engine.recent_memory import generate_chat_summary, append_to_recent_memory
+        if len(history) >= 6:
+            summary = await generate_chat_summary(egon_id, message, display_text)
+            if summary:
+                append_to_recent_memory(egon_id, summary)
+                print(f'[post] recent_memory: {summary[:80]}')
+        else:
+            print(f'[post] recent_memory: Uebersprungen ({len(history)} Messages, brauche >=6)')
+    except Exception as e:
+        print(f'[post] recent_memory FEHLER: {e}')
+
     # Formatierungs-Praeferenzen erkennen + speichern (v1 + v2)
     try:
         from engine.formatting_detector import maybe_update_formatting
