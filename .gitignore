@@ -6,3 +6,7 @@ venv/
 *.egg-info/
 dist/
 build/
+
+# Claude Code (lokale Settings + Worktrees)
+.claude/
+CLAUDE.local.md
