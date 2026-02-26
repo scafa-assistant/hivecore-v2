@@ -1,7 +1,7 @@
 {
   "motor_vocabulary": {
     "version": "1.2",
-    "word_count": 36,
+    "word_count": 38,
     "_note": "v1.2: Alle Arm-Achsen korrigiert anhand echter GLB-Deltas (waving.glb, gesture.glb, thumbs_up.glb)",
 
     "_achsen_map_upper_arm_R": {
@@ -95,6 +95,38 @@
         "bones": {
           "head": { "rx": -12, "rz": 8 },
           "neck": { "rx": -5 }
+        },
+        "easing": "ease_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "kopf_drehen_rechts": {
+        "id": "MOT_HEAD_TURN_R",
+        "category": "gesture",
+        "type": "static",
+        "duration_ms": 500,
+        "_note": "v1.3: ry negativ = Kopf nach rechts (GLB-verifiziert aus look_around.glb)",
+        "bones": {
+          "head": { "ry": -25 },
+          "neck": { "ry": -10 }
+        },
+        "easing": "ease_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "kopf_drehen_links": {
+        "id": "MOT_HEAD_TURN_L",
+        "category": "gesture",
+        "type": "static",
+        "duration_ms": 500,
+        "_note": "v1.3: ry positiv = Kopf nach links (GLB-verifiziert aus look_around.glb)",
+        "bones": {
+          "head": { "ry": 25 },
+          "neck": { "ry": 10 }
         },
         "easing": "ease_out",
         "loopable": false,
