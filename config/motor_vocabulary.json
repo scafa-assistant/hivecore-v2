@@ -650,12 +650,12 @@
         "category": "gesture",
         "type": "static",
         "duration_ms": 600,
-        "_fix": "v1.2: ry:60 statt rx:-90 (GLB: ry=Arm hoch), rz fuer Ellenbogen",
+        "_fix": "v1.4: rz:0 (nicht nach hinten!), Ellenbogen rz:-80 wie winken",
         "bones": {
-          "upper_arm_R": { "rx": -20, "ry": 60, "rz": 15 },
-          "lower_arm_R": { "rz": -20 },
+          "upper_arm_R": { "rx": -24, "ry": 60 },
+          "lower_arm_R": { "rz": -80 },
           "hand_R": { "rx": -10 },
-          "shoulder_R": { "rx": -10, "ry": 5 }
+          "shoulder_R": { "rx": -10, "ry": 6 }
         },
         "easing": "ease_out",
         "loopable": false,
@@ -668,16 +668,16 @@
         "category": "gesture",
         "type": "static",
         "duration_ms": 700,
-        "_fix": "v1.2: ry statt rx, rz fuer Ellenbogen",
+        "_fix": "v1.4: rz:0 (nicht nach hinten!), Ellenbogen rz:-80/+80 wie winken",
         "bones": {
-          "upper_arm_R": { "rx": -20, "ry": 60, "rz": 15 },
-          "upper_arm_L": { "rx": -20, "ry": -60, "rz": -15 },
-          "lower_arm_R": { "rz": -20 },
-          "lower_arm_L": { "rz": 20 },
+          "upper_arm_R": { "rx": -24, "ry": 60 },
+          "upper_arm_L": { "rx": -24, "ry": -60 },
+          "lower_arm_R": { "rz": -80 },
+          "lower_arm_L": { "rz": 80 },
           "hand_R": { "rx": -10 },
           "hand_L": { "rx": -10 },
-          "shoulder_R": { "rx": -10, "ry": 5 },
-          "shoulder_L": { "rx": -10, "ry": -5 }
+          "shoulder_R": { "rx": -10, "ry": 6 },
+          "shoulder_L": { "rx": -10, "ry": -6 }
         },
         "easing": "ease_out",
         "loopable": false,
