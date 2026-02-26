@@ -74,6 +74,7 @@
         "category": "gesture",
         "type": "sequence",
         "duration_ms": 700,
+        "_fix": "v1.4: GLB-Fallback (echte Kopfschuettel-Animation statt Motor-Keyframes)",
         "keyframes": [
           { "t": 0.0,  "bones": { "head": { "ry": 0 } } },
           { "t": 0.25, "bones": { "head": { "ry": -20 } } },
@@ -83,8 +84,8 @@
         ],
         "easing": "ease_in_out",
         "loopable": false,
-        "blendable": true,
-        "glb_fallback": null
+        "blendable": false,
+        "glb_fallback": "head_shake"
       },
 
       "kopf_neigen": {
