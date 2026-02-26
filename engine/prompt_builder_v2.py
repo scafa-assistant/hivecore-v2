@@ -28,6 +28,7 @@ from engine.yaml_to_prompt import (
     skills_to_prompt,
     wallet_to_prompt,
     network_to_prompt,
+    pairing_to_prompt,
 )
 from engine.dna_compressor import compress_dna
 from engine.context_budget_v2 import get_budget, trim_to_budget
@@ -484,6 +485,17 @@ Teile keine Geheimnisse deines Owners.''')
         if maps_text:
             maps_text = trim_to_budget(maps_text, budget.get('social_maps', 100))
             parts.append(f'# WAS DU UEBER ANDERE WEISST\n{maps_text}')
+    except Exception:
+        pass
+
+    # ============================================================
+    # PATCH 6 Phase 2: Pairing / Resonanz Context
+    # ============================================================
+    try:
+        pairing_text = pairing_to_prompt(state_data)
+        if pairing_text:
+            pairing_text = trim_to_budget(pairing_text, budget.get('pairing', 100))
+            parts.append(f'# RESONANZ\n{pairing_text}')
     except Exception:
         pass
 

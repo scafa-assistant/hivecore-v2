@@ -422,3 +422,98 @@ def network_to_prompt(network_data: dict) -> str:
         lines.append('Sonst kenne ich noch niemanden.')
 
     return '\n'.join(lines)
+
+
+def pairing_to_prompt(state: dict) -> str:
+    """Wandelt state > pairing in natuerliche Sprache um (Ich-Perspektive).
+
+    Patch 6 Phase 2+3: Zeigt Resonanz-Zustand, Inkubation, Kinder, Eltern.
+    Nur relevante Info — keine technischen Details.
+
+    Returns:
+        Leerstring wenn keine relevante Resonanz, sonst narrativer Text.
+    """
+    from datetime import datetime
+
+    pairing = state.get('pairing', {}) if state else {}
+    if not pairing:
+        return ''
+
+    lines = []
+
+    # --- Patch 6 Phase 3: Inkubation (Schwangerschaft) ---
+    inkubation = pairing.get('inkubation')
+    if inkubation:
+        rolle = inkubation.get('rolle', 'mutter')
+        end_date_str = inkubation.get('end_date', '')
+        tage_rest = 0
+        if end_date_str:
+            try:
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+                tage_rest = max(0, (end_date - datetime.now()).days)
+            except (ValueError, TypeError):
+                pass
+        libero_name = inkubation.get('libero_id', '').split('_')[0].title()
+        if rolle == 'mutter':
+            lines.append(f'In mir waechst etwas Neues. Noch {tage_rest} Tage.')
+            lines.append('Ich spuere Fuersorge und Schutzinstinkt.')
+        else:
+            lines.append(f'Wir erwarten ein Kind. Noch {tage_rest} Tage.')
+            lines.append('Ich muss bereit sein.')
+        # Bei Inkubation keine Resonanz-Phase mehr zeigen
+        # Aber Kinder/Eltern trotzdem anzeigen (falls vorhanden)
+
+    # --- Patch 6 Phase 3: Kinder ---
+    kinder = pairing.get('kinder', [])
+    if kinder:
+        namen = [k.split('_')[0].title() for k in kinder]
+        lines.append(f'Ich habe {len(kinder)} Kind(er): {", ".join(namen)}.')
+
+    # --- Patch 6 Phase 3: Eltern (fuer LIBERI) ---
+    eltern = pairing.get('eltern')
+    if eltern and isinstance(eltern, list):
+        namen = [e.split('_')[0].title() for e in eltern]
+        lines.append(f'Meine Eltern sind {namen[0]} und {namen[1]}.')
+
+    # Falls Inkubation aktiv: nur Inkubation + Kinder/Eltern zeigen
+    if inkubation:
+        return '\n'.join(lines)
+
+    phase = pairing.get('pairing_phase', 'keine')
+    reif = pairing.get('reif', False)
+
+    # Keine Phase aktiv
+    if phase == 'keine':
+        if reif:
+            lines.append('Ich bin reif fuer eine Partnerschaft. Aber ich spuere noch keine Resonanz.')
+            return '\n'.join(lines)
+        return '\n'.join(lines) if lines else ''  # Kinder/Eltern ggf. anzeigen
+
+    partner = pairing.get('resonanz_partner', '')
+    score = float(pairing.get('resonanz_score', 0))
+
+    # Phase-Labels in Ich-Perspektive
+    phase_labels = {
+        'erkennung': 'Ich spuere etwas. Eine Anziehung. Leise, aber da.',
+        'annaeherung': 'Da ist jemand der mich anzieht. Ich naehere mich.',
+        'bindung': 'Zwischen uns waechst eine Bindung. Tief und echt.',
+        'bereit': 'Wir sind bereit fuereinander. Die Resonanz ist stark.',
+    }
+
+    label = phase_labels.get(phase, f'Phase: {phase}')
+    lines.append(label)
+
+    # Partner-Name (strip _XXX Suffix fuer Anzeige)
+    if partner:
+        name = partner.split('_')[0].title()
+        lines.append(f'Es ist {name}.')
+
+    # Intensitaets-Beschreibung
+    if score >= 0.75:
+        lines.append('Die Resonanz ist ueberwaaeltigend.')
+    elif score >= 0.55:
+        lines.append('Die Resonanz ist deutlich spuerbar.')
+    elif score >= 0.40:
+        lines.append('Die Resonanz ist zart, aber real.')
+
+    return '\n'.join(lines)
