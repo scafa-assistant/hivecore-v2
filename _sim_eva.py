@@ -353,6 +353,190 @@ except Exception as e:
     import traceback
     traceback.print_exc()
 
+# ================================================================
+# PATCH 6 Phase 1 TEST: Geschlecht + Bond-Typ + Geschlechtsspezifisches Wachstum
+# ================================================================
+print()
+print('-' * 60)
+print(' PATCH 6 Phase 1 TEST: Geschlecht + Bond-Typen')
+print('-' * 60)
+
+pass_count = 0
+fail_count = 0
+
+try:
+    from engine.bonds_v2 import (
+        _get_geschlecht, _days_since_last, _check_bond_typ_transition,
+        _find_bond, _calculate_score,
+    )
+
+    # Test 1: Geschlecht aus state.yaml lesen
+    print(f'  [1] Geschlecht-Flag...')
+    expected_gender = {
+        'adam_001': 'M', 'eva_002': 'F', 'lilith_003': 'F',
+        'kain_004': 'M', 'ada_005': 'F', 'abel_006': 'M',
+    }
+    all_ok = True
+    for agent, expected in expected_gender.items():
+        actual = _get_geschlecht(agent)
+        ok = actual == expected
+        status_str = 'OK' if ok else f'FAIL (got {actual})'
+        print(f'      {agent}: {actual} (erwartet: {expected}) {status_str}')
+        if not ok:
+            all_ok = False
+    if all_ok:
+        pass_count += 1
+        print(f'      => [PASS]')
+    else:
+        fail_count += 1
+        print(f'      => [FAIL]')
+
+    # Test 2: Pairing-Block vorhanden
+    print(f'  [2] Pairing-Block...')
+    all_ok = True
+    for agent in expected_gender:
+        s = read_yaml_organ(agent, 'core', 'state.yaml')
+        has_pairing = 'pairing' in s if s else False
+        reif = s.get('pairing', {}).get('reif', '?') if s else '?'
+        ok = has_pairing and reif == False
+        status_str = 'OK' if ok else f'FAIL (pairing={has_pairing}, reif={reif})'
+        print(f'      {agent}: pairing={has_pairing}, reif={reif} {status_str}')
+        if not ok:
+            all_ok = False
+    if all_ok:
+        pass_count += 1
+        print(f'      => [PASS]')
+    else:
+        fail_count += 1
+        print(f'      => [FAIL]')
+
+    # Test 3: Bond-Typ vorhanden
+    print(f'  [3] Bond-Typ in bonds.yaml...')
+    all_ok = True
+    for agent in expected_gender:
+        bd = read_yaml_organ(agent, 'social', 'bonds.yaml')
+        if not bd:
+            print(f'      {agent}: Keine bonds.yaml')
+            continue
+        for bond in bd.get('bonds', []):
+            bt = bond.get('bond_typ', 'FEHLT')
+            bid = bond.get('id', '?')
+            btype = bond.get('type', '?')
+            expected_bt = 'owner' if btype == 'owner' else 'freundschaft'
+            ok = bt == expected_bt
+            status_str = 'OK' if ok else f'FAIL (got {bt})'
+            print(f'      {agent} -> {bid}: bond_typ={bt} (erwartet: {expected_bt}) {status_str}')
+            if not ok:
+                all_ok = False
+    if all_ok:
+        pass_count += 1
+        print(f'      => [PASS]')
+    else:
+        fail_count += 1
+        print(f'      => [FAIL]')
+
+    # Test 4: _days_since_last() Helper
+    print(f'  [4] _days_since_last() Helper...')
+    test_bond = {'last_interaction': '2026-02-25'}
+    days = _days_since_last(test_bond)
+    print(f'      Tage seit 2026-02-25: {days}')
+    empty_bond = {}
+    days2 = _days_since_last(empty_bond)
+    ok = days >= 0 and days2 == 999
+    status_str = 'OK' if ok else 'FAIL'
+    print(f'      Leerer Bond: {days2} (erwartet: 999) {status_str}')
+    if ok:
+        pass_count += 1
+        print(f'      => [PASS]')
+    else:
+        fail_count += 1
+        print(f'      => [FAIL]')
+
+    # Test 5: Bond-Typ Transition (freundschaft -> romantisch)
+    print(f'  [5] Bond-Typ Transition...')
+    # Simuliere Ada (F) mit Bond zu Abel (M), trust=0.6, familiarity=0.4
+    test_bond_trans = {
+        'bond_typ': 'freundschaft',
+        'trust': 0.6,
+        'familiarity': 0.4,
+    }
+    _check_bond_typ_transition('ada_005', 'abel_006', test_bond_trans)
+    trans_ok = test_bond_trans.get('bond_typ') == 'romantisch'
+    print(f'      Ada->Abel (trust=0.6, fam=0.4): bond_typ={test_bond_trans.get("bond_typ")} {"OK" if trans_ok else "FAIL"}')
+
+    # Gleichgeschlechtlich sollte NICHT transitionieren
+    test_bond_same = {
+        'bond_typ': 'freundschaft',
+        'trust': 0.8,
+        'familiarity': 0.5,
+    }
+    _check_bond_typ_transition('ada_005', 'eva_002', test_bond_same)
+    same_ok = test_bond_same.get('bond_typ') == 'freundschaft'
+    print(f'      Ada->Eva (gleichgeschl.): bond_typ={test_bond_same.get("bond_typ")} {"OK" if same_ok else "FAIL"}')
+
+    # Unter Schwelle — sollte NICHT transitionieren
+    test_bond_low = {
+        'bond_typ': 'freundschaft',
+        'trust': 0.3,
+        'familiarity': 0.2,
+    }
+    _check_bond_typ_transition('ada_005', 'abel_006', test_bond_low)
+    low_ok = test_bond_low.get('bond_typ') == 'freundschaft'
+    print(f'      Ada->Abel (trust=0.3, fam=0.2): bond_typ={test_bond_low.get("bond_typ")} {"OK" if low_ok else "FAIL"}')
+
+    # Owner-Bond — sollte NICHT transitionieren
+    test_bond_owner = {
+        'bond_typ': 'owner',
+        'trust': 0.9,
+        'familiarity': 0.8,
+    }
+    _check_bond_typ_transition('ada_005', 'OWNER_CURRENT', test_bond_owner)
+    owner_ok = test_bond_owner.get('bond_typ') == 'owner'
+    print(f'      Ada->Owner: bond_typ={test_bond_owner.get("bond_typ")} {"OK" if owner_ok else "FAIL"}')
+
+    all_trans_ok = trans_ok and same_ok and low_ok and owner_ok
+    if all_trans_ok:
+        pass_count += 1
+        print(f'      => [PASS]')
+    else:
+        fail_count += 1
+        print(f'      => [FAIL]')
+
+    # Test 6: Prompt Bond-Typ Anzeige
+    print(f'  [6] Bond-Typ im Prompt...')
+    from engine.yaml_to_prompt import bonds_to_prompt
+    bd_eva = read_yaml_organ('eva_002', 'social', 'bonds.yaml')
+    prompt_text = bonds_to_prompt(bd_eva)
+    has_bindungstyp = 'Bindungstyp:' in prompt_text or 'Freundschaft' in prompt_text
+    print(f'      Prompt: {prompt_text[:200]}')
+    print(f'      Bindungstyp im Prompt: {"JA" if has_bindungstyp else "NEIN"}')
+    if has_bindungstyp:
+        pass_count += 1
+        print(f'      => [PASS]')
+    else:
+        # Bond-Typ "owner" == type "owner" -> wird nicht extra angezeigt
+        # Bond-Typ "freundschaft" != type "egon" -> sollte angezeigt werden
+        has_freundschaft = 'Freundschaft' in prompt_text
+        if has_freundschaft:
+            pass_count += 1
+            print(f'      => [PASS] (Freundschaft im Text)')
+        else:
+            fail_count += 1
+            print(f'      => [FAIL]')
+
+except Exception as e:
+    print(f'  FEHLER: {e}')
+    import traceback
+    traceback.print_exc()
+    fail_count += 1
+
+print()
+print(f'  Patch 6 Phase 1: {pass_count}/{pass_count + fail_count} Tests bestanden')
+if fail_count == 0:
+    print(f'  ALLE PATCH 6 TESTS BESTANDEN!')
+else:
+    print(f'  {fail_count} Tests FEHLGESCHLAGEN!')
+
 print()
 print('=' * 60)
 print(' SIMULATION ABGESCHLOSSEN')

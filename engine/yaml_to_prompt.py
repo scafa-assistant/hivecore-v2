@@ -107,6 +107,7 @@ def bonds_to_prompt(bonds: dict, partner_id: str = None) -> str:
     for bond in bond_list:
         bid = bond.get('id', '')
         btype = bond.get('type', '')
+        bond_typ = bond.get('bond_typ', '')
         score = bond.get('score', 0)
         trust = bond.get('trust', 0)
         style = bond.get('attachment_style', 'undefined')
@@ -129,6 +130,16 @@ def bonds_to_prompt(bonds: dict, partner_id: str = None) -> str:
             closeness = 'Fremder'
 
         line = f'{btype.title()} (Score {score}, {closeness})'
+        # Patch 6: Bond-Typ anzeigen (wenn nicht leer und nicht gleich type)
+        if bond_typ and bond_typ != btype:
+            bond_typ_label = {
+                'owner': 'Owner',
+                'freundschaft': 'Freundschaft',
+                'romantisch': 'Romantisch',
+                'eltern_kind': 'Eltern-Kind',
+                'rivale': 'Rivale',
+            }.get(bond_typ, bond_typ.title())
+            line += f', Bindungstyp: {bond_typ_label}'
         line += f' — Vertrauen: {trust:.1f}, Stil: {style}'
         if debt > 0:
             line += f', Emotionale Schulden: {debt}'
