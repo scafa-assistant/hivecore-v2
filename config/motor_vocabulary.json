@@ -1,7 +1,7 @@
 {
   "motor_vocabulary": {
     "version": "1.0",
-    "word_count": 37,
+    "word_count": 40,
     "_note": "Alle eye_L/eye_R Referenzen auf head umgeleitet (GLBs haben keine Eye-Bones).",
     "words": {
 
@@ -661,6 +661,53 @@
           "lower_arm_R": { "rx": 40 }
         },
         "easing": "ease_in",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "_test_note": "=== ARM-HEBEN ACHSEN-TEST: Drei Varianten um korrekte Rotation fuer Adams GLB-Skelett zu finden ===",
+
+      "arm_heben_test_a": {
+        "id": "MOT_ARM_TEST_A",
+        "category": "gesture",
+        "type": "static",
+        "duration_ms": 800,
+        "_description": "Variante A: upper_arm_R rx: -45 (Rotation um X-Achse)",
+        "bones": {
+          "upper_arm_R": { "rx": -45 }
+        },
+        "easing": "ease_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "arm_heben_test_b": {
+        "id": "MOT_ARM_TEST_B",
+        "category": "gesture",
+        "type": "static",
+        "duration_ms": 800,
+        "_description": "Variante B: upper_arm_R ry: -45 (Rotation um Y-Achse)",
+        "bones": {
+          "upper_arm_R": { "ry": -45 }
+        },
+        "easing": "ease_out",
+        "loopable": false,
+        "blendable": true,
+        "glb_fallback": null
+      },
+
+      "arm_heben_test_c": {
+        "id": "MOT_ARM_TEST_C",
+        "category": "gesture",
+        "type": "static",
+        "duration_ms": 800,
+        "_description": "Variante C: upper_arm_R rz: -45 (Rotation um Z-Achse)",
+        "bones": {
+          "upper_arm_R": { "rz": -45 }
+        },
+        "easing": "ease_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null

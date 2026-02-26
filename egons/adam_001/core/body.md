@@ -54,6 +54,9 @@ Meine Basis-Bewegungen:
   erschöpft — Müde. Ausgelaugt. Brauche Pause.
   ängstlich — Unsicher. Besorgt. Schutzhaltung.
   gewicht_links / gewicht_rechts — Gewichtsverlagerung.
+  arm_heben_test_a — TEST: Rechten Arm heben (Variante A, rx-Achse)
+  arm_heben_test_b — TEST: Rechten Arm heben (Variante B, ry-Achse)
+  arm_heben_test_c — TEST: Rechten Arm heben (Variante C, rz-Achse)
 
 ## Was ich noch nicht kann
 
