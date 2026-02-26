@@ -10,6 +10,19 @@ import json
 import os
 from typing import Optional
 
+
+def _normalize_umlauts(word: str) -> str:
+    """Normalisiert deutsche Umlaute zu ASCII-Ersetzungen.
+
+    Das LLM generiert manchmal Umlaute (kopf_schütteln) obwohl
+    motor_vocabulary.json ASCII nutzt (kopf_schuetteln).
+    Fix fuer BUG-010: Umlaut-Mismatch body.md vs vocabulary.
+    """
+    return (word
+            .replace('ü', 'ue').replace('ö', 'oe')
+            .replace('ä', 'ae').replace('ß', 'ss')
+            .replace('Ü', 'Ue').replace('Ö', 'Oe').replace('Ä', 'Ae'))
+
 # Motor-Vocabulary einmalig laden (Singleton)
 _vocab_cache: Optional[dict] = None
 _VOCAB_PATH = os.path.join(
@@ -74,9 +87,11 @@ def translate(body_data: dict) -> Optional[dict]:
 
     animations = []
     for word in words:
-        spec = vocab.get(word)
+        normalized = _normalize_umlauts(word)
+        spec = vocab.get(normalized)
         if not spec:
             # Unbekanntes Wort — skippen (LLM hat etwas halluziniert)
+            print(f'[motor] WARNUNG: Unbekanntes Wort "{word}" (normalisiert: "{normalized}")')
             continue
 
         anim = {
