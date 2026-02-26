@@ -1,4 +1,4 @@
-"""Bonds v2 — Bowlby Attachment System.
+"""Bonds v2 — Bowlby Attachment System (Patch 6 Phase 1: Geschlechtsspezifisch).
 
 Ersetzt das alte bonds.py System:
 
@@ -15,6 +15,11 @@ NEU (bonds_v2.py):
   - Bond-History fuer bedeutsame Interaktionen
   - Emotional-Debt Tracking
   - YAML-basiert (bonds.yaml)
+
+Patch 6 Phase 1:
+  - Geschlechtsspezifisches Bond-Wachstum (Oxytocin F / Vasopressin M)
+  - Bond-Typ Tracking (owner/freundschaft/romantisch/eltern_kind/rivale)
+  - Bond-Typ Transition (freundschaft -> romantisch bei gegengeschlechtlichen Paaren)
 """
 
 import re
@@ -89,14 +94,40 @@ async def update_bond_after_chat(
 
     # --- Trust Update (Rolling Average, max +0.1 pro Chat) ---
     trust_delta = max(-0.1, min(0.1, float(eval_data.get('trust_delta', 0.0))))
+
+    # --- Patch 6: Geschlechtsspezifische Trust-Delta Modulation ---
+    geschlecht = _get_geschlecht(egon_id)
+    bond_typ = bond.get('bond_typ', 'freundschaft')
+    if geschlecht and bond_typ not in ('owner',):
+        if geschlecht == 'F':
+            # OXYTOCIN-KANAL: Emotionale Tiefe verstaerkt Bindung
+            if trust_delta > 0:
+                trust_delta *= 1.3   # Positive emotionale Interaktion staerker
+            if trust_delta < -0.03:
+                trust_delta *= 1.2   # Inkonsistenz schmerzt mehr
+        elif geschlecht == 'M':
+            # VASOPRESSIN-KANAL: Praesenz + Regelmaessigkeit zaehlt mehr
+            days_since = _days_since_last(bond)
+            if days_since <= 3 and trust_delta > 0:
+                trust_delta *= 1.2   # Regelmaessige Praesenz belohnt
+            if days_since > 7:
+                trust_delta *= 0.8   # Abwesenheit bestraft
+        # Re-clamp nach Modulation
+        trust_delta = max(-0.1, min(0.1, trust_delta))
+
     current_trust = bond.get('trust', 0.5)
     new_trust = max(0.0, min(1.0, current_trust + trust_delta))
     bond['trust'] = round(new_trust, 3)
 
-    # --- Familiarity steigt leicht bei jeder Interaktion ---
+    # --- Familiarity (Patch 6: geschlechtsspezifisch) ---
     familiarity = bond.get('familiarity', 0.1)
-    # +0.01 pro Interaktion, max 1.0
-    bond['familiarity'] = round(min(1.0, familiarity + 0.01), 3)
+    if geschlecht == 'F':
+        familiarity_increase = 0.012  # Leicht schneller bei emotionaler Oeffnung
+    elif geschlecht == 'M':
+        familiarity_increase = 0.008  # Langsamer, aber stabiler
+    else:
+        familiarity_increase = 0.01   # Default
+    bond['familiarity'] = round(min(1.0, familiarity + familiarity_increase), 3)
 
     # --- Last Interaction aktualisieren ---
     bond['last_interaction'] = datetime.now().strftime('%Y-%m-%d')
@@ -117,6 +148,9 @@ async def update_bond_after_chat(
         })
         # Max 20 History Eintraege
         bond['bond_history'] = history[-20:]
+
+    # --- Patch 6: Bond-Typ Transition pruefen ---
+    _check_bond_typ_transition(egon_id, partner_id, bond)
 
     # --- Score neu berechnen ---
     bond['score'] = _calculate_score(bond)
@@ -309,6 +343,68 @@ def _find_bond(bonds_data: dict, partner_id: str) -> dict | None:
         if bond.get('id') == partner_id:
             return bond
     return None
+
+
+def _get_geschlecht(egon_id: str) -> str | None:
+    """Liest Geschlecht aus state.yaml. Returns 'M', 'F', oder None.
+
+    Patch 6 Phase 1: Geschlechtsspezifisches Bond-Wachstum.
+    """
+    try:
+        state = read_yaml_organ(egon_id, 'core', 'state.yaml')
+        return state.get('geschlecht') if state else None
+    except Exception:
+        return None
+
+
+def _days_since_last(bond: dict) -> int:
+    """Tage seit letzter Interaktion fuer einen Bond.
+
+    Wird fuer Vasopressin-Kanal (M) benoetigt:
+    Regelmaessige Praesenz belohnt, Abwesenheit bestraft.
+    """
+    last = bond.get('last_interaction', '')
+    if not last:
+        return 999
+    try:
+        last_date = datetime.strptime(last, '%Y-%m-%d')
+        return (datetime.now() - last_date).days
+    except ValueError:
+        return 999
+
+
+def _check_bond_typ_transition(
+    egon_id: str, partner_id: str, bond: dict,
+) -> None:
+    """Prueft ob ein freundschafts-Bond zum romantischen werden sollte.
+
+    Patch 6 Phase 1: Nur aktiv wenn beide EGONs ein Geschlecht haben
+    und verschieden sind (M/F oder F/M).
+
+    Bedingungen fuer Transition freundschaft -> romantisch:
+    - Trust > 0.5
+    - Familiarity > 0.3
+    - Unterschiedliches Geschlecht
+    """
+    if bond.get('bond_typ') != 'freundschaft':
+        return  # Nur freundschaft -> romantisch
+
+    if partner_id == 'OWNER_CURRENT':
+        return  # Owner-Bonds bleiben owner
+
+    g_self = _get_geschlecht(egon_id)
+    g_partner = _get_geschlecht(partner_id)
+
+    if not g_self or not g_partner:
+        return  # Kein Geschlecht definiert
+    if g_self == g_partner:
+        return  # Gleichgeschlechtlich — bleibt freundschaft
+
+    # Trust > 0.5 + Familiarity > 0.3 = Schwelle fuer romantisch
+    if bond.get('trust', 0) > 0.5 and bond.get('familiarity', 0) > 0.3:
+        bond['bond_typ'] = 'romantisch'
+        bond['romantisch_seit'] = datetime.now().strftime('%Y-%m-%d')
+        print(f'[bonds_v2] {egon_id}: Bond zu {partner_id} -> romantisch')
 
 
 def get_days_since_last_interaction(egon_id: str, partner_id: str = 'OWNER_CURRENT') -> int:
