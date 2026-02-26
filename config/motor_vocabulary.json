@@ -673,9 +673,9 @@
         "category": "gesture",
         "type": "static",
         "duration_ms": 800,
-        "_description": "Variante A: upper_arm_R rx: -45 (Rotation um X-Achse)",
+        "_description": "Variante A: upper_arm_R rx: +45 (RELATIV zur Bind-Pose)",
         "bones": {
-          "upper_arm_R": { "rx": -45 }
+          "upper_arm_R": { "rx": 45 }
         },
         "easing": "ease_out",
         "loopable": false,
@@ -688,9 +688,9 @@
         "category": "gesture",
         "type": "static",
         "duration_ms": 800,
-        "_description": "Variante B: upper_arm_R ry: -45 (Rotation um Y-Achse)",
+        "_description": "Variante B: upper_arm_R ry: +45 (RELATIV zur Bind-Pose)",
         "bones": {
-          "upper_arm_R": { "ry": -45 }
+          "upper_arm_R": { "ry": 45 }
         },
         "easing": "ease_out",
         "loopable": false,
@@ -703,9 +703,9 @@
         "category": "gesture",
         "type": "static",
         "duration_ms": 800,
-        "_description": "Variante C: upper_arm_R rz: -45 (Rotation um Z-Achse)",
+        "_description": "Variante C: upper_arm_R rz: +45 (RELATIV zur Bind-Pose)",
         "bones": {
-          "upper_arm_R": { "rz": -45 }
+          "upper_arm_R": { "rz": 45 }
         },
         "easing": "ease_out",
         "loopable": false,
