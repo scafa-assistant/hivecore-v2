@@ -44,7 +44,10 @@ async def moonshot_chat(
                 ] + clean_msgs,
             },
         )
-        resp.raise_for_status()
+        if resp.status_code != 200:
+            body = resp.text
+            print(f'[moonshot] API error {resp.status_code}: {body[:500]}')
+            resp.raise_for_status()
         data = resp.json()
         return data['choices'][0]['message']['content']
 
