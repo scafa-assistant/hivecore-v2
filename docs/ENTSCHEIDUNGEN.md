@@ -1,10 +1,25 @@
 # EGON Projekt — Entscheidungslog
 
 > **Verwandte Dateien:** [TECH_STACK.md](TECH_STACK.md), [INDEX.md](INDEX.md)
-> **Zuletzt aktualisiert:** 2026-02-26
+> **Zuletzt aktualisiert:** 2026-02-27
 > **Regel:** Neue Einträge OBEN hinzufügen (neueste zuerst). Alte NIE löschen.
 
 ---
+
+## 2026-02-27
+
+### E-015: Async Post-Processing — Response SOFORT nach bone_update
+- **Tags:** `#server` `#performance` `#architektur`
+- **Entscheidung:** Post-Processing (Thalamus, Emotion, Bonds, Episodes, Memory, Social Mapping etc.) wird via `asyncio.create_task()` in den Background verschoben. HTTP-Response kommt sofort nach bone_update.
+- **Grund:** bone_update war bei Z.303 fertig, aber Response wurde erst bei Z.623 zurueckgeschickt — 15-60 Sekunden Wartezeit fuer Steps die den User nicht blockieren muessen. Race Conditions akzeptabel (Last-Writer-Wins, jeder Step schreibt eigene Dateien).
+- **Betrifft:** `api/chat.py` — neue Funktion `_post_process_chat()`
+- **Hinweis:** Emotion im Response zeigt VORHERIGEN Chat-State. Aktuelle Emotion kommt beim naechsten Poll (5s). bone_update (aus ###BODY###) ist immer aktuell.
+
+### E-014: Heuristische Tier-Erkennung statt LLM-Call
+- **Tags:** `#server` `#performance`
+- **Entscheidung:** `decide_tier()` in `planner.py` nutzt Keyword-Heuristik statt Moonshot LLM-Call.
+- **Grund:** LLM-Call (~300ms) nur um "1", "2" oder "3" zu erhalten. Heuristik liefert gleiches Ergebnis in <1ms. Falsche Tier-Zuweisung aendert nur LLM-Modell, kein Crash-Risiko.
+- **Betrifft:** `llm/planner.py`
 
 ## 2026-02-26
 

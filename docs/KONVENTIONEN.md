@@ -56,6 +56,16 @@ Beispiele:
 - `Server: Deploy motor_vocabulary v1.3`
 - `Docs: Update ACHSEN.md with head values`
 
+## APK-Versionierung
+
+Format: `MAJOR.MINOR.PATCH` (3 Zahlen, z.B. `2.3.9`)
+
+- **PATCH** hochzählen bei jedem neuen Build (2.3.8 → 2.3.9)
+- **MINOR** springt hoch wenn PATCH 10 erreicht (2.3.10 → 2.4.0)
+- **MAJOR** nur bei grundlegenden Architektur-Änderungen
+- APK-Dateiname: `egonsdash-vMAJOR.MINOR.PATCH-TAG-YYYYMMDD.apk`
+- Letzter Build: `2.3.9-PERF` (2026-02-27)
+
 ## Docs-Aktualisierung
 
 Jede Datei hat:
