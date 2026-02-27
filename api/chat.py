@@ -509,6 +509,11 @@ async def chat(req: ChatRequest):
         history.append({'role': 'user', 'content': 'Hey!'})
         history.append({'role': 'assistant', 'content': 'Hey, was geht?\n###BODY###\n{"words": ["nicken", "gewicht_links"], "intensity": 0.4, "reason": "Lockere Begruessung"}\n###END_BODY###'})
 
+    # Aufraemen: Falls vorheriger Chat mit Fehler abgebrochen hat,
+    # steht noch eine User-Nachricht ohne Assistant-Antwort in der History.
+    # Moonshot verlangt strikte User/Assistant-Alternierung.
+    if history and history[-1]['role'] == 'user':
+        history.pop()
     history.append({'role': 'user', 'content': message})
     # Max 10 Messages in History — Few-Shot Primer (erste 2) IMMER behalten
     if len(history) > 10:
