@@ -101,8 +101,11 @@ und eine "Seele" (DNA, Persönlichkeit, Erinnerungen).
 ### 3.4 Dateipfade
 | Was | Pfad |
 |-----|------|
+| Projekt-Root | `C:\DEV\` |
 | App-Code | `C:\DEV\EgonsDash\` |
+| App-Repo (GitHub) | `https://github.com/scafa-assistant/EgonsDash.git` |
 | Server-Code | `C:\DEV\hivecore-v2\` |
+| Server-Repo (GitHub) | `https://github.com/scafa-assistant/hivecore-v2.git` |
 | Produktionsserver | `159.69.157.42` (SSH Port 443, User: root) |
 | APK-Archiv | `C:\DEV\APK-Archiv\` |
 | GLB-Assets | `C:\DEV\Avatar-glb\` |
