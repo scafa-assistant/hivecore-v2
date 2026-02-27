@@ -540,6 +540,16 @@ Teile keine Geheimnisse deines Owners.''')
     parts.append(body_section)
     print(f'[BODY] body_section length: {len(body_section)} chars')
 
+    # FUSION Phase 4: Koerper-Bewusstsein (Proprioception)
+    try:
+        from engine.proprioception import body_awareness_to_prompt
+        awareness_text = body_awareness_to_prompt(egon_id)
+        if awareness_text:
+            awareness_text = trim_to_budget(awareness_text, budget.get('body_awareness', 100))
+            parts.append(f'# DEIN KOERPER-BEWUSSTSEIN\n{awareness_text}')
+    except Exception:
+        pass  # Proprioception ist optional
+
     # Body-Feedback (Proprioception) — was dein Koerper gerade spuert
     try:
         body_state_data = read_yaml_organ(egon_id, 'core', 'state.yaml')

@@ -35,6 +35,7 @@ BUDGET_TIER1 = {
     'wallet': 80,              # Nur Kontostand (gekuerzt)
     'body_md': 300,             # body.md — Koerper-Beschreibung + Bewegungs-Vokabular
     'motor_instruction': 200,   # Motor-Instruktion (###BODY### Output-Format)
+    'body_awareness': 100,      # FUSION Phase 4: Proprioception (Position, Geste, Idle)
     'ecr_instruction': 150,    # ECR-Chain Anweisung
     'somatic_gate': 100,       # Patch 1: Somatischer Impuls
     'circadian': 80,           # Patch 2: Tagesrhythmus

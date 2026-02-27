@@ -7,15 +7,33 @@ Der Avatar im Dashboard zeigt den emotionalen Zustand visuell:
 """
 
 from pathlib import Path
+from typing import Optional
 
 import yaml
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 from config import EGON_DATA_DIR
 from engine.organ_reader import read_yaml_organ, write_yaml_organ
 from engine.body_state_engine import compute_body_state
 
 router = APIRouter()
+
+
+# ================================================================
+# FUSION Phase 4: Body Feedback (POST Request Model)
+# ================================================================
+
+class BodyFeedbackModel(BaseModel):
+    position: Optional[dict] = None
+    facing: Optional[float] = None
+    is_walking: Optional[bool] = None
+    last_motor_word: Optional[str] = None
+    seconds_since_last_gesture: Optional[int] = None
+    seconds_since_last_chat: Optional[int] = None
+
+class AvatarStateRequest(BaseModel):
+    body_feedback: Optional[BodyFeedbackModel] = None
 
 
 # ================================================================
@@ -172,6 +190,24 @@ async def get_avatar_state(egon_id: str):
         'autonomous_bone_update': autonomous_bone_update,
         'circadian_phase': circadian_phase,
     }
+
+
+@router.post('/egon/{egon_id}/avatar-state')
+async def post_avatar_state(egon_id: str, request: AvatarStateRequest = None):
+    """POST version — empfaengt body_feedback, gibt gleichen avatar-state zurueck.
+
+    FUSION Phase 4: Die App sendet alle 15s body_feedback mit Position,
+    Facing, Walking-Status, letzter Geste und Idle-Zeiten.
+    Rueckwaerts-kompatibel: GET ohne body_feedback funktioniert weiterhin.
+    """
+    if request and request.body_feedback:
+        try:
+            from engine.proprioception import process_body_feedback
+            process_body_feedback(egon_id, request.body_feedback.dict())
+        except Exception as e:
+            print(f'[avatar] body_feedback error: {e}')
+
+    return await get_avatar_state(egon_id)
 
 
 def _pop_pending_motor_action(egon_id: str) -> dict | None:
