@@ -45,6 +45,34 @@ router = APIRouter()
 # ================================================================
 # Emotion → Body-Action / Display-State Maps (Phase 3: Embodiment)
 # ================================================================
+def _log_motor_words(egon_id: str, body_data: dict, context: str = 'chat') -> None:
+    """Loggt Motor-Word-Nutzung fuer spaetere Pattern-Analyse (Phase 5).
+
+    Schreibt in memory/motor_log.yaml — wird von motor_learning.py gelesen.
+    """
+    try:
+        from engine.organ_reader import read_yaml_organ, write_yaml_organ
+        words = body_data.get('words', [])
+        intensity = body_data.get('intensity', 0.5)
+        if not words:
+            return
+        log = read_yaml_organ(egon_id, 'memory', 'motor_log.yaml') or {}
+        entries = log.get('entries', [])
+        entries.append({
+            'timestamp': datetime.now().isoformat(),
+            'words': words,
+            'intensity': round(intensity, 2),
+            'context': context,
+        })
+        # Max 200 Eintraege behalten (FIFO)
+        if len(entries) > 200:
+            entries = entries[-200:]
+        log['entries'] = entries
+        write_yaml_organ(egon_id, 'memory', 'motor_log.yaml', log)
+    except Exception as e:
+        print(f'[motor_log] FEHLER: {e}')
+
+
 EMOTION_BODY_MAP = {
     'joy': 'chains_swing',
     'excitement': 'display_glitch',
@@ -558,6 +586,8 @@ async def chat(req: ChatRequest):
             bone_update = motor_translate(body_data)
             if bone_update:
                 print(f'[motor] {bone_update["words"]} intensity={bone_update["intensity"]}')
+                # FUSION Phase 3: Motor-Word-Logging fuer Pattern-Analyse (Phase 5)
+                _log_motor_words(egon_id, body_data, 'chat')
         except Exception as e:
             print(f'[motor] translate FEHLER: {e}')
 
