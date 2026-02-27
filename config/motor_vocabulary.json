@@ -1,9 +1,8 @@
 {
   "motor_vocabulary": {
-    "version": "1.5",
+    "version": "1.6",
     "word_count": 38,
     "_note": "v1.5: Head/Neck rx invertiert + alle GLB-Fallbacks entfernt (Motor-Keyframes statt Clips)",
-
     "_achsen_map_upper_arm_R": {
       "_source": "Verifiziert durch 3 GLB-Animationen (waving, gesture, thumbs_up)",
       "ry_positiv": "Arm HOCH (dominant, 55-83 Grad fuer voll)",
@@ -45,9 +44,7 @@
       "rz_positiv": "Kopf/Hals nach LINKS neigen",
       "rz_negativ": "Kopf/Hals nach RECHTS neigen"
     },
-
     "words": {
-
       "stehen": {
         "id": "MOT_STAND",
         "category": "posture",
@@ -60,7 +57,6 @@
         "glb_fallback": null,
         "_comment": "Leeres bones = Bind Pose (Reset auf Null)"
       },
-
       "nicken": {
         "id": "MOT_NOD",
         "category": "gesture",
@@ -68,36 +64,958 @@
         "duration_ms": 600,
         "_fix": "v1.5: head rx invertiert (positiv=runter in diesem GLB)",
         "keyframes": [
-          { "t": 0.0,  "bones": { "head": { "rx": 0 } } },
-          { "t": 0.35, "bones": { "head": { "rx": 15 } } },
-          { "t": 0.7,  "bones": { "head": { "rx": 0 } } },
-          { "t": 1.0,  "bones": { "head": { "rx": 10 } } }
+          {
+            "t": 0.0,
+            "bones": {
+              "head": {
+                "rx": 0
+              }
+            }
+          },
+          {
+            "t": 0.35,
+            "bones": {
+              "head": {
+                "rx": 15
+              }
+            }
+          },
+          {
+            "t": 0.7,
+            "bones": {
+              "head": {
+                "rx": 0
+              }
+            }
+          },
+          {
+            "t": 1.0,
+            "bones": {
+              "head": {
+                "rx": 10
+              }
+            }
+          }
         ],
         "easing": "ease_in_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "kopf_schuetteln": {
         "id": "MOT_HEADSHAKE",
         "category": "gesture",
         "type": "sequence",
-        "duration_ms": 700,
-        "_fix": "v1.4: GLB-Fallback (echte Kopfschuettel-Animation statt Motor-Keyframes)",
+        "duration_ms": 3766,
+        "_fix": "v1.5: Alle Bones aus head_shake.glb extrahiert",
         "keyframes": [
-          { "t": 0.0,  "bones": { "head": { "ry": 0 } } },
-          { "t": 0.25, "bones": { "head": { "ry": -20 } } },
-          { "t": 0.5,  "bones": { "head": { "ry": 20 } } },
-          { "t": 0.75, "bones": { "head": { "ry": -15 } } },
-          { "t": 1.0,  "bones": { "head": { "ry": 0 } } }
+          {
+            "t": 0.0,
+            "bones": {}
+          },
+          {
+            "t": 0.05,
+            "bones": {
+              "foot_L": {
+                "rx": -14.8,
+                "ry": 7.9,
+                "rz": 10.7
+              },
+              "foot_R": {
+                "rx": -10.6,
+                "rz": -12.9
+              },
+              "hand_L": {
+                "rx": -31.3,
+                "ry": 24.5,
+                "rz": 5.5
+              },
+              "hand_R": {
+                "rx": -25.2,
+                "ry": -6.6,
+                "rz": 11.7
+              },
+              "head": {
+                "rx": 21.5,
+                "ry": 3.5,
+                "rz": -5.4
+              },
+              "hips": {
+                "rx": -15.3
+              },
+              "lower_arm_L": {
+                "rx": -10.3,
+                "ry": 30.1,
+                "rz": 127.8
+              },
+              "lower_arm_R": {
+                "rx": -13.0,
+                "ry": -28.8,
+                "rz": -125.8
+              },
+              "lower_leg_L": {
+                "rx": 5.4
+              },
+              "lower_leg_R": {
+                "rx": 23.0
+              },
+              "neck": {
+                "ry": 7.4
+              },
+              "shoulder_L": {
+                "rx": -22.3,
+                "ry": -3.4,
+                "rz": -18.3
+              },
+              "shoulder_R": {
+                "rx": -42.8,
+                "ry": 6.6,
+                "rz": 22.3
+              },
+              "spine_0": {
+                "rx": 14.1,
+                "ry": 11.3,
+                "rz": -6.5
+              },
+              "spine_1": {
+                "ry": 6.3,
+                "rz": -4.6
+              },
+              "upper_arm_L": {
+                "rx": -43.3,
+                "ry": -72.6,
+                "rz": -33.0
+              },
+              "upper_arm_R": {
+                "rx": -27.5,
+                "ry": 67.9,
+                "rz": 33.4
+              },
+              "upper_leg_L": {
+                "rx": 27.0,
+                "rz": 13.4
+              },
+              "upper_leg_R": {
+                "rx": 9.4,
+                "rz": -17.6
+              }
+            }
+          },
+          {
+            "t": 0.15,
+            "bones": {
+              "foot_L": {
+                "rx": -14.6,
+                "ry": 14.8,
+                "rz": 8.6
+              },
+              "foot_R": {
+                "rx": -15.6,
+                "ry": 9.5,
+                "rz": -19.9
+              },
+              "hand_L": {
+                "rx": -28.1,
+                "ry": 26.3,
+                "rz": 12.3
+              },
+              "hand_R": {
+                "rx": -35.1,
+                "ry": -8.4,
+                "rz": 28.2
+              },
+              "head": {
+                "rx": 21.5,
+                "ry": 3.5,
+                "rz": -5.4
+              },
+              "hips": {
+                "rx": -17.1,
+                "ry": 8.8
+              },
+              "lower_arm_L": {
+                "rx": -11.1,
+                "ry": 29.3,
+                "rz": 124.8
+              },
+              "lower_arm_R": {
+                "rx": -11.8,
+                "ry": -30.1,
+                "rz": -130.7
+              },
+              "lower_leg_L": {
+                "rx": 5.4
+              },
+              "lower_leg_R": {
+                "rx": 18.1
+              },
+              "neck": {
+                "ry": 6.1
+              },
+              "shoulder_L": {
+                "rx": -23.0,
+                "ry": -3.3,
+                "rz": -18.7
+              },
+              "shoulder_R": {
+                "rx": -43.0,
+                "ry": 6.3,
+                "rz": 22.4
+              },
+              "spine_0": {
+                "rx": 7.9,
+                "ry": 10.1,
+                "rz": -5.0
+              },
+              "spine_1": {
+                "ry": 5.4,
+                "rz": -3.5
+              },
+              "upper_arm_L": {
+                "rx": -47.8,
+                "ry": -76.2,
+                "rz": -37.2
+              },
+              "upper_arm_R": {
+                "rx": -42.1,
+                "ry": 63.6,
+                "rz": 36.0
+              },
+              "upper_leg_L": {
+                "rx": 30.5,
+                "rz": 16.5
+              },
+              "upper_leg_R": {
+                "rx": 20.1,
+                "ry": 4.2,
+                "rz": -18.6
+              }
+            }
+          },
+          {
+            "t": 0.25,
+            "bones": {
+              "foot_L": {
+                "rx": -17.1,
+                "ry": 4.8,
+                "rz": 12.2
+              },
+              "foot_R": {
+                "rx": -11.9,
+                "rz": -15.8
+              },
+              "hand_L": {
+                "rx": -35.4,
+                "ry": 20.9,
+                "rz": 14.6
+              },
+              "hand_R": {
+                "rx": -34.7,
+                "ry": -7.4,
+                "rz": 30.3
+              },
+              "head": {
+                "rx": 21.4,
+                "ry": 3.5,
+                "rz": -5.4
+              },
+              "hips": {
+                "rx": -19.5
+              },
+              "lower_arm_L": {
+                "rx": -11.3,
+                "ry": 28.8,
+                "rz": 123.1
+              },
+              "lower_arm_R": {
+                "rx": -11.6,
+                "ry": -30.4,
+                "rz": -132.2
+              },
+              "lower_leg_R": {
+                "rx": 19.8
+              },
+              "neck": {
+                "ry": 4.1
+              },
+              "shoulder_L": {
+                "rx": -23.0,
+                "ry": -3.3,
+                "rz": -18.6
+              },
+              "shoulder_R": {
+                "rx": -43.1,
+                "ry": 6.2,
+                "rz": 22.6
+              },
+              "spine_0": {
+                "rx": 6.0,
+                "ry": 5.7
+              },
+              "spine_1": {
+                "ry": 3.7
+              },
+              "upper_arm_L": {
+                "rx": -61.6,
+                "ry": -72.3,
+                "rz": -29.8
+              },
+              "upper_arm_R": {
+                "rx": -41.1,
+                "ry": 62.5,
+                "rz": 40.8
+              },
+              "upper_leg_L": {
+                "rx": 37.5,
+                "rz": 14.8
+              },
+              "upper_leg_R": {
+                "rx": 18.1,
+                "ry": 6.5,
+                "rz": -21.1
+              }
+            }
+          },
+          {
+            "t": 0.35,
+            "bones": {
+              "foot_L": {
+                "rx": -15.0,
+                "ry": 15.1,
+                "rz": 9.4
+              },
+              "foot_R": {
+                "rx": -14.4,
+                "ry": 7.8,
+                "rz": -18.5
+              },
+              "hand_L": {
+                "rx": -41.9,
+                "ry": 19.7,
+                "rz": 15.9
+              },
+              "hand_R": {
+                "rx": -36.8,
+                "ry": -4.9,
+                "rz": 31.6
+              },
+              "head": {
+                "rx": 21.4,
+                "ry": 3.5,
+                "rz": -5.4
+              },
+              "hips": {
+                "rx": -16.2,
+                "ry": 9.7
+              },
+              "lower_arm_L": {
+                "rx": -10.9,
+                "ry": 29.3,
+                "rz": 123.1
+              },
+              "lower_arm_R": {
+                "rx": -11.7,
+                "ry": -30.2,
+                "rz": -131.2
+              },
+              "lower_leg_L": {
+                "rx": 4.3
+              },
+              "lower_leg_R": {
+                "rx": 14.2
+              },
+              "neck": {
+                "ry": 5.9,
+                "rz": -3.0
+              },
+              "shoulder_L": {
+                "rx": -23.0,
+                "ry": -3.3,
+                "rz": -18.6
+              },
+              "shoulder_R": {
+                "rx": -43.1,
+                "ry": 6.2,
+                "rz": 22.4
+              },
+              "spine_0": {
+                "rx": 5.4,
+                "ry": 7.9,
+                "rz": -5.4
+              },
+              "spine_1": {
+                "ry": 4.9,
+                "rz": -4.3
+              },
+              "upper_arm_L": {
+                "rx": -64.5,
+                "ry": -70.4,
+                "rz": -29.6
+              },
+              "upper_arm_R": {
+                "rx": -49.1,
+                "ry": 61.8,
+                "rz": 37.6
+              },
+              "upper_leg_L": {
+                "rx": 31.2,
+                "rz": 18.9
+              },
+              "upper_leg_R": {
+                "rx": 22.8,
+                "rz": -17.0
+              }
+            }
+          },
+          {
+            "t": 0.45,
+            "bones": {
+              "foot_L": {
+                "rx": -10.9,
+                "ry": 15.4,
+                "rz": 6.4
+              },
+              "foot_R": {
+                "rx": -19.2,
+                "ry": 16.5,
+                "rz": -24.8
+              },
+              "hand_L": {
+                "rx": -34.4,
+                "ry": 27.4,
+                "rz": 14.3
+              },
+              "hand_R": {
+                "rx": -53.8,
+                "rz": 39.7
+              },
+              "head": {
+                "rx": 21.5,
+                "ry": 3.6,
+                "rz": -5.4
+              },
+              "hips": {
+                "rx": -13.5,
+                "ry": 11.4
+              },
+              "lower_arm_L": {
+                "rx": -11.0,
+                "ry": 29.5,
+                "rz": 125.1
+              },
+              "lower_arm_R": {
+                "rx": -11.0,
+                "ry": -30.6,
+                "rz": -131.3
+              },
+              "lower_leg_L": {
+                "rx": 5.9
+              },
+              "lower_leg_R": {
+                "rx": 23.4
+              },
+              "neck": {
+                "ry": 9.0
+              },
+              "shoulder_L": {
+                "rx": -21.6,
+                "ry": -3.2,
+                "rz": -17.4
+              },
+              "shoulder_R": {
+                "rx": -42.6,
+                "ry": 5.9,
+                "rz": 22.0
+              },
+              "spine_0": {
+                "rx": 14.4,
+                "ry": 18.6
+              },
+              "spine_1": {
+                "ry": 7.7,
+                "rz": -5.0
+              },
+              "upper_arm_L": {
+                "rx": -48.6,
+                "ry": -74.1,
+                "rz": -34.9
+              },
+              "upper_arm_R": {
+                "rx": -65.3,
+                "ry": 49.8,
+                "rz": 27.5
+              },
+              "upper_leg_L": {
+                "rx": 23.2,
+                "rz": 11.3
+              },
+              "upper_leg_R": {
+                "rx": 12.0,
+                "ry": 9.1,
+                "rz": -20.0
+              }
+            }
+          },
+          {
+            "t": 0.55,
+            "bones": {
+              "foot_L": {
+                "rx": -28.5,
+                "rz": 15.5
+              },
+              "foot_R": {
+                "ry": -6.0,
+                "rz": -10.8
+              },
+              "hand_L": {
+                "rx": -35.9,
+                "ry": 41.1,
+                "rz": 9.2
+              },
+              "hand_R": {
+                "rx": -37.5,
+                "ry": -15.3,
+                "rz": 15.5
+              },
+              "head": {
+                "rx": 21.7,
+                "ry": 3.5,
+                "rz": -5.4
+              },
+              "hips": {
+                "rx": -18.2,
+                "ry": -35.2,
+                "rz": 4.9
+              },
+              "lower_arm_L": {
+                "rx": -10.4,
+                "ry": 30.2,
+                "rz": 126.9
+              },
+              "lower_arm_R": {
+                "rx": -11.6,
+                "ry": -30.5,
+                "rz": -129.7
+              },
+              "lower_leg_L": {
+                "rx": 29.2
+              },
+              "lower_leg_R": {
+                "rx": 36.8
+              },
+              "neck": {
+                "rx": 13.3,
+                "rz": -3.0
+              },
+              "shoulder_L": {
+                "rx": -19.9,
+                "ry": -3.9,
+                "rz": -17.0
+              },
+              "shoulder_R": {
+                "rx": -40.4,
+                "ry": 6.8,
+                "rz": 20.7
+              },
+              "spine_0": {
+                "rx": 34.9,
+                "ry": -8.8,
+                "rz": 4.0
+              },
+              "spine_1": {
+                "rx": 14.0
+              },
+              "upper_arm_L": {
+                "rx": -25.2,
+                "ry": -64.6,
+                "rz": -14.7
+              },
+              "upper_arm_R": {
+                "rx": -6.1,
+                "ry": 62.4,
+                "rz": 32.5
+              },
+              "upper_leg_L": {
+                "rx": 7.5,
+                "ry": 22.9,
+                "rz": -6.2
+              },
+              "upper_leg_R": {
+                "rx": -23.2,
+                "ry": 25.6,
+                "rz": -27.2
+              }
+            }
+          },
+          {
+            "t": 0.65,
+            "bones": {
+              "foot_L": {
+                "rx": -24.5,
+                "ry": 3.6,
+                "rz": 13.9
+              },
+              "foot_R": {
+                "ry": -5.9,
+                "rz": -9.1
+              },
+              "hand_L": {
+                "rx": -29.0,
+                "ry": 46.0,
+                "rz": 12.4
+              },
+              "hand_R": {
+                "rx": -34.3,
+                "ry": -15.6,
+                "rz": 15.5
+              },
+              "head": {
+                "rx": 21.7,
+                "ry": 3.6,
+                "rz": -5.4
+              },
+              "hips": {
+                "rx": -14.2,
+                "ry": -29.2,
+                "rz": 4.1
+              },
+              "lower_arm_L": {
+                "rx": -10.7,
+                "ry": 30.2,
+                "rz": 126.8
+              },
+              "lower_arm_R": {
+                "rx": -11.6,
+                "ry": -30.6,
+                "rz": -129.7
+              },
+              "lower_leg_L": {
+                "rx": 24.2
+              },
+              "lower_leg_R": {
+                "rx": 35.6
+              },
+              "neck": {
+                "rx": 11.8
+              },
+              "shoulder_L": {
+                "rx": -19.9,
+                "ry": -3.9,
+                "rz": -16.9
+              },
+              "shoulder_R": {
+                "rx": -40.6,
+                "ry": 6.9,
+                "rz": 20.8
+              },
+              "spine_0": {
+                "rx": 36.2
+              },
+              "spine_1": {
+                "rx": 12.5
+              },
+              "upper_arm_L": {
+                "rx": -16.1,
+                "ry": -68.7,
+                "rz": -20.1
+              },
+              "upper_arm_R": {
+                "rx": -3.3,
+                "ry": 67.5,
+                "rz": 34.4
+              },
+              "upper_leg_L": {
+                "rx": 8.2,
+                "ry": 20.1,
+                "rz": -3.8
+              },
+              "upper_leg_R": {
+                "rx": -21.3,
+                "ry": 19.8,
+                "rz": -23.3
+              }
+            }
+          },
+          {
+            "t": 0.75,
+            "bones": {
+              "foot_L": {
+                "rx": -22.7,
+                "rz": 16.7
+              },
+              "foot_R": {
+                "rx": 7.3,
+                "ry": -15.3
+              },
+              "hand_L": {
+                "rx": -48.7,
+                "ry": 40.8,
+                "rz": 8.6
+              },
+              "hand_R": {
+                "rx": -18.6,
+                "ry": -26.4,
+                "rz": 15.2
+              },
+              "head": {
+                "rx": 21.7,
+                "ry": 3.5,
+                "rz": -5.4
+              },
+              "hips": {
+                "rx": -8.7,
+                "ry": -36.3
+              },
+              "lower_arm_L": {
+                "rx": -10.0,
+                "ry": 30.4,
+                "rz": 126.3
+              },
+              "lower_arm_R": {
+                "rx": -11.8,
+                "ry": -30.9,
+                "rz": -131.9
+              },
+              "lower_leg_L": {
+                "rx": 22.6
+              },
+              "lower_leg_R": {
+                "rx": 26.9
+              },
+              "neck": {
+                "rx": 12.3,
+                "rz": -7.8
+              },
+              "shoulder_L": {
+                "rx": -20.0,
+                "ry": -4.1,
+                "rz": -17.2
+              },
+              "shoulder_R": {
+                "rx": -40.6,
+                "ry": 7.0,
+                "rz": 20.7
+              },
+              "spine_0": {
+                "rx": 38.7,
+                "ry": -13.1
+              },
+              "spine_1": {
+                "rx": 13.6,
+                "rz": -6.2
+              },
+              "upper_arm_L": {
+                "rx": -34.4,
+                "ry": -64.0,
+                "rz": -7.8
+              },
+              "upper_arm_R": {
+                "rx": 14.3,
+                "ry": 72.1,
+                "rz": 49.8
+              },
+              "upper_leg_L": {
+                "ry": 23.2,
+                "rz": -5.0
+              },
+              "upper_leg_R": {
+                "rx": -26.8,
+                "ry": 17.4,
+                "rz": -14.0
+              }
+            }
+          },
+          {
+            "t": 0.85,
+            "bones": {
+              "foot_L": {
+                "rx": -19.9,
+                "rz": 16.4
+              },
+              "foot_R": {
+                "rx": 8.9,
+                "ry": -20.7,
+                "rz": 4.6
+              },
+              "hand_L": {
+                "rx": -46.8,
+                "ry": 38.8,
+                "rz": 6.8
+              },
+              "hand_R": {
+                "rx": -24.5,
+                "ry": -27.3,
+                "rz": 22.9
+              },
+              "head": {
+                "rx": 21.7,
+                "ry": 3.5,
+                "rz": -5.4
+              },
+              "hips": {
+                "rx": -6.2,
+                "ry": -35.8
+              },
+              "lower_arm_L": {
+                "rx": -9.9,
+                "ry": 30.5,
+                "rz": 127.0
+              },
+              "lower_arm_R": {
+                "rx": -11.4,
+                "ry": -31.3,
+                "rz": -133.3
+              },
+              "lower_leg_L": {
+                "rx": 24.7
+              },
+              "lower_leg_R": {
+                "rx": 24.8
+              },
+              "neck": {
+                "rx": 12.0,
+                "rz": -5.4
+              },
+              "shoulder_L": {
+                "rx": -19.9,
+                "ry": -4.1,
+                "rz": -17.1
+              },
+              "shoulder_R": {
+                "rx": -40.6,
+                "ry": 6.9,
+                "rz": 20.7
+              },
+              "spine_0": {
+                "rx": 42.5,
+                "ry": -6.8,
+                "rz": -3.5
+              },
+              "spine_1": {
+                "rx": 12.9,
+                "rz": -4.4
+              },
+              "upper_arm_L": {
+                "rx": -35.8,
+                "ry": -64.9,
+                "rz": -7.9
+              },
+              "upper_arm_R": {
+                "rx": 10.6,
+                "ry": 73.5,
+                "rz": 48.2
+              },
+              "upper_leg_L": {
+                "rx": -4.2,
+                "ry": 25.9,
+                "rz": -3.5
+              },
+              "upper_leg_R": {
+                "rx": -29.1,
+                "ry": 14.4,
+                "rz": -5.0
+              }
+            }
+          },
+          {
+            "t": 0.95,
+            "bones": {
+              "foot_L": {
+                "rx": -15.6,
+                "ry": 7.7,
+                "rz": 11.2
+              },
+              "foot_R": {
+                "rx": -9.8,
+                "rz": -11.7
+              },
+              "hand_L": {
+                "rx": -32.0,
+                "ry": 25.9,
+                "rz": 5.2
+              },
+              "hand_R": {
+                "rx": -23.7,
+                "ry": -8.7,
+                "rz": 14.4
+              },
+              "head": {
+                "rx": 21.5,
+                "ry": 3.6,
+                "rz": -5.4
+              },
+              "hips": {
+                "rx": -14.7
+              },
+              "lower_arm_L": {
+                "rx": -10.2,
+                "ry": 30.2,
+                "rz": 128.0
+              },
+              "lower_arm_R": {
+                "rx": -12.7,
+                "ry": -29.2,
+                "rz": -127.0
+              },
+              "lower_leg_L": {
+                "rx": 7.4
+              },
+              "lower_leg_R": {
+                "rx": 24.2
+              },
+              "neck": {
+                "ry": 7.0,
+                "rz": -3.0
+              },
+              "shoulder_L": {
+                "rx": -22.1,
+                "ry": -3.5,
+                "rz": -18.1
+              },
+              "shoulder_R": {
+                "rx": -42.7,
+                "ry": 6.7,
+                "rz": 22.2
+              },
+              "spine_0": {
+                "rx": 16.1,
+                "ry": 10.1,
+                "rz": -6.0
+              },
+              "spine_1": {
+                "ry": 5.9,
+                "rz": -4.5
+              },
+              "upper_arm_L": {
+                "rx": -42.3,
+                "ry": -72.1,
+                "rz": -30.8
+              },
+              "upper_arm_R": {
+                "rx": -22.2,
+                "ry": 69.9,
+                "rz": 34.8
+              },
+              "upper_leg_L": {
+                "rx": 25.2,
+                "rz": 12.7
+              },
+              "upper_leg_R": {
+                "rx": 6.1,
+                "rz": -16.7
+              }
+            }
+          },
+          {
+            "t": 1.0,
+            "bones": {}
+          }
         ],
         "easing": "ease_in_out",
         "loopable": false,
         "blendable": false,
         "glb_fallback": null
       },
-
       "kopf_neigen": {
         "id": "MOT_HEAD_TILT",
         "category": "expression",
@@ -105,15 +1023,19 @@
         "duration_ms": 500,
         "_fix": "v1.5: head/neck rx invertiert",
         "bones": {
-          "head": { "rx": 12, "rz": 8 },
-          "neck": { "rx": 5 }
+          "head": {
+            "rx": 12,
+            "rz": 8
+          },
+          "neck": {
+            "rx": 5
+          }
         },
         "easing": "ease_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "kopf_drehen_rechts": {
         "id": "MOT_HEAD_TURN_R",
         "category": "gesture",
@@ -121,15 +1043,18 @@
         "duration_ms": 500,
         "_note": "v1.3: ry negativ = Kopf nach rechts (GLB-verifiziert aus look_around.glb)",
         "bones": {
-          "head": { "ry": -25 },
-          "neck": { "ry": -10 }
+          "head": {
+            "ry": -25
+          },
+          "neck": {
+            "ry": -10
+          }
         },
         "easing": "ease_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "kopf_drehen_links": {
         "id": "MOT_HEAD_TURN_L",
         "category": "gesture",
@@ -137,15 +1062,18 @@
         "duration_ms": 500,
         "_note": "v1.3: ry positiv = Kopf nach links (GLB-verifiziert aus look_around.glb)",
         "bones": {
-          "head": { "ry": 25 },
-          "neck": { "ry": 10 }
+          "head": {
+            "ry": 25
+          },
+          "neck": {
+            "ry": 10
+          }
         },
         "easing": "ease_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "kopf_heben": {
         "id": "MOT_HEAD_UP",
         "category": "expression",
@@ -153,15 +1081,18 @@
         "duration_ms": 400,
         "_fix": "v1.5: head/neck rx invertiert (negativ=hoch in diesem GLB)",
         "bones": {
-          "head": { "rx": -15 },
-          "neck": { "rx": -8 }
+          "head": {
+            "rx": -15
+          },
+          "neck": {
+            "rx": -8
+          }
         },
         "easing": "ease_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "schultern_hochziehen": {
         "id": "MOT_SHRUG",
         "category": "gesture",
@@ -169,59 +1100,1726 @@
         "duration_ms": 900,
         "_fix": "v1.2: upper_arm ry statt rx fuer Arm-Heben",
         "keyframes": [
-          { "t": 0.0, "bones": {} },
-          { "t": 0.3, "bones": { "shoulder_L": { "ry": 12 }, "shoulder_R": { "ry": 12 }, "upper_arm_L": { "ry": -20 }, "upper_arm_R": { "ry": 20 }, "hand_L": { "rz": -30 }, "hand_R": { "rz": 30 } } },
-          { "t": 0.7, "bones": { "shoulder_L": { "ry": 12 }, "shoulder_R": { "ry": 12 } } },
-          { "t": 1.0, "bones": {} }
+          {
+            "t": 0.0,
+            "bones": {}
+          },
+          {
+            "t": 0.3,
+            "bones": {
+              "shoulder_L": {
+                "ry": 12
+              },
+              "shoulder_R": {
+                "ry": 12
+              },
+              "upper_arm_L": {
+                "ry": -20
+              },
+              "upper_arm_R": {
+                "ry": 20
+              },
+              "hand_L": {
+                "rz": -30
+              },
+              "hand_R": {
+                "rz": 30
+              }
+            }
+          },
+          {
+            "t": 0.7,
+            "bones": {
+              "shoulder_L": {
+                "ry": 12
+              },
+              "shoulder_R": {
+                "ry": 12
+              }
+            }
+          },
+          {
+            "t": 1.0,
+            "bones": {}
+          }
         ],
         "easing": "ease_in_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "winken": {
         "id": "MOT_WAVE",
         "category": "gesture",
         "type": "sequence",
-        "duration_ms": 1200,
-        "_fix": "v1.3: GLB-Fallback (echte Waving-Animation statt Motor-Keyframes)",
+        "duration_ms": 1533,
+        "_fix": "v1.5: Alle Bones aus waving_right.glb extrahiert (nicht nur Arm)",
         "keyframes": [
-          { "t": 0.0,  "bones": {} },
-          { "t": 0.2,  "bones": { "upper_arm_R": {"rx":-24,"ry":59,"rz":26}, "lower_arm_R": {"rx":-17,"ry":-17,"rz":-82}, "hand_R": {"rx":-75,"ry":9,"rz":39}, "shoulder_R": {"rx":-11,"ry":6,"rz":9}, "head": {"rx":16,"ry":4,"rz":3} } },
-          { "t": 0.35, "bones": { "upper_arm_R": {"rx":-24,"ry":59,"rz":26}, "lower_arm_R": {"rx":-17,"ry":-17,"rz":-82}, "hand_R": {"rx":-75,"ry":-15,"rz":39}, "shoulder_R": {"rx":-11,"ry":6,"rz":9}, "head": {"rx":16,"ry":4,"rz":3} } },
-          { "t": 0.5,  "bones": { "upper_arm_R": {"rx":-24,"ry":59,"rz":26}, "lower_arm_R": {"rx":-17,"ry":-17,"rz":-82}, "hand_R": {"rx":-75,"ry":25,"rz":39}, "shoulder_R": {"rx":-11,"ry":6,"rz":9}, "head": {"rx":16,"ry":4,"rz":3} } },
-          { "t": 0.65, "bones": { "upper_arm_R": {"rx":-24,"ry":59,"rz":26}, "lower_arm_R": {"rx":-17,"ry":-17,"rz":-82}, "hand_R": {"rx":-75,"ry":-10,"rz":39}, "shoulder_R": {"rx":-11,"ry":6,"rz":9}, "head": {"rx":16,"ry":4,"rz":3} } },
-          { "t": 0.8,  "bones": { "upper_arm_R": {"rx":-24,"ry":59,"rz":26}, "lower_arm_R": {"rx":-17,"ry":-17,"rz":-82}, "hand_R": {"rx":-75,"ry":20,"rz":39}, "shoulder_R": {"rx":-11,"ry":6,"rz":9}, "head": {"rx":16,"ry":4,"rz":3} } },
-          { "t": 1.0,  "bones": {} }
+          {
+            "t": 0.0,
+            "bones": {}
+          },
+          {
+            "t": 0.05,
+            "bones": {
+              "foot_L": {
+                "rx": -9.3,
+                "ry": 17.7,
+                "rz": -8.6
+              },
+              "foot_R": {
+                "rx": -3.1,
+                "ry": -7.1,
+                "rz": -13.0
+              },
+              "hand_L": {
+                "rx": -8.5,
+                "ry": 17.7,
+                "rz": 8.4
+              },
+              "hand_R": {
+                "rx": 6.4,
+                "ry": -20.6,
+                "rz": -8.4
+              },
+              "head": {
+                "rx": 7.3
+              },
+              "hips": {
+                "rx": -7.5,
+                "rz": 6.0
+              },
+              "lower_arm_L": {
+                "rz": 5.6
+              },
+              "lower_leg_L": {
+                "rx": -4.3
+              },
+              "lower_leg_R": {
+                "rx": 21.6
+              },
+              "neck": {
+                "rz": -5.0
+              },
+              "shoulder_L": {
+                "rx": -17.5,
+                "ry": -3.2,
+                "rz": -17.5
+              },
+              "shoulder_R": {
+                "rx": -24.0,
+                "ry": 6.7,
+                "rz": 23.4
+              },
+              "spine_1": {
+                "rz": -5.6
+              },
+              "upper_arm_L": {
+                "ry": 14.1,
+                "rz": -21.0
+              },
+              "upper_arm_R": {
+                "ry": -7.9,
+                "rz": 40.5
+              },
+              "upper_leg_L": {
+                "rx": 22.0,
+                "ry": 7.0,
+                "rz": -12.0
+              },
+              "upper_leg_R": {
+                "rx": -4.7,
+                "ry": -20.8,
+                "rz": -15.5
+              }
+            }
+          },
+          {
+            "t": 0.15,
+            "bones": {
+              "foot_L": {
+                "rx": -11.7,
+                "ry": 16.7,
+                "rz": -7.6
+              },
+              "foot_R": {
+                "rx": -5.3,
+                "ry": -9.1,
+                "rz": -13.1
+              },
+              "hand_L": {
+                "rx": -9.2,
+                "ry": 17.8,
+                "rz": 7.3
+              },
+              "hand_R": {
+                "rx": 12.6,
+                "ry": -45.1
+              },
+              "head": {
+                "rx": 14.2
+              },
+              "hips": {
+                "rx": -10.1,
+                "rz": 7.1
+              },
+              "lower_arm_L": {
+                "rz": 3.7
+              },
+              "lower_arm_R": {
+                "rx": -3.0,
+                "rz": -9.5
+              },
+              "lower_leg_R": {
+                "rx": 25.8
+              },
+              "neck": {
+                "rx": 3.7,
+                "rz": -5.2
+              },
+              "shoulder_L": {
+                "rx": -6.6,
+                "rz": -4.7
+              },
+              "shoulder_R": {
+                "rx": -27.0,
+                "ry": 9.5,
+                "rz": 28.1
+              },
+              "spine_1": {
+                "rx": 3.7,
+                "rz": -5.7
+              },
+              "upper_arm_L": {
+                "rx": 4.6,
+                "ry": 10.7,
+                "rz": -15.2
+              },
+              "upper_arm_R": {
+                "rx": -4.2,
+                "ry": -12.1,
+                "rz": 45.6
+              },
+              "upper_leg_L": {
+                "rx": 23.4,
+                "ry": 6.9,
+                "rz": -11.9
+              },
+              "upper_leg_R": {
+                "ry": -21.9,
+                "rz": -19.1
+              }
+            }
+          },
+          {
+            "t": 0.25,
+            "bones": {
+              "foot_L": {
+                "rx": -14.2,
+                "ry": 12.6,
+                "rz": -5.5
+              },
+              "foot_R": {
+                "rx": -4.2,
+                "ry": -12.6,
+                "rz": -9.8
+              },
+              "hand_L": {
+                "rx": -11.6,
+                "ry": 16.8,
+                "rz": 7.9
+              },
+              "hand_R": {
+                "rx": -10.8,
+                "ry": -55.9,
+                "rz": 5.8
+              },
+              "head": {
+                "rx": 22.7,
+                "ry": 3.9
+              },
+              "hips": {
+                "rx": -11.8,
+                "rz": 5.6
+              },
+              "lower_arm_L": {
+                "rx": -6.1,
+                "rz": 21.8
+              },
+              "lower_arm_R": {
+                "rx": -15.5,
+                "ry": -9.5,
+                "rz": -59.4
+              },
+              "lower_leg_L": {
+                "rx": 4.6
+              },
+              "lower_leg_R": {
+                "rx": 27.4
+              },
+              "neck": {
+                "rx": 5.2,
+                "rz": -3.1
+              },
+              "shoulder_L": {
+                "rz": 17.7
+              },
+              "shoulder_R": {
+                "rx": -34.1,
+                "ry": 11.7,
+                "rz": 31.3
+              },
+              "spine_1": {
+                "rx": 5.1,
+                "rz": -3.3
+              },
+              "upper_arm_L": {
+                "rx": 20.6,
+                "ry": 8.4,
+                "rz": 8.9
+              },
+              "upper_arm_R": {
+                "rx": -9.6,
+                "ry": -15.9,
+                "rz": 55.7
+              },
+              "upper_leg_L": {
+                "rx": 20.1,
+                "ry": 7.2,
+                "rz": -11.2
+              },
+              "upper_leg_R": {
+                "rx": -6.9,
+                "ry": -20.8,
+                "rz": -15.5
+              }
+            }
+          },
+          {
+            "t": 0.35,
+            "bones": {
+              "foot_L": {
+                "rx": -8.8,
+                "ry": 10.8,
+                "rz": -7.4
+              },
+              "foot_R": {
+                "ry": -10.3,
+                "rz": -6.4
+              },
+              "hand_L": {
+                "rx": -5.4,
+                "ry": 18.3,
+                "rz": 9.7
+              },
+              "hand_R": {
+                "rx": -43.2,
+                "ry": -46.6,
+                "rz": -13.1
+              },
+              "head": {
+                "rx": 11.5,
+                "rz": 9.0
+              },
+              "hips": {
+                "ry": -7.4,
+                "rz": 5.0
+              },
+              "lower_arm_L": {
+                "rx": -11.1,
+                "ry": 5.7,
+                "rz": 42.7
+              },
+              "lower_arm_R": {
+                "rx": -17.4,
+                "ry": -16.6,
+                "rz": -82.7
+              },
+              "lower_leg_R": {
+                "rx": 20.9
+              },
+              "neck": {
+                "rx": 4.5
+              },
+              "shoulder_L": {
+                "rx": 12.3,
+                "rz": 35.7
+              },
+              "shoulder_R": {
+                "rx": -30.1,
+                "ry": 8.9,
+                "rz": 26.7
+              },
+              "spine_1": {
+                "rx": 4.4
+              },
+              "upper_arm_L": {
+                "rx": 17.2,
+                "ry": 9.5,
+                "rz": 28.3
+              },
+              "upper_arm_R": {
+                "rx": -19.3,
+                "ry": 21.8,
+                "rz": 52.5
+              },
+              "upper_leg_L": {
+                "rx": 6.3,
+                "ry": 5.0,
+                "rz": -17.0
+              },
+              "upper_leg_R": {
+                "rx": -25.4,
+                "ry": -14.3
+              }
+            }
+          },
+          {
+            "t": 0.45,
+            "bones": {
+              "foot_L": {
+                "rx": -5.5,
+                "ry": 11.0,
+                "rz": -9.3
+              },
+              "foot_R": {
+                "rx": 5.5,
+                "ry": -8.3,
+                "rz": -4.5
+              },
+              "hand_L": {
+                "rx": -9.1,
+                "ry": 17.5,
+                "rz": 9.3
+              },
+              "hand_R": {
+                "rx": -54.9,
+                "ry": -26.8,
+                "rz": 13.1
+              },
+              "head": {
+                "rx": 8.0,
+                "ry": 3.1,
+                "rz": 7.7
+              },
+              "hips": {
+                "rx": 4.5,
+                "ry": -9.0,
+                "rz": 6.4
+              },
+              "lower_arm_L": {
+                "rx": -13.0,
+                "ry": 8.4,
+                "rz": 53.4
+              },
+              "lower_arm_R": {
+                "rx": -16.7,
+                "ry": -13.0,
+                "rz": -71.3
+              },
+              "lower_leg_R": {
+                "rx": 21.1
+              },
+              "neck": {
+                "rx": 5.7,
+                "ry": -3.2
+              },
+              "shoulder_L": {
+                "rz": 26.4
+              },
+              "shoulder_R": {
+                "rx": -36.2,
+                "ry": 11.6,
+                "rz": 30.2
+              },
+              "spine_1": {
+                "rx": 5.7
+              },
+              "upper_arm_L": {
+                "rx": 14.3,
+                "ry": 12.1,
+                "rz": 31.8
+              },
+              "upper_arm_R": {
+                "rx": -24.2,
+                "ry": 50.9,
+                "rz": 63.4
+              },
+              "upper_leg_L": {
+                "rz": -21.9
+              },
+              "upper_leg_R": {
+                "rx": -37.0,
+                "ry": -10.2
+              }
+            }
+          },
+          {
+            "t": 0.55,
+            "bones": {
+              "foot_L": {
+                "rx": -3.2,
+                "ry": 10.9,
+                "rz": -10.0
+              },
+              "foot_R": {
+                "rx": 7.5,
+                "ry": -7.7,
+                "rz": -3.2
+              },
+              "hand_L": {
+                "rx": -6.2,
+                "ry": 18.1,
+                "rz": 10.4
+              },
+              "hand_R": {
+                "rx": -61.2,
+                "ry": -22.8,
+                "rz": 13.5
+              },
+              "head": {
+                "rx": 5.9,
+                "ry": 3.0,
+                "rz": 8.8
+              },
+              "hips": {
+                "rx": 6.1,
+                "ry": -9.7,
+                "rz": 6.5
+              },
+              "lower_arm_L": {
+                "rx": -13.8,
+                "ry": 9.8,
+                "rz": 58.9
+              },
+              "lower_arm_R": {
+                "rx": -16.8,
+                "ry": -13.9,
+                "rz": -74.1
+              },
+              "lower_leg_R": {
+                "rx": 19.5
+              },
+              "neck": {
+                "rx": 6.3,
+                "ry": -3.3
+              },
+              "shoulder_L": {
+                "rx": -17.0,
+                "rz": 12.3
+              },
+              "shoulder_R": {
+                "rx": -34.7,
+                "ry": 10.4,
+                "rz": 28.6
+              },
+              "spine_1": {
+                "rx": 6.2
+              },
+              "upper_arm_L": {
+                "rx": 19.1,
+                "ry": 11.8,
+                "rz": 36.2
+              },
+              "upper_arm_R": {
+                "rx": -32.4,
+                "ry": 44.3,
+                "rz": 61.8
+              },
+              "upper_leg_L": {
+                "rx": -5.0,
+                "rz": -23.0
+              },
+              "upper_leg_R": {
+                "rx": -39.5,
+                "ry": -8.4,
+                "rz": 3.3
+              }
+            }
+          },
+          {
+            "t": 0.65,
+            "bones": {
+              "foot_L": {
+                "ry": 11.3,
+                "rz": -9.2
+              },
+              "foot_R": {
+                "rx": 7.0,
+                "ry": -7.9,
+                "rz": -4.1
+              },
+              "hand_L": {
+                "rx": -4.5,
+                "ry": 17.7,
+                "rz": 12.3
+              },
+              "hand_R": {
+                "rx": -28.2,
+                "ry": -36.8,
+                "rz": 20.9
+              },
+              "head": {
+                "rx": 4.0,
+                "rz": 8.1
+              },
+              "hips": {
+                "ry": -8.2,
+                "rz": 5.5
+              },
+              "lower_arm_L": {
+                "rx": -12.0,
+                "ry": 6.8,
+                "rz": 47.6
+              },
+              "lower_arm_R": {
+                "rx": -16.6,
+                "ry": -12.2,
+                "rz": -69.3
+              },
+              "lower_leg_L": {
+                "rx": -5.0
+              },
+              "lower_leg_R": {
+                "rx": 16.8
+              },
+              "neck": {
+                "rx": 4.9
+              },
+              "shoulder_L": {
+                "rx": -18.4,
+                "rz": 8.0
+              },
+              "shoulder_R": {
+                "rx": -30.2,
+                "ry": 9.0,
+                "rz": 27.2
+              },
+              "spine_1": {
+                "rx": 4.9
+              },
+              "upper_arm_L": {
+                "rx": 19.9,
+                "ry": 8.3,
+                "rz": 32.1
+              },
+              "upper_arm_R": {
+                "rx": -40.5,
+                "ry": 14.4,
+                "rz": 35.8
+              },
+              "upper_leg_L": {
+                "ry": 3.9,
+                "rz": -19.5
+              },
+              "upper_leg_R": {
+                "rx": -30.9,
+                "ry": -10.8
+              }
+            }
+          },
+          {
+            "t": 0.75,
+            "bones": {
+              "foot_L": {
+                "rx": -6.7,
+                "ry": 14.2,
+                "rz": -7.4
+              },
+              "foot_R": {
+                "ry": -7.3,
+                "rz": -7.6
+              },
+              "hand_L": {
+                "rx": -4.0,
+                "ry": 16.9,
+                "rz": 14.1
+              },
+              "hand_R": {
+                "rx": -4.5,
+                "ry": -23.4,
+                "rz": 12.1
+              },
+              "head": {
+                "rx": 5.1,
+                "rz": 5.3
+              },
+              "hips": {
+                "rx": -3.5,
+                "ry": -3.3,
+                "rz": 3.7
+              },
+              "lower_arm_L": {
+                "rx": -9.2,
+                "ry": 4.1,
+                "rz": 34.5
+              },
+              "lower_arm_R": {
+                "rx": -9.4,
+                "rz": -31.6
+              },
+              "lower_leg_L": {
+                "rx": -4.0
+              },
+              "lower_leg_R": {
+                "rx": 16.9
+              },
+              "shoulder_L": {
+                "rx": -9.0,
+                "rz": 6.1
+              },
+              "shoulder_R": {
+                "rx": -24.8,
+                "ry": 7.6,
+                "rz": 24.6
+              },
+              "upper_arm_L": {
+                "rx": 15.1,
+                "ry": 12.4,
+                "rz": 17.7
+              },
+              "upper_arm_R": {
+                "rx": -14.1,
+                "rz": 21.4
+              },
+              "upper_leg_L": {
+                "rx": 12.7,
+                "ry": 7.4,
+                "rz": -12.8
+              },
+              "upper_leg_R": {
+                "rx": -15.6,
+                "ry": -15.4,
+                "rz": -4.8
+              }
+            }
+          },
+          {
+            "t": 0.85,
+            "bones": {
+              "foot_L": {
+                "rx": -8.8,
+                "ry": 17.5,
+                "rz": -8.2
+              },
+              "foot_R": {
+                "ry": -6.7,
+                "rz": -11.9
+              },
+              "hand_L": {
+                "rx": -9.0,
+                "ry": 16.9,
+                "rz": 10.3
+              },
+              "hand_R": {
+                "rx": -5.3,
+                "ry": -7.0
+              },
+              "head": {
+                "rx": 5.8
+              },
+              "hips": {
+                "rx": -7.6,
+                "rz": 5.6
+              },
+              "lower_arm_L": {
+                "rx": -6.8,
+                "rz": 23.8
+              },
+              "lower_arm_R": {
+                "rx": -4.2,
+                "rz": -13.9
+              },
+              "lower_leg_L": {
+                "rx": -3.6
+              },
+              "lower_leg_R": {
+                "rx": 21.7
+              },
+              "neck": {
+                "rx": 3.1,
+                "rz": -4.5
+              },
+              "shoulder_L": {
+                "rx": -9.2,
+                "rz": -7.5
+              },
+              "shoulder_R": {
+                "rx": -22.6,
+                "ry": 6.8,
+                "rz": 23.6
+              },
+              "spine_1": {
+                "rx": 3.0,
+                "rz": -5.0
+              },
+              "upper_arm_L": {
+                "rx": 4.1,
+                "ry": 18.0,
+                "rz": -4.7
+              },
+              "upper_arm_R": {
+                "ry": -4.9,
+                "rz": 31.4
+              },
+              "upper_leg_L": {
+                "rx": 20.5,
+                "ry": 7.4,
+                "rz": -11.8
+              },
+              "upper_leg_R": {
+                "rx": -6.4,
+                "ry": -19.6,
+                "rz": -13.9
+              }
+            }
+          },
+          {
+            "t": 0.95,
+            "bones": {
+              "foot_L": {
+                "rx": -9.3,
+                "ry": 17.7,
+                "rz": -8.6
+              },
+              "foot_R": {
+                "rx": -3.1,
+                "ry": -7.1,
+                "rz": -13.0
+              },
+              "hand_L": {
+                "rx": -8.5,
+                "ry": 17.7,
+                "rz": 8.4
+              },
+              "hand_R": {
+                "rx": 6.4,
+                "ry": -20.6,
+                "rz": -8.4
+              },
+              "head": {
+                "rx": 7.3
+              },
+              "hips": {
+                "rx": -7.5,
+                "rz": 6.0
+              },
+              "lower_arm_L": {
+                "rz": 5.6
+              },
+              "lower_leg_L": {
+                "rx": -4.3
+              },
+              "lower_leg_R": {
+                "rx": 21.5
+              },
+              "neck": {
+                "rz": -5.0
+              },
+              "shoulder_L": {
+                "rx": -17.4,
+                "ry": -3.2,
+                "rz": -17.5
+              },
+              "shoulder_R": {
+                "rx": -24.0,
+                "ry": 6.7,
+                "rz": 23.4
+              },
+              "spine_1": {
+                "rz": -5.6
+              },
+              "upper_arm_L": {
+                "ry": 14.1,
+                "rz": -21.0
+              },
+              "upper_arm_R": {
+                "ry": -7.9,
+                "rz": 40.5
+              },
+              "upper_leg_L": {
+                "rx": 22.0,
+                "ry": 7.0,
+                "rz": -12.0
+              },
+              "upper_leg_R": {
+                "rx": -4.7,
+                "ry": -20.8,
+                "rz": -15.5
+              }
+            }
+          },
+          {
+            "t": 1.0,
+            "bones": {}
+          }
         ],
         "easing": "ease_in_out",
         "loopable": false,
         "blendable": false,
         "glb_fallback": null
       },
-
       "winken_links": {
         "id": "MOT_WAVE_LEFT",
         "category": "gesture",
         "type": "sequence",
-        "duration_ms": 1200,
-        "_fix": "v1.3: GLB-Fallback (gespiegelte waving_right Animation)",
+        "duration_ms": 1533,
+        "_fix": "v1.5: Alle Bones aus waving_left.glb extrahiert (nicht nur Arm)",
         "keyframes": [
-          { "t": 0.0,  "bones": {} },
-          { "t": 0.2,  "bones": { "upper_arm_L": {"rx":-24,"ry":-59,"rz":-26}, "lower_arm_L": {"rx":-17,"ry":17,"rz":82}, "hand_L": {"rx":-75,"ry":-9,"rz":-39}, "shoulder_L": {"rx":-11,"ry":-6,"rz":-9}, "head": {"rx":16,"ry":-4,"rz":-3} } },
-          { "t": 0.35, "bones": { "upper_arm_L": {"rx":-24,"ry":-59,"rz":-26}, "lower_arm_L": {"rx":-17,"ry":17,"rz":82}, "hand_L": {"rx":-75,"ry":15,"rz":-39}, "shoulder_L": {"rx":-11,"ry":-6,"rz":-9}, "head": {"rx":16,"ry":-4,"rz":-3} } },
-          { "t": 0.5,  "bones": { "upper_arm_L": {"rx":-24,"ry":-59,"rz":-26}, "lower_arm_L": {"rx":-17,"ry":17,"rz":82}, "hand_L": {"rx":-75,"ry":-25,"rz":-39}, "shoulder_L": {"rx":-11,"ry":-6,"rz":-9}, "head": {"rx":16,"ry":-4,"rz":-3} } },
-          { "t": 0.65, "bones": { "upper_arm_L": {"rx":-24,"ry":-59,"rz":-26}, "lower_arm_L": {"rx":-17,"ry":17,"rz":82}, "hand_L": {"rx":-75,"ry":10,"rz":-39}, "shoulder_L": {"rx":-11,"ry":-6,"rz":-9}, "head": {"rx":16,"ry":-4,"rz":-3} } },
-          { "t": 0.8,  "bones": { "upper_arm_L": {"rx":-24,"ry":-59,"rz":-26}, "lower_arm_L": {"rx":-17,"ry":17,"rz":82}, "hand_L": {"rx":-75,"ry":-20,"rz":-39}, "shoulder_L": {"rx":-11,"ry":-6,"rz":-9}, "head": {"rx":16,"ry":-4,"rz":-3} } },
-          { "t": 1.0,  "bones": {} }
+          {
+            "t": 0.0,
+            "bones": {}
+          },
+          {
+            "t": 0.05,
+            "bones": {
+              "foot_L": {
+                "rx": -8.1,
+                "ry": 12.9,
+                "rz": 7.3
+              },
+              "foot_R": {
+                "rx": -4.4,
+                "ry": -11.9
+              },
+              "hand_L": {
+                "rx": -3.0,
+                "ry": 54.6,
+                "rz": 22.8
+              },
+              "hand_R": {
+                "ry": 16.2,
+                "rz": 6.0
+              },
+              "head": {
+                "rx": 7.3
+              },
+              "hips": {
+                "rx": -7.5,
+                "ry": -5.0,
+                "rz": -24.2
+              },
+              "lower_arm_L": {
+                "rz": -3.0
+              },
+              "lower_arm_R": {
+                "rz": -9.7
+              },
+              "lower_leg_L": {
+                "rx": 12.6
+              },
+              "lower_leg_R": {
+                "rx": 4.6
+              },
+              "shoulder_L": {
+                "rx": -24.5,
+                "ry": -7.8,
+                "rz": -26.3
+              },
+              "shoulder_R": {
+                "rx": -17.0,
+                "rz": 14.6
+              },
+              "spine_0": {
+                "ry": 22.6,
+                "rz": 16.5
+              },
+              "spine_1": {
+                "ry": -3.0
+              },
+              "upper_arm_L": {
+                "rx": -4.0,
+                "ry": 12.0,
+                "rz": -34.8
+              },
+              "upper_arm_R": {
+                "rx": 6.8,
+                "ry": -10.0,
+                "rz": 26.7
+              },
+              "upper_leg_L": {
+                "rx": 5.6,
+                "ry": 39.6,
+                "rz": 18.0
+              },
+              "upper_leg_R": {
+                "rx": 11.6,
+                "ry": 11.8,
+                "rz": 14.5
+              }
+            }
+          },
+          {
+            "t": 0.15,
+            "bones": {
+              "foot_L": {
+                "rx": -10.3,
+                "ry": 14.9,
+                "rz": 7.3
+              },
+              "foot_R": {
+                "rx": -6.7,
+                "ry": -10.9
+              },
+              "hand_L": {
+                "rx": 3.3,
+                "ry": 79.1,
+                "rz": 16.5
+              },
+              "hand_R": {
+                "ry": 16.1,
+                "rz": 7.1
+              },
+              "head": {
+                "rx": 14.2,
+                "rz": 3.2
+              },
+              "hips": {
+                "rx": -10.1,
+                "ry": -4.7,
+                "rz": -25.4
+              },
+              "lower_arm_L": {
+                "rz": 5.4
+              },
+              "lower_arm_R": {
+                "rz": -7.8
+              },
+              "lower_leg_L": {
+                "rx": 16.9
+              },
+              "lower_leg_R": {
+                "rx": 8.3
+              },
+              "neck": {
+                "rx": 3.7
+              },
+              "shoulder_L": {
+                "rx": -27.4,
+                "ry": -10.5,
+                "rz": -31.1
+              },
+              "shoulder_R": {
+                "rx": -6.2
+              },
+              "spine_0": {
+                "ry": 22.5,
+                "rz": 16.5
+              },
+              "spine_1": {
+                "rx": 3.7
+              },
+              "upper_arm_L": {
+                "rx": -9.6,
+                "ry": 16.2,
+                "rz": -39.8
+              },
+              "upper_arm_R": {
+                "rx": 10.0,
+                "ry": -6.6,
+                "rz": 21.0
+              },
+              "upper_leg_L": {
+                "rx": 7.5,
+                "ry": 40.7,
+                "rz": 21.6
+              },
+              "upper_leg_R": {
+                "rx": 13.0,
+                "ry": 11.9,
+                "rz": 14.4
+              }
+            }
+          },
+          {
+            "t": 0.25,
+            "bones": {
+              "foot_L": {
+                "rx": -9.2,
+                "ry": 18.4,
+                "rz": 4.1
+              },
+              "foot_R": {
+                "rx": -9.2,
+                "ry": -6.7
+              },
+              "hand_L": {
+                "rx": -20.2,
+                "ry": 89.8,
+                "rz": 8.6
+              },
+              "hand_R": {
+                "ry": 17.1,
+                "rz": 6.5
+              },
+              "head": {
+                "rx": 22.7,
+                "ry": -4.5
+              },
+              "hips": {
+                "rx": -11.8,
+                "rz": -23.9
+              },
+              "lower_arm_L": {
+                "rx": -14.6,
+                "ry": 9.8,
+                "rz": 55.4
+              },
+              "lower_arm_R": {
+                "rx": -7.0,
+                "rz": -25.9
+              },
+              "lower_leg_L": {
+                "rx": 18.5
+              },
+              "lower_leg_R": {
+                "rx": 13.5
+              },
+              "neck": {
+                "rx": 5.2
+              },
+              "shoulder_L": {
+                "rx": -34.5,
+                "ry": -12.8,
+                "rz": -34.2
+              },
+              "shoulder_R": {
+                "rz": -20.6
+              },
+              "spine_0": {
+                "ry": 22.5,
+                "rz": 14.6
+              },
+              "spine_1": {
+                "rx": 5.1
+              },
+              "upper_arm_L": {
+                "rx": -15.0,
+                "ry": 20.0,
+                "rz": -49.9
+              },
+              "upper_arm_R": {
+                "rx": 26.0,
+                "ry": -4.3,
+                "rz": -3.1
+              },
+              "upper_leg_L": {
+                "rx": 3.5,
+                "ry": 39.6,
+                "rz": 18.0
+              },
+              "upper_leg_R": {
+                "rx": 9.8,
+                "ry": 11.6,
+                "rz": 13.8
+              }
+            }
+          },
+          {
+            "t": 0.35,
+            "bones": {
+              "foot_L": {
+                "ry": 16.1
+              },
+              "foot_R": {
+                "rx": -3.9,
+                "ry": -5.0
+              },
+              "hand_L": {
+                "rx": -52.5,
+                "ry": 80.5,
+                "rz": 27.5
+              },
+              "hand_R": {
+                "rx": 4.0,
+                "ry": 15.6,
+                "rz": 4.7
+              },
+              "head": {
+                "rx": 11.5,
+                "ry": -3.0,
+                "rz": -8.7
+              },
+              "hips": {
+                "ry": 5.0,
+                "rz": -23.3
+              },
+              "lower_arm_L": {
+                "rx": -16.5,
+                "ry": 16.9,
+                "rz": 78.7
+              },
+              "lower_arm_R": {
+                "rx": -12.0,
+                "ry": -5.4,
+                "rz": -46.8
+              },
+              "lower_leg_L": {
+                "rx": 12.0
+              },
+              "lower_leg_R": {
+                "rx": 9.4
+              },
+              "neck": {
+                "rx": 4.5,
+                "rz": -4.8
+              },
+              "shoulder_L": {
+                "rx": -30.5,
+                "ry": -9.9,
+                "rz": -29.6
+              },
+              "shoulder_R": {
+                "rx": 12.8,
+                "rz": -38.6
+              },
+              "spine_0": {
+                "ry": 22.1,
+                "rz": 10.9
+              },
+              "spine_1": {
+                "rx": 4.4,
+                "rz": -6.3
+              },
+              "upper_arm_L": {
+                "rx": -24.7,
+                "ry": -17.7,
+                "rz": -46.8
+              },
+              "upper_arm_R": {
+                "rx": 22.6,
+                "ry": -5.4,
+                "rz": -22.5
+              },
+              "upper_leg_L": {
+                "rx": -15.1,
+                "ry": 33.0,
+                "rz": 4.7
+              },
+              "upper_leg_R": {
+                "rx": -4.0,
+                "ry": 13.8,
+                "rz": 19.5
+              }
+            }
+          },
+          {
+            "t": 0.45,
+            "bones": {
+              "foot_L": {
+                "ry": 14.1
+              },
+              "foot_R": {
+                "ry": -5.1,
+                "rz": 3.6
+              },
+              "hand_L": {
+                "rx": -64.3,
+                "ry": 60.7
+              },
+              "hand_R": {
+                "ry": 16.5,
+                "rz": 5.1
+              },
+              "head": {
+                "rx": 8.0,
+                "ry": -3.8,
+                "rz": -7.4
+              },
+              "hips": {
+                "rx": 4.5,
+                "ry": 6.5,
+                "rz": -24.7
+              },
+              "lower_arm_L": {
+                "rx": -15.8,
+                "ry": 13.3,
+                "rz": 67.3
+              },
+              "lower_arm_R": {
+                "rx": -13.9,
+                "ry": -8.1,
+                "rz": -57.5
+              },
+              "lower_leg_L": {
+                "rx": 12.2
+              },
+              "lower_leg_R": {
+                "rx": 9.4
+              },
+              "neck": {
+                "rx": 5.7,
+                "ry": 3.3,
+                "rz": -7.0
+              },
+              "shoulder_L": {
+                "rx": -36.6,
+                "ry": -12.6,
+                "rz": -33.1
+              },
+              "shoulder_R": {
+                "ry": -3.4,
+                "rz": -29.3
+              },
+              "spine_0": {
+                "rx": 3.1,
+                "ry": 20.7,
+                "rz": 9.1
+              },
+              "spine_1": {
+                "rx": 5.7,
+                "rz": -8.5
+              },
+              "upper_arm_L": {
+                "rx": -29.6,
+                "ry": -46.7,
+                "rz": -57.7
+              },
+              "upper_arm_R": {
+                "rx": 19.7,
+                "ry": -8.0,
+                "rz": -26.0
+              },
+              "upper_leg_L": {
+                "rx": -26.6,
+                "ry": 29.0
+              },
+              "upper_leg_R": {
+                "rx": -13.0,
+                "ry": 17.0,
+                "rz": 24.4
+              }
+            }
+          },
+          {
+            "t": 0.55,
+            "bones": {
+              "foot_L": {
+                "ry": 13.5
+              },
+              "foot_R": {
+                "ry": -5.1,
+                "rz": 4.3
+              },
+              "hand_L": {
+                "rx": -70.6,
+                "ry": 56.7
+              },
+              "hand_R": {
+                "rx": 3.1,
+                "ry": 15.8,
+                "rz": 4.0
+              },
+              "head": {
+                "rx": 5.9,
+                "ry": -3.6,
+                "rz": -8.5
+              },
+              "hips": {
+                "rx": 6.1,
+                "ry": 7.3,
+                "rz": -24.8
+              },
+              "lower_arm_L": {
+                "rx": -15.9,
+                "ry": 14.2,
+                "rz": 70.1
+              },
+              "lower_arm_R": {
+                "rx": -14.7,
+                "ry": -9.5,
+                "rz": -63.0
+              },
+              "lower_leg_L": {
+                "rx": 10.6
+              },
+              "lower_leg_R": {
+                "rx": 7.7
+              },
+              "neck": {
+                "rx": 6.3,
+                "ry": 3.4,
+                "rz": -7.5
+              },
+              "shoulder_L": {
+                "rx": -35.1,
+                "ry": -11.4,
+                "rz": -31.6
+              },
+              "shoulder_R": {
+                "rx": -16.6,
+                "ry": -3.3,
+                "rz": -15.3
+              },
+              "spine_0": {
+                "rx": 3.4,
+                "ry": 20.5,
+                "rz": 8.8
+              },
+              "spine_1": {
+                "rx": 6.2,
+                "rz": -9.0
+              },
+              "upper_arm_L": {
+                "rx": -37.8,
+                "ry": -40.2,
+                "rz": -56.1
+              },
+              "upper_arm_R": {
+                "rx": 24.4,
+                "ry": -7.7,
+                "rz": -30.4
+              },
+              "upper_leg_L": {
+                "rx": -29.1,
+                "ry": 27.2
+              },
+              "upper_leg_R": {
+                "rx": -15.4,
+                "ry": 17.7,
+                "rz": 25.5
+              }
+            }
+          },
+          {
+            "t": 0.65,
+            "bones": {
+              "foot_L": {
+                "ry": 13.7
+              },
+              "foot_R": {
+                "ry": -5.5,
+                "rz": 3.5
+              },
+              "hand_L": {
+                "rx": -37.5,
+                "ry": 70.7,
+                "rz": -6.5
+              },
+              "hand_R": {
+                "rx": 4.8,
+                "ry": 16.3
+              },
+              "head": {
+                "rx": 4.0,
+                "ry": -3.5,
+                "rz": -7.9
+              },
+              "hips": {
+                "ry": 5.8,
+                "rz": -23.8
+              },
+              "lower_arm_L": {
+                "rx": -15.7,
+                "ry": 12.5,
+                "rz": 65.3
+              },
+              "lower_arm_R": {
+                "rx": -12.9,
+                "ry": -6.5,
+                "rz": -51.6
+              },
+              "lower_leg_L": {
+                "rx": 7.9
+              },
+              "lower_leg_R": {
+                "rx": 3.9
+              },
+              "neck": {
+                "rx": 4.9,
+                "rz": -6.5
+              },
+              "shoulder_L": {
+                "rx": -30.6,
+                "ry": -10.0,
+                "rz": -30.1
+              },
+              "shoulder_R": {
+                "rx": -18.0,
+                "rz": -10.9
+              },
+              "spine_0": {
+                "ry": 21.2,
+                "rz": 9.9
+              },
+              "spine_1": {
+                "rx": 4.9,
+                "rz": -7.5
+              },
+              "upper_arm_L": {
+                "rx": -45.9,
+                "ry": -10.3,
+                "rz": -30.0
+              },
+              "upper_arm_R": {
+                "rx": 25.3,
+                "ry": -4.1,
+                "rz": -26.3
+              },
+              "upper_leg_L": {
+                "rx": -20.5,
+                "ry": 29.6
+              },
+              "upper_leg_R": {
+                "rx": -8.1,
+                "ry": 14.9,
+                "rz": 22.0
+              }
+            }
+          },
+          {
+            "t": 0.75,
+            "bones": {
+              "foot_L": {
+                "ry": 13.1
+              },
+              "foot_R": {
+                "ry": -8.4
+              },
+              "hand_L": {
+                "rx": -13.9,
+                "ry": 57.4
+              },
+              "hand_R": {
+                "rx": 5.4,
+                "ry": 17.0
+              },
+              "head": {
+                "rx": 5.1,
+                "rz": -5.1
+              },
+              "hips": {
+                "rx": -3.5,
+                "rz": -22.0
+              },
+              "lower_arm_L": {
+                "rx": -8.5,
+                "ry": 3.1,
+                "rz": 27.5
+              },
+              "lower_arm_R": {
+                "rx": -10.1,
+                "ry": -3.8,
+                "rz": -38.5
+              },
+              "lower_leg_L": {
+                "rx": 8.0
+              },
+              "lower_leg_R": {
+                "rx": 4.9
+              },
+              "neck": {
+                "rz": -4.1
+              },
+              "shoulder_L": {
+                "rx": -25.2,
+                "ry": -8.6,
+                "rz": -27.6
+              },
+              "shoulder_R": {
+                "rx": -8.6,
+                "rz": -9.0
+              },
+              "spine_0": {
+                "ry": 22.1,
+                "rz": 12.5
+              },
+              "spine_1": {
+                "rz": -4.9
+              },
+              "upper_arm_L": {
+                "rx": -19.5,
+                "rz": -15.6
+              },
+              "upper_arm_R": {
+                "rx": 20.5,
+                "ry": -8.3,
+                "rz": -12.0
+              },
+              "upper_leg_L": {
+                "rx": -5.2,
+                "ry": 34.2,
+                "rz": 7.3
+              },
+              "upper_leg_R": {
+                "ry": 11.4,
+                "rz": 15.4
+              }
+            }
+          },
+          {
+            "t": 0.85,
+            "bones": {
+              "foot_L": {
+                "rx": -7.8,
+                "ry": 12.5,
+                "rz": 6.2
+              },
+              "foot_R": {
+                "rx": -3.9,
+                "ry": -11.7
+              },
+              "hand_L": {
+                "rx": -14.6,
+                "ry": 40.9,
+                "rz": 12.6
+              },
+              "hand_R": {
+                "ry": 17.0,
+                "rz": 4.1
+              },
+              "head": {
+                "rx": 5.8
+              },
+              "hips": {
+                "rx": -7.6,
+                "ry": -4.3,
+                "rz": -23.9
+              },
+              "lower_arm_L": {
+                "rx": -3.3,
+                "rz": 9.8
+              },
+              "lower_arm_R": {
+                "rx": -7.7,
+                "rz": -27.9
+              },
+              "lower_leg_L": {
+                "rx": 12.8
+              },
+              "lower_leg_R": {
+                "rx": 5.3
+              },
+              "neck": {
+                "rx": 3.1
+              },
+              "shoulder_L": {
+                "rx": -23.0,
+                "ry": -7.9,
+                "rz": -26.5
+              },
+              "shoulder_R": {
+                "rx": -8.8,
+                "rz": 4.6
+              },
+              "spine_0": {
+                "ry": 22.7,
+                "rz": 15.8
+              },
+              "spine_1": {
+                "rx": 3.0
+              },
+              "upper_arm_L": {
+                "rx": -3.2,
+                "ry": 9.0,
+                "rz": -25.6
+              },
+              "upper_arm_R": {
+                "rx": 9.4,
+                "ry": -13.9,
+                "rz": 10.5
+              },
+              "upper_leg_L": {
+                "rx": 3.9,
+                "ry": 38.4,
+                "rz": 16.4
+              },
+              "upper_leg_R": {
+                "rx": 10.1,
+                "ry": 11.4,
+                "rz": 14.3
+              }
+            }
+          },
+          {
+            "t": 0.95,
+            "bones": {
+              "foot_L": {
+                "rx": -8.1,
+                "ry": 12.9,
+                "rz": 7.3
+              },
+              "foot_R": {
+                "rx": -4.4,
+                "ry": -11.9
+              },
+              "hand_L": {
+                "rx": -3.0,
+                "ry": 54.6,
+                "rz": 22.8
+              },
+              "hand_R": {
+                "ry": 16.2,
+                "rz": 6.0
+              },
+              "head": {
+                "rx": 7.3
+              },
+              "hips": {
+                "rx": -7.5,
+                "ry": -5.0,
+                "rz": -24.2
+              },
+              "lower_arm_L": {
+                "rz": -3.0
+              },
+              "lower_arm_R": {
+                "rz": -9.7
+              },
+              "lower_leg_L": {
+                "rx": 12.6
+              },
+              "lower_leg_R": {
+                "rx": 4.6
+              },
+              "shoulder_L": {
+                "rx": -24.5,
+                "ry": -7.8,
+                "rz": -26.3
+              },
+              "shoulder_R": {
+                "rx": -17.0,
+                "rz": 14.6
+              },
+              "spine_0": {
+                "ry": 22.6,
+                "rz": 16.5
+              },
+              "spine_1": {
+                "ry": -3.0
+              },
+              "upper_arm_L": {
+                "rx": -4.0,
+                "ry": 12.0,
+                "rz": -34.8
+              },
+              "upper_arm_R": {
+                "rx": 6.8,
+                "ry": -10.0,
+                "rz": 26.7
+              },
+              "upper_leg_L": {
+                "rx": 5.6,
+                "ry": 39.6,
+                "rz": 18.0
+              },
+              "upper_leg_R": {
+                "rx": 11.6,
+                "ry": 11.8,
+                "rz": 14.5
+              }
+            }
+          },
+          {
+            "t": 1.0,
+            "bones": {}
+          }
         ],
         "easing": "ease_in_out",
         "loopable": false,
         "blendable": false,
         "glb_fallback": null
       },
-
       "arm_heben_rechts": {
         "id": "MOT_ARM_UP_R",
         "category": "gesture",
@@ -229,15 +2827,21 @@
         "duration_ms": 800,
         "_fix": "v1.2: ry statt rx (GLB: ry=dominant fuer Arm hoch)",
         "bones": {
-          "upper_arm_R": { "rx": -20, "ry": 55, "rz": 20 },
-          "shoulder_R": { "rx": -8, "ry": 5 }
+          "upper_arm_R": {
+            "rx": -20,
+            "ry": 55,
+            "rz": 20
+          },
+          "shoulder_R": {
+            "rx": -8,
+            "ry": 5
+          }
         },
         "easing": "ease_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "arm_heben_links": {
         "id": "MOT_ARM_UP_L",
         "category": "gesture",
@@ -245,15 +2849,21 @@
         "duration_ms": 800,
         "_fix": "v1.2: ry statt rx, gespiegelt",
         "bones": {
-          "upper_arm_L": { "rx": -20, "ry": -55, "rz": -20 },
-          "shoulder_L": { "rx": -8, "ry": -5 }
+          "upper_arm_L": {
+            "rx": -20,
+            "ry": -55,
+            "rz": -20
+          },
+          "shoulder_L": {
+            "rx": -8,
+            "ry": -5
+          }
         },
         "easing": "ease_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "zeigen": {
         "id": "MOT_POINT",
         "category": "gesture",
@@ -261,18 +2871,26 @@
         "duration_ms": 600,
         "_fix": "v1.2: basiert auf GESTURE GLB-Deltas (rx:-72, ry:83, rz:-7)",
         "bones": {
-          "upper_arm_R": { "rx": -45, "ry": 50, "rz": -5 },
-          "lower_arm_R": { "rz": -45 },
-          "hand_R": { "rx": -40 },
-          "shoulder_R": { "rx": -20 }
-
+          "upper_arm_R": {
+            "rx": -45,
+            "ry": 50,
+            "rz": -5
+          },
+          "lower_arm_R": {
+            "rz": -45
+          },
+          "hand_R": {
+            "rx": -40
+          },
+          "shoulder_R": {
+            "rx": -20
+          }
         },
         "easing": "ease_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "arme_verschraenken": {
         "id": "MOT_ARMS_CROSSED",
         "category": "posture",
@@ -280,19 +2898,34 @@
         "duration_ms": 700,
         "_fix": "v1.2: lower_arm rz statt rx fuer Ellenbogen",
         "bones": {
-          "upper_arm_R": { "rx": -15, "ry": 25, "rz": -35 },
-          "lower_arm_R": { "rz": -100 },
-          "upper_arm_L": { "rx": -15, "ry": -25, "rz": 35 },
-          "lower_arm_L": { "rz": 100 },
-          "hand_L": { "rx": 10 },
-          "hand_R": { "rx": 10 }
+          "upper_arm_R": {
+            "rx": -15,
+            "ry": 25,
+            "rz": -35
+          },
+          "lower_arm_R": {
+            "rz": -100
+          },
+          "upper_arm_L": {
+            "rx": -15,
+            "ry": -25,
+            "rz": 35
+          },
+          "lower_arm_L": {
+            "rz": 100
+          },
+          "hand_L": {
+            "rx": 10
+          },
+          "hand_R": {
+            "rx": 10
+          }
         },
         "easing": "ease_in_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "haende_huefte": {
         "id": "MOT_HANDS_HIP",
         "category": "posture",
@@ -300,17 +2933,26 @@
         "duration_ms": 600,
         "_fix": "v1.2: lower_arm rz statt rx, upper_arm ry statt rx",
         "bones": {
-          "upper_arm_R": { "ry": 15, "rz": -30 },
-          "lower_arm_R": { "rz": -70 },
-          "upper_arm_L": { "ry": -15, "rz": 30 },
-          "lower_arm_L": { "rz": 70 }
+          "upper_arm_R": {
+            "ry": 15,
+            "rz": -30
+          },
+          "lower_arm_R": {
+            "rz": -70
+          },
+          "upper_arm_L": {
+            "ry": -15,
+            "rz": 30
+          },
+          "lower_arm_L": {
+            "rz": 70
+          }
         },
         "easing": "ease_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "kinn_beruehren": {
         "id": "MOT_TOUCH_CHIN",
         "category": "gesture",
@@ -318,17 +2960,27 @@
         "duration_ms": 800,
         "_fix": "v1.2: basiert auf GESTURE GLB-Deltas, ry fuer Arm hoch, rz fuer Ellenbogen",
         "bones": {
-          "upper_arm_R": { "rx": -35, "ry": 40, "rz": -30 },
-          "lower_arm_R": { "rz": -100 },
-          "hand_R": { "rx": -40 },
-          "head": { "rx": 8, "rz": 5 }
+          "upper_arm_R": {
+            "rx": -35,
+            "ry": 40,
+            "rz": -30
+          },
+          "lower_arm_R": {
+            "rz": -100
+          },
+          "hand_R": {
+            "rx": -40
+          },
+          "head": {
+            "rx": 8,
+            "rz": 5
+          }
         },
         "easing": "ease_in_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "kopf_kratzen": {
         "id": "MOT_SCRATCH_HEAD",
         "category": "gesture",
@@ -336,18 +2988,68 @@
         "duration_ms": 1000,
         "_fix": "v1.2: upper_arm ry fuer Arm hoch, lower_arm rz fuer Ellenbogen",
         "keyframes": [
-          { "t": 0.0,  "bones": {} },
-          { "t": 0.25, "bones": { "upper_arm_R": {"rx":-30,"ry":70,"rz":15}, "lower_arm_R": {"rz":-100}, "head": {"rz":8} } },
-          { "t": 0.5,  "bones": { "upper_arm_R": {"rx":-30,"ry":70,"rz":15}, "lower_arm_R": {"rz":-95}, "hand_R": {"ry":10} } },
-          { "t": 0.75, "bones": { "upper_arm_R": {"rx":-30,"ry":70,"rz":15}, "lower_arm_R": {"rz":-100}, "hand_R": {"ry":-10} } },
-          { "t": 1.0,  "bones": {} }
+          {
+            "t": 0.0,
+            "bones": {}
+          },
+          {
+            "t": 0.25,
+            "bones": {
+              "upper_arm_R": {
+                "rx": -30,
+                "ry": 70,
+                "rz": 15
+              },
+              "lower_arm_R": {
+                "rz": -100
+              },
+              "head": {
+                "rz": 8
+              }
+            }
+          },
+          {
+            "t": 0.5,
+            "bones": {
+              "upper_arm_R": {
+                "rx": -30,
+                "ry": 70,
+                "rz": 15
+              },
+              "lower_arm_R": {
+                "rz": -95
+              },
+              "hand_R": {
+                "ry": 10
+              }
+            }
+          },
+          {
+            "t": 0.75,
+            "bones": {
+              "upper_arm_R": {
+                "rx": -30,
+                "ry": 70,
+                "rz": 15
+              },
+              "lower_arm_R": {
+                "rz": -100
+              },
+              "hand_R": {
+                "ry": -10
+              }
+            }
+          },
+          {
+            "t": 1.0,
+            "bones": {}
+          }
         ],
         "easing": "ease_in_out",
         "loopable": false,
         "blendable": false,
         "glb_fallback": null
       },
-
       "jubeln": {
         "id": "MOT_CELEBRATE",
         "category": "expression",
@@ -355,18 +3057,86 @@
         "duration_ms": 1500,
         "_fix": "v1.2: upper_arm ry statt rx fuer Arme HOCH (R:+80, L:-80)",
         "keyframes": [
-          { "t": 0.0,  "bones": {} },
-          { "t": 0.2,  "bones": { "upper_arm_R": {"rx":-15,"ry":75,"rz":20}, "upper_arm_L": {"rx":-15,"ry":-75,"rz":-20}, "spine_2": {"rx":10}, "head": {"rx":-15} } },
-          { "t": 0.5,  "bones": { "upper_arm_R": {"rx":-15,"ry":80,"rz":25}, "upper_arm_L": {"rx":-15,"ry":-80,"rz":-25}, "hand_R": {"rz":-20}, "hand_L": {"rz":20}, "spine_2": {"rx":12}, "head": {"rx":-18} } },
-          { "t": 0.75, "bones": { "upper_arm_R": {"rx":-10,"ry":70,"rz":18}, "upper_arm_L": {"rx":-10,"ry":-70,"rz":-18}, "spine_2": {"rx":8} } },
-          { "t": 1.0,  "bones": {} }
+          {
+            "t": 0.0,
+            "bones": {}
+          },
+          {
+            "t": 0.2,
+            "bones": {
+              "upper_arm_R": {
+                "rx": -15,
+                "ry": 75,
+                "rz": 20
+              },
+              "upper_arm_L": {
+                "rx": -15,
+                "ry": -75,
+                "rz": -20
+              },
+              "spine_2": {
+                "rx": 10
+              },
+              "head": {
+                "rx": -15
+              }
+            }
+          },
+          {
+            "t": 0.5,
+            "bones": {
+              "upper_arm_R": {
+                "rx": -15,
+                "ry": 80,
+                "rz": 25
+              },
+              "upper_arm_L": {
+                "rx": -15,
+                "ry": -80,
+                "rz": -25
+              },
+              "hand_R": {
+                "rz": -20
+              },
+              "hand_L": {
+                "rz": 20
+              },
+              "spine_2": {
+                "rx": 12
+              },
+              "head": {
+                "rx": -18
+              }
+            }
+          },
+          {
+            "t": 0.75,
+            "bones": {
+              "upper_arm_R": {
+                "rx": -10,
+                "ry": 70,
+                "rz": 18
+              },
+              "upper_arm_L": {
+                "rx": -10,
+                "ry": -70,
+                "rz": -18
+              },
+              "spine_2": {
+                "rx": 8
+              }
+            }
+          },
+          {
+            "t": 1.0,
+            "bones": {}
+          }
         ],
         "easing": "ease_out",
         "loopable": false,
         "blendable": false,
         "glb_fallback": null
       },
-
       "traurig_stehen": {
         "id": "MOT_SAD_STAND",
         "category": "expression",
@@ -374,21 +3144,39 @@
         "duration_ms": 1000,
         "_fix": "v1.5: head/neck/spine rx invertiert (positiv=runter/vorn in diesem GLB)",
         "bones": {
-          "head": { "rx": 25, "rz": -5 },
-          "neck": { "rx": 10 },
-          "spine_2": { "rx": 8 },
-          "spine_1": { "rx": 5 },
-          "shoulder_L": { "ry": -5, "rz": 3 },
-          "shoulder_R": { "ry": -5, "rz": -3 },
-          "upper_arm_L": { "ry": 5 },
-          "upper_arm_R": { "ry": -5 }
+          "head": {
+            "rx": 25,
+            "rz": -5
+          },
+          "neck": {
+            "rx": 10
+          },
+          "spine_2": {
+            "rx": 8
+          },
+          "spine_1": {
+            "rx": 5
+          },
+          "shoulder_L": {
+            "ry": -5,
+            "rz": 3
+          },
+          "shoulder_R": {
+            "ry": -5,
+            "rz": -3
+          },
+          "upper_arm_L": {
+            "ry": 5
+          },
+          "upper_arm_R": {
+            "ry": -5
+          }
         },
         "easing": "ease_in",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "wuetend_stehen": {
         "id": "MOT_ANGRY_STAND",
         "category": "expression",
@@ -396,21 +3184,36 @@
         "duration_ms": 500,
         "_fix": "v1.5: head rx invertiert",
         "bones": {
-          "head": { "rx": 5 },
-          "spine_2": { "rx": 5 },
-          "shoulder_L": { "ry": 8 },
-          "shoulder_R": { "ry": 8 },
-          "upper_arm_R": { "ry": 15 },
-          "upper_arm_L": { "ry": -15 },
-          "hand_L": { "rx": -40 },
-          "hand_R": { "rx": -40 }
+          "head": {
+            "rx": 5
+          },
+          "spine_2": {
+            "rx": 5
+          },
+          "shoulder_L": {
+            "ry": 8
+          },
+          "shoulder_R": {
+            "ry": 8
+          },
+          "upper_arm_R": {
+            "ry": 15
+          },
+          "upper_arm_L": {
+            "ry": -15
+          },
+          "hand_L": {
+            "rx": -40
+          },
+          "hand_R": {
+            "rx": -40
+          }
         },
         "easing": "ease_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "lachen": {
         "id": "MOT_LAUGH",
         "category": "expression",
@@ -418,20 +3221,92 @@
         "duration_ms": 1200,
         "_fix": "v1.5: head rx invertiert (Kopf kippt beim Lachen nach hinten)",
         "keyframes": [
-          { "t": 0.0,  "bones": { "spine_2": { "rx": 0 } } },
-          { "t": 0.15, "bones": { "spine_2": { "rx": 8 }, "head": { "rx": -10 }, "shoulder_L": { "ry": 5 }, "shoulder_R": { "ry": 5 } } },
-          { "t": 0.3,  "bones": { "spine_2": { "rx": 3 }, "head": { "rx": -5 } } },
-          { "t": 0.45, "bones": { "spine_2": { "rx": 7 }, "head": { "rx": -9 } } },
-          { "t": 0.6,  "bones": { "spine_2": { "rx": 2 }, "head": { "rx": -4 } } },
-          { "t": 0.8,  "bones": { "spine_2": { "rx": 5 }, "head": { "rx": -7 } } },
-          { "t": 1.0,  "bones": { "spine_2": { "rx": 0 }, "head": { "rx": 0 } } }
+          {
+            "t": 0.0,
+            "bones": {
+              "spine_2": {
+                "rx": 0
+              }
+            }
+          },
+          {
+            "t": 0.15,
+            "bones": {
+              "spine_2": {
+                "rx": 8
+              },
+              "head": {
+                "rx": -10
+              },
+              "shoulder_L": {
+                "ry": 5
+              },
+              "shoulder_R": {
+                "ry": 5
+              }
+            }
+          },
+          {
+            "t": 0.3,
+            "bones": {
+              "spine_2": {
+                "rx": 3
+              },
+              "head": {
+                "rx": -5
+              }
+            }
+          },
+          {
+            "t": 0.45,
+            "bones": {
+              "spine_2": {
+                "rx": 7
+              },
+              "head": {
+                "rx": -9
+              }
+            }
+          },
+          {
+            "t": 0.6,
+            "bones": {
+              "spine_2": {
+                "rx": 2
+              },
+              "head": {
+                "rx": -4
+              }
+            }
+          },
+          {
+            "t": 0.8,
+            "bones": {
+              "spine_2": {
+                "rx": 5
+              },
+              "head": {
+                "rx": -7
+              }
+            }
+          },
+          {
+            "t": 1.0,
+            "bones": {
+              "spine_2": {
+                "rx": 0
+              },
+              "head": {
+                "rx": 0
+              }
+            }
+          }
         ],
         "easing": "ease_out",
         "loopable": false,
         "blendable": false,
         "glb_fallback": null
       },
-
       "ueberrascht": {
         "id": "MOT_SURPRISED",
         "category": "expression",
@@ -439,32 +3314,79 @@
         "duration_ms": 800,
         "_fix": "v1.2: upper_arm ry statt rx fuer Arme leicht HOCH",
         "keyframes": [
-          { "t": 0.0,  "bones": {} },
-          { "t": 0.15, "bones": { "head": {"rx":-12}, "spine_2": {"rx":5}, "upper_arm_R": {"ry":25}, "upper_arm_L": {"ry":-25}, "shoulder_L": {"ry":8}, "shoulder_R": {"ry":8} } },
-          { "t": 0.5,  "bones": { "head": {"rx":-10}, "spine_2": {"rx":4}, "upper_arm_R": {"ry":20}, "upper_arm_L": {"ry":-20} } },
-          { "t": 1.0,  "bones": {} }
+          {
+            "t": 0.0,
+            "bones": {}
+          },
+          {
+            "t": 0.15,
+            "bones": {
+              "head": {
+                "rx": -12
+              },
+              "spine_2": {
+                "rx": 5
+              },
+              "upper_arm_R": {
+                "ry": 25
+              },
+              "upper_arm_L": {
+                "ry": -25
+              },
+              "shoulder_L": {
+                "ry": 8
+              },
+              "shoulder_R": {
+                "ry": 8
+              }
+            }
+          },
+          {
+            "t": 0.5,
+            "bones": {
+              "head": {
+                "rx": -10
+              },
+              "spine_2": {
+                "rx": 4
+              },
+              "upper_arm_R": {
+                "ry": 20
+              },
+              "upper_arm_L": {
+                "ry": -20
+              }
+            }
+          },
+          {
+            "t": 1.0,
+            "bones": {}
+          }
         ],
         "easing": "ease_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "verwirrt": {
         "id": "MOT_CONFUSED",
         "category": "expression",
         "type": "static",
         "duration_ms": 600,
         "bones": {
-          "head": { "rz": 12, "rx": 5 },
-          "neck": { "rz": 5 }
+          "head": {
+            "rz": 12,
+            "rx": 5
+          },
+          "neck": {
+            "rz": 5
+          }
         },
         "easing": "ease_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "sitzen": {
         "id": "MOT_SIT",
         "category": "posture",
@@ -472,23 +3394,42 @@
         "duration_ms": 1200,
         "_fix": "v1.2: lower_arm rz statt rx fuer Ellenbogen",
         "bones": {
-          "hips": { "ty": -0.3 },
-          "upper_leg_L": { "rx": -90 },
-          "upper_leg_R": { "rx": -90 },
-          "lower_leg_L": { "rx": -90 },
-          "lower_leg_R": { "rx": -90 },
-          "spine_0": { "rx": 5 },
-          "upper_arm_R": { "ry": 10 },
-          "upper_arm_L": { "ry": -10 },
-          "lower_arm_R": { "rz": -50 },
-          "lower_arm_L": { "rz": 50 }
+          "hips": {
+            "ty": -0.3
+          },
+          "upper_leg_L": {
+            "rx": -90
+          },
+          "upper_leg_R": {
+            "rx": -90
+          },
+          "lower_leg_L": {
+            "rx": -90
+          },
+          "lower_leg_R": {
+            "rx": -90
+          },
+          "spine_0": {
+            "rx": 5
+          },
+          "upper_arm_R": {
+            "ry": 10
+          },
+          "upper_arm_L": {
+            "ry": -10
+          },
+          "lower_arm_R": {
+            "rz": -50
+          },
+          "lower_arm_L": {
+            "rz": 50
+          }
         },
         "easing": "ease_in_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "schlafen": {
         "id": "MOT_SLEEP",
         "category": "posture",
@@ -496,21 +3437,37 @@
         "duration_ms": 2000,
         "_fix": "v1.5: head/neck/spine rx invertiert (Kopf sackt nach vorn)",
         "bones": {
-          "head": { "rx": 30, "rz": 15 },
-          "neck": { "rx": 15 },
-          "spine_2": { "rx": 10 },
-          "spine_1": { "rx": 8 },
-          "shoulder_L": { "ry": -8 },
-          "shoulder_R": { "ry": -8 },
-          "upper_arm_L": { "ry": 8 },
-          "upper_arm_R": { "ry": -8 }
+          "head": {
+            "rx": 30,
+            "rz": 15
+          },
+          "neck": {
+            "rx": 15
+          },
+          "spine_2": {
+            "rx": 10
+          },
+          "spine_1": {
+            "rx": 8
+          },
+          "shoulder_L": {
+            "ry": -8
+          },
+          "shoulder_R": {
+            "ry": -8
+          },
+          "upper_arm_L": {
+            "ry": 8
+          },
+          "upper_arm_R": {
+            "ry": -8
+          }
         },
         "easing": "ease_in",
         "loopable": false,
         "blendable": false,
         "glb_fallback": null
       },
-
       "aufwachen": {
         "id": "MOT_WAKE",
         "category": "gesture",
@@ -518,18 +3475,84 @@
         "duration_ms": 2000,
         "_fix": "v1.2: upper_arm ry + lower_arm rz fuer Arm-Stretch",
         "keyframes": [
-          { "t": 0.0,  "bones": { "head": {"rx":30,"rz":15}, "neck": {"rx":15}, "spine_2": {"rx":10}, "spine_1": {"rx":8}, "shoulder_L": {"ry":-8}, "shoulder_R": {"ry":-8}, "upper_arm_L": {"ry":8}, "upper_arm_R": {"ry":-8} } },
-          { "t": 0.3,  "bones": { "head": {"rx":15} } },
-          { "t": 0.5,  "bones": { "head": {"rx":0}, "spine_2": {"rx":0}, "upper_arm_L": {"rx":-15,"ry":-50,"rz":-15}, "lower_arm_L": {"rz":60} } },
-          { "t": 0.7,  "bones": { "upper_arm_L": {"ry":-20}, "head": {"rx":-5} } },
-          { "t": 1.0,  "bones": {} }
+          {
+            "t": 0.0,
+            "bones": {
+              "head": {
+                "rx": 30,
+                "rz": 15
+              },
+              "neck": {
+                "rx": 15
+              },
+              "spine_2": {
+                "rx": 10
+              },
+              "spine_1": {
+                "rx": 8
+              },
+              "shoulder_L": {
+                "ry": -8
+              },
+              "shoulder_R": {
+                "ry": -8
+              },
+              "upper_arm_L": {
+                "ry": 8
+              },
+              "upper_arm_R": {
+                "ry": -8
+              }
+            }
+          },
+          {
+            "t": 0.3,
+            "bones": {
+              "head": {
+                "rx": 15
+              }
+            }
+          },
+          {
+            "t": 0.5,
+            "bones": {
+              "head": {
+                "rx": 0
+              },
+              "spine_2": {
+                "rx": 0
+              },
+              "upper_arm_L": {
+                "rx": -15,
+                "ry": -50,
+                "rz": -15
+              },
+              "lower_arm_L": {
+                "rz": 60
+              }
+            }
+          },
+          {
+            "t": 0.7,
+            "bones": {
+              "upper_arm_L": {
+                "ry": -20
+              },
+              "head": {
+                "rx": -5
+              }
+            }
+          },
+          {
+            "t": 1.0,
+            "bones": {}
+          }
         ],
         "easing": "ease_out",
         "loopable": false,
         "blendable": false,
         "glb_fallback": null
       },
-
       "laufen": {
         "id": "MOT_WALK",
         "category": "locomotion",
@@ -537,129 +3560,288 @@
         "duration_ms": 800,
         "_note": "Arm-Swing rz ist korrekt (vorwaerts/rueckwaerts)",
         "keyframes": [
-          { "t": 0.0, "bones": { "upper_leg_L": {"rx":-25}, "upper_leg_R": {"rx":15}, "lower_leg_L": {"rx":-20}, "lower_leg_R": {"rx":-40}, "upper_arm_L": {"rz":-10}, "upper_arm_R": {"rz":15}, "hips": {"ty":0.02} } },
-          { "t": 0.5, "bones": { "upper_leg_L": {"rx":15}, "upper_leg_R": {"rx":-25}, "lower_leg_L": {"rx":-40}, "lower_leg_R": {"rx":-20}, "upper_arm_L": {"rz":15}, "upper_arm_R": {"rz":-10}, "hips": {"ty":0.02} } },
-          { "t": 1.0, "bones": { "upper_leg_L": {"rx":-25}, "upper_leg_R": {"rx":15}, "lower_leg_L": {"rx":-20}, "lower_leg_R": {"rx":-40}, "upper_arm_L": {"rz":-10}, "upper_arm_R": {"rz":15}, "hips": {"ty":0.02} } }
+          {
+            "t": 0.0,
+            "bones": {
+              "upper_leg_L": {
+                "rx": -25
+              },
+              "upper_leg_R": {
+                "rx": 15
+              },
+              "lower_leg_L": {
+                "rx": -20
+              },
+              "lower_leg_R": {
+                "rx": -40
+              },
+              "upper_arm_L": {
+                "rz": -10
+              },
+              "upper_arm_R": {
+                "rz": 15
+              },
+              "hips": {
+                "ty": 0.02
+              }
+            }
+          },
+          {
+            "t": 0.5,
+            "bones": {
+              "upper_leg_L": {
+                "rx": 15
+              },
+              "upper_leg_R": {
+                "rx": -25
+              },
+              "lower_leg_L": {
+                "rx": -40
+              },
+              "lower_leg_R": {
+                "rx": -20
+              },
+              "upper_arm_L": {
+                "rz": 15
+              },
+              "upper_arm_R": {
+                "rz": -10
+              },
+              "hips": {
+                "ty": 0.02
+              }
+            }
+          },
+          {
+            "t": 1.0,
+            "bones": {
+              "upper_leg_L": {
+                "rx": -25
+              },
+              "upper_leg_R": {
+                "rx": 15
+              },
+              "lower_leg_L": {
+                "rx": -20
+              },
+              "lower_leg_R": {
+                "rx": -40
+              },
+              "upper_arm_L": {
+                "rz": -10
+              },
+              "upper_arm_R": {
+                "rz": 15
+              },
+              "hips": {
+                "ty": 0.02
+              }
+            }
+          }
         ],
         "easing": "linear",
         "loopable": true,
         "blendable": false,
         "glb_fallback": null
       },
-
       "blick_halten": {
         "id": "MOT_GAZE_HOLD",
         "category": "expression",
         "type": "static",
         "duration_ms": 300,
         "bones": {
-          "head": { "ry": 0 }
+          "head": {
+            "ry": 0
+          }
         },
         "easing": "ease_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "blick_wegdrehen": {
         "id": "MOT_LOOK_AWAY",
         "category": "expression",
         "type": "static",
         "duration_ms": 500,
         "bones": {
-          "head": { "ry": 35, "rx": 8 },
-          "neck": { "ry": 15 }
+          "head": {
+            "ry": 35,
+            "rx": 8
+          },
+          "neck": {
+            "ry": 15
+          }
         },
         "easing": "ease_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "nach_vorn_lehnen": {
         "id": "MOT_LEAN_FORWARD",
         "category": "posture",
         "type": "static",
         "duration_ms": 600,
         "bones": {
-          "spine_0": { "rx": 10 },
-          "spine_1": { "rx": 8 },
-          "spine_2": { "rx": 5 },
-          "head": { "rx": -5 }
+          "spine_0": {
+            "rx": 10
+          },
+          "spine_1": {
+            "rx": 8
+          },
+          "spine_2": {
+            "rx": 5
+          },
+          "head": {
+            "rx": -5
+          }
         },
         "easing": "ease_in_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "zuruecklehnen": {
         "id": "MOT_LEAN_BACK",
         "category": "posture",
         "type": "static",
         "duration_ms": 600,
         "bones": {
-          "spine_0": { "rx": -8 },
-          "spine_1": { "rx": -6 },
-          "spine_2": { "rx": -4 },
-          "hips": { "ty": -0.05 }
+          "spine_0": {
+            "rx": -8
+          },
+          "spine_1": {
+            "rx": -6
+          },
+          "spine_2": {
+            "rx": -4
+          },
+          "hips": {
+            "ty": -0.05
+          }
         },
         "easing": "ease_in_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "gewicht_links": {
         "id": "MOT_WEIGHT_LEFT",
         "category": "posture",
         "type": "static",
         "duration_ms": 500,
         "bones": {
-          "hips": { "tx": -0.04, "rz": 3 },
-          "spine_0": { "rz": -2 },
-          "upper_leg_L": { "rx": -3 },
-          "upper_leg_R": { "rx": 3 }
+          "hips": {
+            "tx": -0.04,
+            "rz": 3
+          },
+          "spine_0": {
+            "rz": -2
+          },
+          "upper_leg_L": {
+            "rx": -3
+          },
+          "upper_leg_R": {
+            "rx": 3
+          }
         },
         "easing": "ease_in_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "gewicht_rechts": {
         "id": "MOT_WEIGHT_RIGHT",
         "category": "posture",
         "type": "static",
         "duration_ms": 500,
         "bones": {
-          "hips": { "tx": 0.04, "rz": -3 },
-          "spine_0": { "rz": 2 },
-          "upper_leg_L": { "rx": 3 },
-          "upper_leg_R": { "rx": -3 }
+          "hips": {
+            "tx": 0.04,
+            "rz": -3
+          },
+          "spine_0": {
+            "rz": 2
+          },
+          "upper_leg_L": {
+            "rx": 3
+          },
+          "upper_leg_R": {
+            "rx": -3
+          }
         },
         "easing": "ease_in_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "wippen": {
         "id": "MOT_SWAY",
         "category": "posture",
         "type": "sequence",
         "duration_ms": 2000,
         "keyframes": [
-          { "t": 0.0, "bones": { "hips": {"tx":-0.04,"rz":3}, "spine_0": {"rz":-2}, "upper_leg_L": {"rx":-3}, "upper_leg_R": {"rx":3} } },
-          { "t": 0.5, "bones": { "hips": {"tx":0.04,"rz":-3}, "spine_0": {"rz":2}, "upper_leg_L": {"rx":3}, "upper_leg_R": {"rx":-3} } },
-          { "t": 1.0, "bones": { "hips": {"tx":-0.04,"rz":3}, "spine_0": {"rz":-2}, "upper_leg_L": {"rx":-3}, "upper_leg_R": {"rx":3} } }
+          {
+            "t": 0.0,
+            "bones": {
+              "hips": {
+                "tx": -0.04,
+                "rz": 3
+              },
+              "spine_0": {
+                "rz": -2
+              },
+              "upper_leg_L": {
+                "rx": -3
+              },
+              "upper_leg_R": {
+                "rx": 3
+              }
+            }
+          },
+          {
+            "t": 0.5,
+            "bones": {
+              "hips": {
+                "tx": 0.04,
+                "rz": -3
+              },
+              "spine_0": {
+                "rz": 2
+              },
+              "upper_leg_L": {
+                "rx": 3
+              },
+              "upper_leg_R": {
+                "rx": -3
+              }
+            }
+          },
+          {
+            "t": 1.0,
+            "bones": {
+              "hips": {
+                "tx": -0.04,
+                "rz": 3
+              },
+              "spine_0": {
+                "rz": -2
+              },
+              "upper_leg_L": {
+                "rx": -3
+              },
+              "upper_leg_R": {
+                "rx": 3
+              }
+            }
+          }
         ],
         "easing": "ease_in_out",
         "loopable": true,
         "blendable": true,
         "glb_fallback": null
       },
-
       "hand_heben": {
         "id": "MOT_RAISE_HAND",
         "category": "gesture",
@@ -667,17 +3849,26 @@
         "duration_ms": 600,
         "_fix": "v1.4: rz:0 (nicht nach hinten!), Ellenbogen rz:-80 wie winken",
         "bones": {
-          "upper_arm_R": { "rx": -24, "ry": 60 },
-          "lower_arm_R": { "rz": -80 },
-          "hand_R": { "rx": -10 },
-          "shoulder_R": { "rx": -10, "ry": 6 }
+          "upper_arm_R": {
+            "rx": -24,
+            "ry": 60
+          },
+          "lower_arm_R": {
+            "rz": -80
+          },
+          "hand_R": {
+            "rx": -10
+          },
+          "shoulder_R": {
+            "rx": -10,
+            "ry": 6
+          }
         },
         "easing": "ease_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "beide_haende_heben": {
         "id": "MOT_RAISE_BOTH",
         "category": "gesture",
@@ -685,21 +3876,40 @@
         "duration_ms": 700,
         "_fix": "v1.4: rz:0 (nicht nach hinten!), Ellenbogen rz:-80/+80 wie winken",
         "bones": {
-          "upper_arm_R": { "rx": -24, "ry": 60 },
-          "upper_arm_L": { "rx": -24, "ry": -60 },
-          "lower_arm_R": { "rz": -80 },
-          "lower_arm_L": { "rz": 80 },
-          "hand_R": { "rx": -10 },
-          "hand_L": { "rx": -10 },
-          "shoulder_R": { "rx": -10, "ry": 6 },
-          "shoulder_L": { "rx": -10, "ry": -6 }
+          "upper_arm_R": {
+            "rx": -24,
+            "ry": 60
+          },
+          "upper_arm_L": {
+            "rx": -24,
+            "ry": -60
+          },
+          "lower_arm_R": {
+            "rz": -80
+          },
+          "lower_arm_L": {
+            "rz": 80
+          },
+          "hand_R": {
+            "rx": -10
+          },
+          "hand_L": {
+            "rx": -10
+          },
+          "shoulder_R": {
+            "rx": -10,
+            "ry": 6
+          },
+          "shoulder_L": {
+            "rx": -10,
+            "ry": -6
+          }
         },
         "easing": "ease_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "abwehr": {
         "id": "MOT_DEFENSIVE",
         "category": "gesture",
@@ -707,21 +3917,40 @@
         "duration_ms": 400,
         "_fix": "v1.2: upper_arm ry + lower_arm rz fuer Abwehrhaltung",
         "bones": {
-          "upper_arm_R": { "rx": -15, "ry": 30, "rz": -15 },
-          "upper_arm_L": { "rx": -15, "ry": -30, "rz": 15 },
-          "lower_arm_R": { "rz": -70 },
-          "lower_arm_L": { "rz": 70 },
-          "hand_L": { "rx": 30 },
-          "hand_R": { "rx": 30 },
-          "spine_2": { "rx": -5 },
-          "head": { "rx": 5 }
+          "upper_arm_R": {
+            "rx": -15,
+            "ry": 30,
+            "rz": -15
+          },
+          "upper_arm_L": {
+            "rx": -15,
+            "ry": -30,
+            "rz": 15
+          },
+          "lower_arm_R": {
+            "rz": -70
+          },
+          "lower_arm_L": {
+            "rz": 70
+          },
+          "hand_L": {
+            "rx": 30
+          },
+          "hand_R": {
+            "rx": 30
+          },
+          "spine_2": {
+            "rx": -5
+          },
+          "head": {
+            "rx": 5
+          }
         },
         "easing": "ease_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "verbeugen": {
         "id": "MOT_BOW",
         "category": "gesture",
@@ -729,17 +3958,60 @@
         "duration_ms": 1800,
         "_fix": "v1.2: upper_arm ry statt rx fuer leichtes Arm-Haengen",
         "keyframes": [
-          { "t": 0.0, "bones": {} },
-          { "t": 0.3, "bones": { "spine_0": {"rx":20}, "spine_1": {"rx":15}, "spine_2": {"rx":10}, "head": {"rx":10}, "upper_arm_R": {"ry":-5}, "upper_arm_L": {"ry":5} } },
-          { "t": 0.7, "bones": { "spine_0": {"rx":20}, "spine_1": {"rx":15}, "spine_2": {"rx":10}, "head": {"rx":10} } },
-          { "t": 1.0, "bones": {} }
+          {
+            "t": 0.0,
+            "bones": {}
+          },
+          {
+            "t": 0.3,
+            "bones": {
+              "spine_0": {
+                "rx": 20
+              },
+              "spine_1": {
+                "rx": 15
+              },
+              "spine_2": {
+                "rx": 10
+              },
+              "head": {
+                "rx": 10
+              },
+              "upper_arm_R": {
+                "ry": -5
+              },
+              "upper_arm_L": {
+                "ry": 5
+              }
+            }
+          },
+          {
+            "t": 0.7,
+            "bones": {
+              "spine_0": {
+                "rx": 20
+              },
+              "spine_1": {
+                "rx": 15
+              },
+              "spine_2": {
+                "rx": 10
+              },
+              "head": {
+                "rx": 10
+              }
+            }
+          },
+          {
+            "t": 1.0,
+            "bones": {}
+          }
         ],
         "easing": "ease_in_out",
         "loopable": false,
         "blendable": false,
         "glb_fallback": null
       },
-
       "arbeiten_tippen": {
         "id": "MOT_WORK_TYPE",
         "category": "posture",
@@ -747,16 +4019,72 @@
         "duration_ms": 600,
         "_fix": "v1.2: upper_arm ry + lower_arm rz fuer Tipp-Haltung",
         "keyframes": [
-          { "t": 0.0, "bones": { "upper_arm_R": {"ry":20}, "upper_arm_L": {"ry":-20}, "lower_arm_R": {"rz":-60}, "lower_arm_L": {"rz":60}, "head": {"rx":10}, "spine_2": {"rx":-5}, "hand_L": {"rx":-15} } },
-          { "t": 0.5, "bones": { "upper_arm_R": {"ry":20}, "upper_arm_L": {"ry":-20}, "lower_arm_R": {"rz":-60}, "lower_arm_L": {"rz":60}, "head": {"rx":10}, "spine_2": {"rx":-5}, "hand_R": {"rx":-15} } },
-          { "t": 1.0, "bones": { "hand_L": {"rx":-15} } }
+          {
+            "t": 0.0,
+            "bones": {
+              "upper_arm_R": {
+                "ry": 20
+              },
+              "upper_arm_L": {
+                "ry": -20
+              },
+              "lower_arm_R": {
+                "rz": -60
+              },
+              "lower_arm_L": {
+                "rz": 60
+              },
+              "head": {
+                "rx": 10
+              },
+              "spine_2": {
+                "rx": -5
+              },
+              "hand_L": {
+                "rx": -15
+              }
+            }
+          },
+          {
+            "t": 0.5,
+            "bones": {
+              "upper_arm_R": {
+                "ry": 20
+              },
+              "upper_arm_L": {
+                "ry": -20
+              },
+              "lower_arm_R": {
+                "rz": -60
+              },
+              "lower_arm_L": {
+                "rz": 60
+              },
+              "head": {
+                "rx": 10
+              },
+              "spine_2": {
+                "rx": -5
+              },
+              "hand_R": {
+                "rx": -15
+              }
+            }
+          },
+          {
+            "t": 1.0,
+            "bones": {
+              "hand_L": {
+                "rx": -15
+              }
+            }
+          }
         ],
         "easing": "linear",
         "loopable": true,
         "blendable": false,
         "glb_fallback": null
       },
-
       "stolz_stehen": {
         "id": "MOT_PROUD",
         "category": "expression",
@@ -764,19 +4092,32 @@
         "duration_ms": 800,
         "_fix": "v1.5: head rx invertiert",
         "bones": {
-          "spine_0": { "rx": -5 },
-          "spine_1": { "rx": -3 },
-          "spine_2": { "rx": -5 },
-          "head": { "rx": -10 },
-          "shoulder_L": { "ry": 3, "rz": -3 },
-          "shoulder_R": { "ry": 3, "rz": 3 }
+          "spine_0": {
+            "rx": -5
+          },
+          "spine_1": {
+            "rx": -3
+          },
+          "spine_2": {
+            "rx": -5
+          },
+          "head": {
+            "rx": -10
+          },
+          "shoulder_L": {
+            "ry": 3,
+            "rz": -3
+          },
+          "shoulder_R": {
+            "ry": 3,
+            "rz": 3
+          }
         },
         "easing": "ease_out",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "erschoepft": {
         "id": "MOT_EXHAUSTED",
         "category": "expression",
@@ -784,21 +4125,36 @@
         "duration_ms": 1000,
         "_fix": "v1.5: head rx invertiert",
         "bones": {
-          "spine_0": { "rx": 8 },
-          "spine_1": { "rx": 6 },
-          "spine_2": { "rx": 4 },
-          "head": { "rx": 20 },
-          "shoulder_L": { "ry": -10 },
-          "shoulder_R": { "ry": -10 },
-          "upper_arm_L": { "ry": 8 },
-          "upper_arm_R": { "ry": -8 }
+          "spine_0": {
+            "rx": 8
+          },
+          "spine_1": {
+            "rx": 6
+          },
+          "spine_2": {
+            "rx": 4
+          },
+          "head": {
+            "rx": 20
+          },
+          "shoulder_L": {
+            "ry": -10
+          },
+          "shoulder_R": {
+            "ry": -10
+          },
+          "upper_arm_L": {
+            "ry": 8
+          },
+          "upper_arm_R": {
+            "ry": -8
+          }
         },
         "easing": "ease_in",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       },
-
       "aengstlich": {
         "id": "MOT_ANXIOUS",
         "category": "expression",
@@ -806,20 +4162,38 @@
         "duration_ms": 600,
         "_fix": "v1.2: upper_arm ry + lower_arm rz fuer angespannte Haltung",
         "bones": {
-          "shoulder_L": { "ry": 10 },
-          "shoulder_R": { "ry": 10 },
-          "spine_2": { "rx": -5 },
-          "head": { "rx": 8, "ry": -15 },
-          "upper_arm_R": { "ry": 15 },
-          "upper_arm_L": { "ry": -15 },
-          "lower_arm_R": { "rz": -30 },
-          "lower_arm_L": { "rz": 30 }
+          "shoulder_L": {
+            "ry": 10
+          },
+          "shoulder_R": {
+            "ry": 10
+          },
+          "spine_2": {
+            "rx": -5
+          },
+          "head": {
+            "rx": 8,
+            "ry": -15
+          },
+          "upper_arm_R": {
+            "ry": 15
+          },
+          "upper_arm_L": {
+            "ry": -15
+          },
+          "lower_arm_R": {
+            "rz": -30
+          },
+          "lower_arm_L": {
+            "rz": 30
+          }
         },
         "easing": "ease_in",
         "loopable": false,
         "blendable": true,
         "glb_fallback": null
       }
-    }
+    },
+    "_last_glb_extraction": "2026-02-27: waving_right, waving_left, head_shake -> Motor-Keyframes"
   }
 }
