@@ -85,9 +85,16 @@ def translate(body_data: dict) -> Optional[dict]:
     intensity = body_data.get('intensity', 0.5)
     reason = body_data.get('reason', '')
 
+    # Wort-Aliase: LLM sagt "schlafen" → Motor spielt "hinlegen_schlafen"
+    WORD_ALIASES = {
+        'schlafen': 'hinlegen_schlafen',
+        'aufwachen': 'aufstehen',
+    }
+
     animations = []
     for word in words:
         normalized = _normalize_umlauts(word)
+        normalized = WORD_ALIASES.get(normalized, normalized)
         spec = vocab.get(normalized)
         if not spec:
             # Unbekanntes Wort — skippen (LLM hat etwas halluziniert)
