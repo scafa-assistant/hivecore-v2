@@ -510,9 +510,9 @@ async def chat(req: ChatRequest):
         history.append({'role': 'assistant', 'content': 'Hey, was geht?\n###BODY###\n{"words": ["nicken", "gewicht_links"], "intensity": 0.4, "reason": "Lockere Begruessung"}\n###END_BODY###'})
 
     history.append({'role': 'user', 'content': message})
-    # Max 10 Messages in History
+    # Max 10 Messages in History — Few-Shot Primer (erste 2) IMMER behalten
     if len(history) > 10:
-        history = history[-10:]
+        history = history[:2] + history[-8:]
 
     # 6. LLM Call — Agent Loop oder normaler Chat
     needs_tools = should_use_tools(message) if BRAIN_VERSION == 'v2' else False
