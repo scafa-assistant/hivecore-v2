@@ -6,7 +6,7 @@ load_dotenv()
 # Tier 1: Moonshot
 MOONSHOT_API_KEY = os.getenv('MOONSHOT_API_KEY')
 MOONSHOT_BASE_URL = os.getenv('MOONSHOT_BASE_URL', 'https://api.moonshot.ai/v1')
-MOONSHOT_MODEL = os.getenv('MOONSHOT_MODEL', 'moonshot-v1-8k')
+MOONSHOT_MODEL = os.getenv('MOONSHOT_MODEL', 'moonshot-v1-32k')
 
 # Tier 2: Kimi K2.5
 KIMI_API_KEY = os.getenv('KIMI_API_KEY')

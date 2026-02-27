@@ -9,7 +9,7 @@ yaml_to_prompt() komprimiert YAML-Organe massiv,
 daher sind die Budgets kleiner als bei rohem Text.
 """
 
-MAX_CONTEXT_TIER1 = 6000   # Moonshot 8K
+MAX_CONTEXT_TIER1 = 24000  # Moonshot 32K
 MAX_CONTEXT_TIER2 = 30000  # Kimi K2.5 (konservativ)
 MAX_CONTEXT_TIER3 = 50000  # Sonnet (konservativ)
 ANSWER_RESERVE = 2000      # Tokens fuer Antwort

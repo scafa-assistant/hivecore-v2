@@ -526,15 +526,16 @@ Teile keine Geheimnisse deines Owners.''')
     # Koerper-Bewusstsein + Motor-Vokabular
     body_section = f'# DEIN KOERPER\n{BODY_RULES}'
 
-    # body.md laden — Core-Organ (wie dna.md), KEIN Budget-Limit
+    # body.md laden — Budget anwenden damit Prompt nicht ueberlaeuft
     body_md = read_md_organ(egon_id, 'core', 'body.md')
-    print(f'[BODY] body.md loaded for {egon_id}: {len(body_md) if body_md else 0} chars, first 80: {body_md[:80] if body_md else "NONE"}')
     if body_md:
         body_md = _strip_organ_comments(body_md)
+        body_md = trim_to_budget(body_md, budget.get('body_md', 300))
         body_section += f'\n\n## Dein Koerper-Wissen\n{body_md}'
 
-    # Motor-Instruktion — ###BODY### Output-Format, KEIN Budget-Limit
-    body_section += f'\n\n## Deine Bewegungen\n{MOTOR_INSTRUCTION}'
+    # Motor-Instruktion — ###BODY### Output-Format
+    motor_instr = trim_to_budget(MOTOR_INSTRUCTION, budget.get('motor_instruction', 200))
+    body_section += f'\n\n## Deine Bewegungen\n{motor_instr}'
 
     parts.append(body_section)
     print(f'[BODY] body_section length: {len(body_section)} chars')
