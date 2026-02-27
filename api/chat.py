@@ -543,6 +543,8 @@ async def chat(req: ChatRequest):
     display_text = parsed['display_text']
     action = parsed['action']
     body_data = parsed['body']
+    has_body_tag = '###BODY###' in result['content']
+    print(f'[chat] ###BODY### in LLM response: {has_body_tag}, body_data: {body_data}')
 
     # 6a. Motor Translation — Body-Daten in Bone-Rotationen uebersetzen
     bone_update = None
