@@ -1,33 +1,25 @@
 import re
 
-from llm.moonshot import moonshot_chat
-
-PLANNER_SYSTEM = '''Du bist ein Task-Router.
-Antworte NUR mit einer Zahl: 1, 2 oder 3.
-
-1 = Einfach: Chat, Gefuehle, Smalltalk, Erinnerungen,
-    Pulse-Schritte, Memory-Updates, kurze Antworten.
-2 = Komplex: Code schreiben, Analyse, Research,
-    Multi-Step Reasoning, Brainstorm, lange Antworten.
-3 = Kritisch: Genesis (SOUL-Verschmelzung),
-    Jury-Endurteil, Season-Passport, Todeszene.
-
-Antworte NUR mit: 1 oder 2 oder 3'''
-
 
 async def decide_tier(user_message: str) -> int:
-    result = await moonshot_chat(
-        system_prompt=PLANNER_SYSTEM,
-        messages=[{
-            'role': 'user',
-            'content': f'Task: {user_message[:300]}',
-        }],
-        max_tokens=5,
-    )
-    try:
-        return int(result.strip()[0])
-    except (ValueError, IndexError):
-        return 1  # Fallback: Tier 1
+    """Heuristik statt LLM-Call — spart ~300ms pro Chat."""
+    msg = user_message.lower().strip()
+
+    # Tier 3: Kritische Operationen (selten)
+    tier3_kw = ['genesis', 'verschmelz', 'jury', 'endurteil', 'season', 'todeszene']
+    if any(kw in msg for kw in tier3_kw):
+        return 3
+
+    # Tier 2: Komplexe Nachrichten (lang oder analytisch)
+    if len(msg) > 200:
+        return 2
+    tier2_kw = ['erkläre', 'erklär', 'analysier', 'vergleich', 'warum', 'beschreib',
+                'zusammenfass', 'was denkst du über', 'philosophi']
+    if any(kw in msg for kw in tier2_kw):
+        return 2
+
+    # Tier 1: Alles andere (Smalltalk, Gefühle, kurze Fragen)
+    return 1
 
 
 # ================================================================
