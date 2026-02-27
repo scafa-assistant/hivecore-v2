@@ -550,6 +550,21 @@ Teile keine Geheimnisse deines Owners.''')
     except Exception:
         pass  # Proprioception ist optional
 
+    # FUSION Phase 5: Gelernte Koerpersprache (Motor Learning)
+    try:
+        from engine.motor_learning import get_learned_skills_for_prompt
+        learned_skills_text = get_learned_skills_for_prompt(egon_id)
+        if learned_skills_text:
+            parts.append(
+                f'# DEINE GELERNTE KOERPERSPRACHE\n'
+                f'Du hast eigene Gesten entwickelt. Nutze sie wenn sie passen:\n'
+                f'{learned_skills_text}\n'
+                f'Diese Gesten sind Kombinationen deiner Basis-Woerter. '
+                f'Schicke die einzelnen Woerter im ###BODY### Block.'
+            )
+    except Exception:
+        pass  # Motor Learning ist optional
+
     # Body-Feedback (Proprioception) — was dein Koerper gerade spuert
     try:
         body_state_data = read_yaml_organ(egon_id, 'core', 'state.yaml')

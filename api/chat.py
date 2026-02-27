@@ -588,6 +588,14 @@ async def chat(req: ChatRequest):
                 print(f'[motor] {bone_update["words"]} intensity={bone_update["intensity"]}')
                 # FUSION Phase 3: Motor-Word-Logging fuer Pattern-Analyse (Phase 5)
                 _log_motor_words(egon_id, body_data, 'chat')
+                # FUSION Phase 5: Pose-Naturalness Check
+                try:
+                    from engine.motor_translator import check_pose_naturalness
+                    naturalness = check_pose_naturalness(bone_update)
+                    if not naturalness['natural']:
+                        print(f'[motor] Naturalness WARNING: {naturalness["warnings"]}')
+                except Exception:
+                    pass
         except Exception as e:
             print(f'[motor] translate FEHLER: {e}')
 

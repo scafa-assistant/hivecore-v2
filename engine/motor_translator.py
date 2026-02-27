@@ -136,6 +136,65 @@ def translate(body_data: dict) -> Optional[dict]:
     }
 
 
+def check_pose_naturalness(bone_update: dict) -> dict:
+    """Prueft ob eine Pose physikalisch natuerlich aussieht.
+
+    FUSION Phase 5: Constraint-Check fuer gelernte Motor-Skills.
+    Wird nach Translation aufgerufen um unnatuerliche Kombinationen zu erkennen.
+
+    Returns: {'natural': bool, 'warnings': [...]}
+    """
+    warnings = []
+
+    if not bone_update or not isinstance(bone_update, dict):
+        return {'natural': True, 'warnings': []}
+
+    animations = bone_update.get('animations', [])
+
+    for anim in animations:
+        bones = anim.get('bones', {})
+        if not bones:
+            # Keyframe-Animation — Keyframes einzeln pruefen
+            for kf in anim.get('keyframes', []):
+                bones = kf.get('bones', {})
+                _check_bones(bones, warnings)
+            continue
+        _check_bones(bones, warnings)
+
+    return {
+        'natural': len(warnings) == 0,
+        'warnings': warnings,
+    }
+
+
+def _check_bones(bones: dict, warnings: list) -> None:
+    """Prueft einzelne Bone-Rotationen auf natuerliche Grenzen."""
+    # Kopf: Rotation > 45° in jede Richtung ist unnatuerlich
+    head = bones.get('head', {})
+    if abs(head.get('ry', 0)) > 45:
+        warnings.append('head_overrotation_y')
+    if abs(head.get('rx', 0)) > 50:
+        warnings.append('head_overrotation_x')
+    if abs(head.get('rz', 0)) > 30:
+        warnings.append('head_tilt_extreme')
+
+    # Spine: Verdrehung > 30° ist unnatuerlich
+    for spine_name in ('spine_0', 'spine_1', 'spine_2'):
+        spine = bones.get(spine_name, {})
+        if abs(spine.get('ry', 0)) > 30:
+            warnings.append(f'{spine_name}_twist_extreme')
+        if abs(spine.get('rz', 0)) > 25:
+            warnings.append(f'{spine_name}_lateral_extreme')
+
+    # Schultern: Asymmetrie > 20° ist auffaellig
+    left_shoulder = bones.get('upper_arm_L', {})
+    right_shoulder = bones.get('upper_arm_R', {})
+    if left_shoulder and right_shoulder:
+        asym = abs(left_shoulder.get('rz', 0) - right_shoulder.get('rz', 0))
+        if asym > 40:
+            warnings.append('shoulder_asymmetry_extreme')
+
+
 def _scale_bones(bones: dict, intensity: float) -> dict:
     """Skaliert statische Bone-Rotationen mit Intensitaet.
 

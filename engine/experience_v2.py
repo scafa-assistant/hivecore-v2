@@ -330,7 +330,52 @@ async def generate_dream(egon_id: str) -> dict | None:
 
     write_yaml_organ(egon_id, 'memory', 'experience.yaml', exp_data)
     print(f'[dream] {egon_name} traeumt: {new_dream["id"]} ({dream_type}) — {new_dream["content"][:60]}')
+
+    # FUSION Phase 5: Dream-Motor-Verbindung
+    _dream_motor_connection(egon_id, dream_type, new_dream)
+
     return new_dream
+
+
+def _dream_motor_connection(egon_id: str, dream_type: str, dream: dict) -> None:
+    """FUSION Phase 5: Traeume beeinflussen Motor-Skills.
+
+    - Verarbeitungstraeume festigen Motor-Skills (confidence += 0.1)
+    - Kreativtraeume schlagen Motor-Experimente vor (inner_voice Eintrag)
+    """
+    try:
+        from engine.motor_learning import update_skill_confidence
+
+        skills_data = read_yaml_organ(egon_id, 'capabilities', 'skills.yaml')
+        if not skills_data:
+            return
+        learned = skills_data.get('motor_skills', {}).get('learned', [])
+        if not learned:
+            return
+
+        if dream_type == 'verarbeitungstraum':
+            # Verarbeitungstraeume festigen alle Skills leicht
+            for skill in learned:
+                if skill.get('confidence', 0) > 0.3:
+                    update_skill_confidence(egon_id, skill['name'], 0.05)
+                    print(f'[dream-motor] Festigung: {skill["name"]} +0.05')
+                    break  # Nur einen Skill pro Traum festigen
+
+        elif dream_type == 'kreativtraum' and dream.get('spark_potential'):
+            # Kreativtraeume mit Spark-Potenzial → Motor-Experiment in inner_voice
+            from engine.organ_reader import read_md_organ, write_organ
+            iv_text = read_md_organ(egon_id, 'memory', 'inner_voice.md') or ''
+            now = datetime.now().strftime('%Y-%m-%d %H:%M')
+            experiment_note = (
+                f'\n\n## {now} — Traum-Koerper-Impuls\n'
+                f'Im Traum habe ich mich anders bewegt... '
+                f'Vielleicht sollte ich neue Kombinationen ausprobieren.'
+            )
+            write_organ(egon_id, 'memory', 'inner_voice.md', iv_text + experiment_note)
+            print(f'[dream-motor] Kreativ-Impuls in inner_voice geschrieben')
+
+    except Exception as e:
+        print(f'[dream-motor] FEHLER: {e}')
 
 
 # ================================================================
