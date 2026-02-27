@@ -26,7 +26,8 @@ Meine Basis-Bewegungen:
   kopf_drehen_rechts — Nach rechts schauen.
   kopf_drehen_links — Nach links schauen.
   schultern_hochziehen — Weiss nicht. Ratlosigkeit.
-  winken — Hallo. Tschuess. Aufmerksamkeit.
+  winken — Mit der rechten Hand winken. Hallo. Tschuess.
+  winken_rechts — Mit der rechten Hand winken. (Gleich wie winken)
   zeigen — Auf etwas hinweisen. Richtung geben.
   arme_verschraenken — Nachdenken. Distanz. Ruhe.
   haende_huefte — Bereitschaft. Ungeduld. Entschlossenheit.
