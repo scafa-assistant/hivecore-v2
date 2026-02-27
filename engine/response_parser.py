@@ -20,6 +20,11 @@ def parse_body(text: str) -> tuple[str, Optional[dict]]:
 
     body_dict Format:
         {"words": ["nicken", "gewicht_links"], "intensity": 0.5, "reason": "..."}
+
+    Robustheit:
+    - Wenn ###END_BODY### fehlt, wird trotzdem geparst
+    - Wenn JSON unvollstaendig ist, wird es entfernt statt angezeigt
+    - Alles ab ###BODY### wird IMMER aus dem display_text entfernt
     """
     body = None
     display_text = text
@@ -28,29 +33,52 @@ def parse_body(text: str) -> tuple[str, Optional[dict]]:
         try:
             parts = text.split('###BODY###')
             display_text = parts[0].strip()
-            body_json = parts[1].split('###END_BODY###')[0].strip()
+
+            # Alles nach ###BODY### ist Body-Daten — NIEMALS anzeigen
+            raw_body = parts[1] if len(parts) > 1 else ''
+
+            # ###END_BODY### vorhanden?
+            if '###END_BODY###' in raw_body:
+                body_json = raw_body.split('###END_BODY###')[0].strip()
+                # Rest nach ###END_BODY### pruefen (koennte ###ACTION### sein)
+                after_body = raw_body.split('###END_BODY###')
+                if len(after_body) > 1:
+                    remainder = after_body[1].strip()
+                    # Nur ###ACTION### Bloecke zurueck an display_text
+                    if remainder and '###ACTION###' in remainder:
+                        display_text = display_text + '\n' + remainder
+            else:
+                # ###END_BODY### fehlt — ganzen Rest als Body-JSON versuchen
+                body_json = raw_body.strip()
+                print(f'[parser] WARNUNG: ###END_BODY### fehlt, versuche trotzdem zu parsen')
+
+            # JSON parsen
             body = json.loads(body_json)
 
             # Validierung: words muss eine Liste sein
             if not isinstance(body.get('words'), list):
                 body = None
             else:
-                # Defaults setzen
                 body.setdefault('intensity', 0.5)
                 body.setdefault('reason', '')
 
-                # Rest nach ###END_BODY### zurueck an display_text haengen
-                # (falls noch ###ACTION### oder anderer Text folgt)
-                after_body = parts[1].split('###END_BODY###')
-                if len(after_body) > 1:
-                    remainder = after_body[1].strip()
-                    if remainder:
-                        display_text = display_text + '\n' + remainder
-
-        except (IndexError, json.JSONDecodeError):
-            # Parsing fehlgeschlagen — Text bereinigen, kein Body
-            display_text = text.replace('###BODY###', '').replace('###END_BODY###', '').strip()
+        except (IndexError, json.JSONDecodeError) as e:
+            print(f'[parser] BODY parse error: {e}')
+            # Alles ab ###BODY### entfernen — NIEMALS rohen JSON anzeigen
+            display_text = text.split('###BODY###')[0].strip()
+            # Auch ###END_BODY### Reste entfernen
+            display_text = display_text.replace('###END_BODY###', '').strip()
             body = None
+
+    # Sicherheitsnetz: JSON-Fragmente die durchgerutscht sind entfernen
+    # z.B. {"words": ["arme_vers  (abgeschnitten)
+    if display_text and display_text.rstrip().endswith(('{', '["', '"words"')):
+        # Abgeschnittenes JSON am Ende — entfernen
+        for marker in ['{"words"', '{"word', '{']:
+            idx = display_text.rfind(marker)
+            if idx > 0 and idx > len(display_text) - 100:
+                display_text = display_text[:idx].strip()
+                break
 
     return display_text, body
 
