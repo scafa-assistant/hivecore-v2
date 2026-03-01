@@ -1,0 +1,19 @@
+entries:
+- timestamp: '2026-03-01T17:56:40.239542'
+  words:
+  - kopf_neigen
+  - nach_vorn_lehnen
+  intensity: 0.6
+  context: chat
+- timestamp: '2026-03-01T17:57:22.602558'
+  words:
+  - kopf_neigen
+  - hand_heben
+  intensity: 0.5
+  context: chat
+- timestamp: '2026-03-01T17:58:07.015395'
+  words:
+  - nicken
+  - nach_vorn_lehnen
+  intensity: 0.6
+  context: chat

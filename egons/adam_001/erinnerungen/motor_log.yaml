@@ -1,0 +1,13 @@
+entries:
+- timestamp: '2026-03-01T17:54:34.102756'
+  words:
+  - blick_halten
+  - hand_heben
+  intensity: 0.6
+  context: chat
+- timestamp: '2026-03-01T17:55:20.681960'
+  words:
+  - kopf_neigen
+  - hand_heben
+  intensity: 0.6
+  context: chat

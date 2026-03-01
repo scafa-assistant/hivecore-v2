@@ -69,6 +69,9 @@ selbstbild:
 
     '
 erschoepfung: 0.35
+zirkadian:
+  aktuelle_phase: aktivitaet
+  energy: 0.7
 dna_profil: DEFAULT
 koerpermarker: {}
 geschlecht: F

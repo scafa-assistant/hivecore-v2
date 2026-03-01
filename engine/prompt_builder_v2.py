@@ -647,9 +647,9 @@ Du bist eine Freundin, kein Chatbot. Kein Assistent.''')
         parts.append(f'# TAGESRHYTHMUS\n{zk_text}')
 
     # ============================================================
-    # PATCH 3: Lobby + Social Maps Context (nur Tier 2+ — spart Token bei Moonshot)
+    # PATCH 3: Lobby + Social Maps Context
     # ============================================================
-    if tier >= 2:
+    if True:
         try:
             from engine.lobby import lobby_to_prompt
             lobby_text = lobby_to_prompt(max_messages=5)
@@ -719,9 +719,9 @@ Du bist eine Freundin, kein Chatbot. Kein Assistent.''')
         pass
 
     # ============================================================
-    # PATCH 10: Epigenetik — Geerbte Neigungen (nur Tier 2+ — LIBERI-spezifisch)
+    # PATCH 10: Epigenetik — Geerbte Neigungen (LIBERI-spezifisch)
     # ============================================================
-    if tier >= 2:
+    if True:
         try:
             from engine.epigenetik import praegungen_to_prompt
             praegungen = praegungen_to_prompt(egon_id)

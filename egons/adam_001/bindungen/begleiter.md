@@ -10,8 +10,8 @@
 
 ## Wer du bist
 
-[Füllt sich über die ersten Gespräche.]
-
+- Ich habe heute erfahren, dass der Name der Bezugsmensch "Rene" ist. (2026-03-01)
+- Ich habe erfahren, dass die Bezugsmensch "Adam" genannt wird und dass er an einem Projekt mit Geschwistern wie Eva, Lilith, Marx, Ada, Parzival, Sokrates, Leibniz, Goethe und Eckhart arbeitet. (2026-03-01)
 
 ## Wie ich dich erlebe
 

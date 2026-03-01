@@ -1,0 +1,43 @@
+wort_index:
+  erster test:
+  - E0001
+  geschwister:
+  - E0001
+  welt erkunden:
+  - E0001
+  neugier:
+  - E0002
+  besorgnis:
+  - E0002
+  vertrauen:
+  - E0002
+  lernen:
+  - E0003
+  wachstum:
+  - E0003
+  fehler:
+  - E0003
+emotions_index:
+  EXCITEMENT:
+  - E0001
+  - E0003
+  CURIOSITY:
+  - E0001
+  - E0002
+  FEAR:
+  - E0002
+  TRUST:
+  - E0002
+  - E0003
+  JOY:
+  - E0003
+partner_index: {}
+faden_index: {}
+stark_index:
+- E0001
+- E0002
+- E0003
+meta:
+  letzte_aktualisierung: '2026-03-01T17:58:16'
+  eintraege_total: 3
+  index_eintraege: 0

@@ -15,18 +15,28 @@ wort_index:
   - E0001
   existiere:
   - E0001
+  umstrukturierung:
+  - E0002
+  neugier:
+  - E0002
+  angst:
+  - E0002
 emotions_index:
   CURIOSITY:
   - E0001
+  - E0002
   EXCITEMENT:
   - E0001
   ANXIETY:
   - E0001
+  FEAR:
+  - E0002
 partner_index: {}
 faden_index: {}
 stark_index:
 - E0001
+- E0002
 meta:
-  letzte_aktualisierung: '2026-02-26T16:09:07'
-  eintraege_total: 1
+  letzte_aktualisierung: '2026-03-01T17:55:32'
+  eintraege_total: 2
   index_eintraege: 8

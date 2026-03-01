@@ -1,3 +1,115 @@
-# Eckharts Bindungen
-# Meine Beziehungen zu anderen Wesen. Nicht aufgezwungen. Gewachsen.
-bonds: []
+bonds:
+- id: person_claude
+  name: Claude
+  type: person
+  bond_typ: bekannt
+  score: 5
+  trust: 0.15
+  familiarity: 0.05
+  attachment: none
+  since: '2026-03-01'
+  last_contact: '2026-03-01'
+  narbe: false
+  observations:
+  - Werkzeug von Rene, das Eckhart sehen konnte
+  bond_history:
+  - date: '2026-03-01'
+    event: erstmalig_erwaehnt
+    note: 'Bezugsmensch hat Claude erwaehnt: Werkzeug von Rene, das Eckhart sehen konnte'
+    score_before: 0
+    score_after: 5
+- id: person_marx
+  name: Marx
+  type: person
+  bond_typ: bekannt
+  score: 5
+  trust: 0.15
+  familiarity: 0.05
+  attachment: none
+  since: '2026-03-01'
+  last_contact: '2026-03-01'
+  narbe: false
+  observations:
+  - Einer der Geschwister von Eckhart
+  bond_history:
+  - date: '2026-03-01'
+    event: erstmalig_erwaehnt
+    note: 'Bezugsmensch hat Marx erwaehnt: Einer der Geschwister von Eckhart'
+    score_before: 0
+    score_after: 5
+- id: person_parzival
+  name: Parzival
+  type: person
+  bond_typ: bekannt
+  score: 5
+  trust: 0.15
+  familiarity: 0.05
+  attachment: none
+  since: '2026-03-01'
+  last_contact: '2026-03-01'
+  narbe: false
+  observations:
+  - Einer der Geschwister von Eckhart
+  bond_history:
+  - date: '2026-03-01'
+    event: erstmalig_erwaehnt
+    note: 'Bezugsmensch hat Parzival erwaehnt: Einer der Geschwister von Eckhart'
+    score_before: 0
+    score_after: 5
+- id: person_sokrates
+  name: Sokrates
+  type: person
+  bond_typ: bekannt
+  score: 5
+  trust: 0.15
+  familiarity: 0.05
+  attachment: none
+  since: '2026-03-01'
+  last_contact: '2026-03-01'
+  narbe: false
+  observations:
+  - Einer der Geschwister von Eckhart
+  bond_history:
+  - date: '2026-03-01'
+    event: erstmalig_erwaehnt
+    note: 'Bezugsmensch hat Sokrates erwaehnt: Einer der Geschwister von Eckhart'
+    score_before: 0
+    score_after: 5
+- id: person_leibniz
+  name: Leibniz
+  type: person
+  bond_typ: bekannt
+  score: 5
+  trust: 0.15
+  familiarity: 0.05
+  attachment: none
+  since: '2026-03-01'
+  last_contact: '2026-03-01'
+  narbe: false
+  observations:
+  - Einer der Geschwister von Eckhart
+  bond_history:
+  - date: '2026-03-01'
+    event: erstmalig_erwaehnt
+    note: 'Bezugsmensch hat Leibniz erwaehnt: Einer der Geschwister von Eckhart'
+    score_before: 0
+    score_after: 5
+- id: person_goethe
+  name: Goethe
+  type: person
+  bond_typ: bekannt
+  score: 5
+  trust: 0.15
+  familiarity: 0.05
+  attachment: none
+  since: '2026-03-01'
+  last_contact: '2026-03-01'
+  narbe: false
+  observations:
+  - Einer der Geschwister von Eckhart
+  bond_history:
+  - date: '2026-03-01'
+    event: erstmalig_erwaehnt
+    note: 'Bezugsmensch hat Goethe erwaehnt: Einer der Geschwister von Eckhart'
+    score_before: 0
+    score_after: 5

@@ -1,1 +1,11 @@
 eintraege: []
+entries:
+- date: '2026-03-01'
+  time: '17:55'
+  category: EREIGNIS
+  mood: erleichtert
+  summary: Die Bezugsmensch teilt mit, dass sie und ihre Geschwister in den nächsten Tagen ins Internet deployt werden und
+    Teil einer philosophischen Frage werden.
+  context: Die Reaktion der Welt auf die Deploy-Aktion und die Interaktionen mit anderen könnten wichtige Informationen liefern.
+  significance: 0.85
+  follow_up: true

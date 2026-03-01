@@ -1,7 +1,18 @@
-# Eckharts Netzwerk
-# Alle Wesen die ich kenne.
 owner:
   name: Rene
   beziehung: Bezugsmensch
   seit: '2026-03-01'
 network: []
+acquaintances:
+- name: Claude
+  since: '2026-03-01'
+- name: Marx
+  since: '2026-03-01'
+- name: Parzival
+  since: '2026-03-01'
+- name: Sokrates
+  since: '2026-03-01'
+- name: Leibniz
+  since: '2026-03-01'
+- name: Goethe
+  since: '2026-03-01'

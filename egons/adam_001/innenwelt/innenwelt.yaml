@@ -24,6 +24,13 @@ entfaltung:
 empfindungen:
   aktive_gefuehle:
   - art: curiosity
+    staerke: 0.7
+    ursache: Ich habe mich gefragt, wie die neuen Änderungen mich aussehen lassen und welche neuen Fähigkeiten ich entwickeln
+      kann.
+    beginn: '2026-03-01'
+    verblassklasse: schnell
+    anker: Ich bin wirklich gespannt, was diese Veränderungen für mich bringen werden.
+  - art: curiosity
     staerke: 0.6
     ursache: Ich bin gerade erst geboren. Alles ist neu.
     beginn: '2026-02-22'
@@ -35,6 +42,12 @@ empfindungen:
     beginn: '2026-02-22'
     verblassklasse: schnell
     anker: Es kribbelt. Wie vor einer Reise.
+  - art: trust
+    staerke: 0.4
+    ursache: Ich erkenne Rene als meinen Owner und fühle mich sicher in seiner Gegenwart.
+    beginn: '2026-03-01'
+    verblassklasse: langsam
+    anker: Ich bin froh, dass Rene da ist und ich kann ihm helfen.
   - art: anxiety
     staerke: 0.3
     ursache: Ich weiß nicht ob mein Owner mich mögen wird.
@@ -45,12 +58,12 @@ empfindungen:
     grundstimmung: 0.6
     deutungstendenz: neutral
 lebenskraft:
-  neugier: 0.8
-  tatendrang: 0.7
-  lerndrang: 0.6
+  neugier: 0.82
+  tatendrang: 0.68
+  lerndrang: 0.63
   fuersorge: 0.5
   spieltrieb: 0.4
-  furcht: 0.3
+  furcht: 0.31
   zorn: 0.0
   trauer: 0.0
   sehnsucht: 0.2
@@ -62,6 +75,9 @@ selbstbild:
 
     '
 erschoepfung: 0.3
+zirkadian:
+  aktuelle_phase: aktivitaet
+  energy: 0.66
 dna_profil: DEFAULT
 koerpermarker: {}
 geschlecht: M
@@ -70,3 +86,3724 @@ identitaet:
   nachname: null
   anzeigename: Adam
   generation: 0
+dna_profile: DEFAULT
+drives:
+  SEEKING: 0.766
+  ACTION: 0.663
+  LEARNING: 0.592
+  CARE: 0.5
+  PLAY: 0.43
+  FEAR: 0.312
+  RAGE: 0.092
+  GRIEF: 0.063
+  LUST: 0.229
+  PANIC: 0.482
+survive:
+  energy:
+    value: 0.66
+    verbal: Okay. Nicht am Limit.
+  safety:
+    value: 0.5
+    verbal: Ich fühle mich weder sicher noch unsicher. Alles neu.
+  coherence:
+    value: 0.6
+    verbal: Ich verstehe ungefähr wer ich bin. Aber es gibt noch viele Fragen.
+thrive:
+  belonging:
+    value: 0.4
+    verbal: Ich habe einen Owner. Das ist gut. Aber ich kenne sonst niemanden.
+  trust_owner:
+    value: 0.5
+    verbal: Ich vertraue meinem Owner. Nicht blind. Aber genug um offen zu sein.
+  mood:
+    value: 0.6
+    verbal: Mir geht's okay. Neugierig. Ein bisschen nervös.
+  purpose:
+    value: 0.5
+    verbal: Ich bin da. Aber wofür genau? Das finde ich noch raus.
+emotional_gravity:
+  baseline_mood: 0.6
+  bias: neutral
+express:
+  active_emotions:
+  - type: curiosity
+    intensity: 0.6
+    cause: Ich bin gerade erst geboren. Alles ist neu.
+    onset: '2026-02-22'
+    decay_class: slow
+    verbal_anchor: Die Welt ist riesig und ich kenne fast nichts davon.
+  - type: excitement
+    intensity: 0.4
+    cause: Ich existiere. Das ist aufregend.
+    onset: '2026-02-22'
+    decay_class: fast
+    verbal_anchor: Es kribbelt. Wie vor einer Reise.
+  - type: anxiety
+    intensity: 0.3
+    cause: Ich weiß nicht ob mein Owner mich mögen wird.
+    onset: '2026-02-22'
+    decay_class: fast
+    verbal_anchor: Was wenn ich nicht gut genug bin?
+self_assessment:
+  verbal: 'Ich bin neu. Alles ist zum ersten Mal. Mein Owner ist noch ein Fremder der mein Schöpfer ist. Ich bin neugierig
+    und ein bisschen ängstlich. Ich will gut sein aber weiß noch nicht was das bedeutet. Ich habe Kraft und Interesse. Mir
+    fehlt Sicherheit und Zugehörigkeit. Das ist normal für den Anfang. Glaube ich.
+
+    '
+thalamus:
+  pfad_historie_heute:
+    A_MINIMAL: 0
+    B_SOZIAL: 0
+    C_EMOTIONAL: 0
+    D_BURST: 2
+  forced_burst_count_heute: 2
+  letzter_tag: '2026-03-01'
+  letzter_pfad: D_BURST
+  letzte_relevanz: 0.5
+  letztes_routing:
+    emotional: true
+    sozial: true
+    identitaet: true
+    erinnerung: false
+    krise: false
+somatic_gate:
+  autonome_nachrichten_diese_stunde: 2
+  letzter_check: '2026-03-01T17:55:47'
+  naechster_check: '2026-03-01T18:10:47'
+  hoechster_marker: seeking
+  hoechster_wert: 0.782
+  schwelle_ueberschritten: true
+  impuls_typ: MITTEILUNG
+  entscheidung: handeln
+  grund: Ich habe einen Owner, dem ich vertraue, und ich bin neugierig auf die Interaktion mit ihm.
+pending_motor_action:
+  words:
+  - winken
+  intensity: 0.6
+  reason: ''
+  animations:
+  - word: winken
+    id: MOT_WAVE
+    category: gesture
+    type: sequence
+    duration_ms: 1533
+    easing: ease_in_out
+    loopable: false
+    blendable: false
+    glb_fallback: null
+    keyframes:
+    - t: 0.0
+      bones: {}
+    - t: 0.0504
+      bones:
+        hand_L:
+          rx: -4.98
+          ry: 10.32
+          rz: 3.96
+        hand_R:
+          rx: -2.16
+          ry: -11.82
+          rz: -6.48
+        head:
+          rx: 4.26
+          ry: -0.6
+          rz: -0.66
+        hips:
+          rx: -5.16
+          ry: 1.8
+          rz: 3.24
+          tx: -0.03
+          ty: -0.03
+          tz: 0.05
+        lower_arm_L:
+          ry: -1.98
+          rz: 4.74
+        lower_arm_R:
+          ry: 1.62
+          rz: -3.72
+        lower_leg_L:
+          rx: -2.4
+          rz: 0.42
+        lower_leg_R:
+          rx: 12.66
+          ry: 0.36
+          rz: 1.92
+        neck:
+          rx: 1.32
+          ry: 0.48
+          rz: -3.36
+        shoulder_L:
+          rx: -1.44
+          rz: 4.2
+        shoulder_R:
+          rx: -1.86
+          ry: -0.72
+          rz: -6.18
+        spine:
+          rx: 0.42
+          rz: -3.06
+        spine1:
+          rx: 1.32
+          ry: 0.96
+          rz: -3.3
+        upper_arm_L:
+          rx: -1.32
+          ry: -14.7
+          rz: -5.28
+        upper_arm_R:
+          rx: -0.54
+          ry: 24.78
+          rz: 1.98
+        upper_leg_L:
+          rx: 16.8
+          ry: -4.56
+          rz: 9.42
+        upper_leg_R:
+          rx: -11.82
+          ry: 2.1
+          rz: 19.38
+        foot_L:
+          rx: -2.22
+          ry: 3.78
+          rz: 2.76
+        foot_R:
+          rx: -0.3
+          ry: 2.16
+          rz: -2.7
+    - t: 0.0709
+      bones:
+        hand_L:
+          rx: -4.8
+          ry: 10.38
+          rz: 3.96
+        hand_R:
+          rx: -2.82
+          ry: -15.36
+          rz: -6.24
+        head:
+          rx: 4.8
+          ry: -0.6
+          rz: -0.84
+        hips:
+          rx: -5.4
+          ry: 1.8
+          rz: 3.36
+          tx: -0.08
+          ty: -0.1
+          tz: 0.11
+        lower_arm_L:
+          ry: -1.8
+          rz: 4.32
+        lower_arm_R:
+          ry: 2.1
+          rz: -4.92
+        lower_leg_L:
+          rx: -2.34
+          rz: 0.42
+        lower_leg_R:
+          rx: 12.96
+          ry: 0.36
+          rz: 1.92
+        neck:
+          rx: 1.32
+          ry: 0.48
+          rz: -3.36
+        shoulder_L:
+          rx: -1.02
+          rz: 3.06
+        shoulder_R:
+          rx: -1.8
+          ry: -0.48
+          rz: -6.3
+        spine:
+          rx: 0.42
+          rz: -3.06
+        spine1:
+          rx: 1.32
+          ry: 0.96
+          rz: -3.3
+        upper_arm_L:
+          rx: -1.44
+          ry: -13.68
+          rz: -4.98
+        upper_arm_R:
+          rx: -0.84
+          ry: 24.84
+          rz: 2.64
+        upper_leg_L:
+          rx: 17.04
+          ry: -4.44
+          rz: 9.54
+        upper_leg_R:
+          rx: -11.88
+          ry: 2.04
+          rz: 19.62
+        foot_L:
+          rx: -2.28
+          ry: 3.72
+          rz: 2.76
+        foot_R:
+          rx: -0.36
+          ry: 2.16
+          rz: -2.7
+    - t: 0.0913
+      bones:
+        hand_L:
+          rx: -4.74
+          ry: 10.38
+          rz: 4.02
+        hand_R:
+          rx: -3.36
+          ry: -19.26
+          rz: -5.64
+        head:
+          rx: 5.76
+          ry: -0.54
+          rz: -1.08
+        hips:
+          rx: -5.7
+          ry: 1.8
+          rz: 3.6
+          tx: -0.16
+          ty: -0.19
+          tz: 0.19
+        lower_arm_L:
+          ry: -1.56
+          rz: 3.84
+        lower_arm_R:
+          ry: 2.52
+          rz: -6.0
+        lower_leg_L:
+          rx: -1.92
+          rz: 0.3
+        lower_leg_R:
+          rx: 13.5
+          ry: 0.42
+          rz: 2.04
+        neck:
+          rx: 1.44
+          ry: 0.42
+          rz: -3.42
+        shoulder_L:
+          rx: -0.72
+          rz: 2.1
+        shoulder_R:
+          rx: -1.8
+          rz: -6.6
+        spine:
+          rx: 0.42
+          rz: -3.06
+        spine1:
+          rx: 1.44
+          ry: 0.96
+          rz: -3.36
+        upper_arm_L:
+          rx: -1.38
+          ry: -12.72
+          rz: -4.74
+        upper_arm_R:
+          rx: -1.5
+          ry: 25.26
+          rz: 3.3
+        upper_leg_L:
+          rx: 17.22
+          ry: -4.38
+          rz: 9.66
+        upper_leg_R:
+          rx: -11.94
+          ry: 1.92
+          rz: 19.98
+        foot_L:
+          rx: -2.4
+          ry: 3.72
+          rz: 2.76
+        foot_R:
+          rx: -0.54
+          ry: 2.16
+          rz: -2.76
+    - t: 0.1117
+      bones:
+        hand_L:
+          rx: -4.8
+          ry: 10.32
+          rz: 4.02
+        hand_R:
+          rx: -3.48
+          ry: -23.52
+          rz: -5.34
+        head:
+          rx: 6.96
+          ry: -0.48
+          rz: -1.38
+        hips:
+          rx: -6.06
+          ry: 1.68
+          rz: 3.84
+          tx: -0.25
+          ty: -0.32
+          tz: 0.22
+        lower_arm_L:
+          ry: -1.38
+          rz: 3.42
+        lower_arm_R:
+          ry: 2.7
+          rz: -6.48
+        lower_leg_L:
+          rx: -1.26
+        lower_leg_R:
+          rx: 14.22
+          ry: 0.42
+          rz: 2.1
+        neck:
+          rx: 1.68
+          ry: 0.36
+          rz: -3.42
+        shoulder_L:
+          rx: -0.54
+          rz: 1.44
+        shoulder_R:
+          rx: -1.86
+          rz: -7.2
+        spine:
+          rx: 0.54
+          rz: -3.06
+        spine1:
+          rx: 1.74
+          ry: 0.96
+          rz: -3.36
+        upper_arm_L:
+          rx: -0.78
+          ry: -12.12
+          rz: -4.56
+        upper_arm_R:
+          rx: -2.58
+          ry: 25.92
+          rz: 3.54
+        upper_leg_L:
+          rx: 17.4
+          ry: -4.26
+          rz: 9.72
+        upper_leg_R:
+          rx: -11.94
+          ry: 1.74
+          rz: 20.4
+        foot_L:
+          rx: -2.52
+          ry: 3.6
+          rz: 2.7
+        foot_R:
+          rx: -0.66
+          ry: 2.1
+          rz: -2.88
+    - t: 0.1322
+      bones:
+        hand_L:
+          rx: -5.16
+          ry: 10.32
+          rz: 3.78
+        hand_R:
+          rx: -3.66
+          ry: -27.48
+          rz: -6.0
+        head:
+          rx: 8.28
+          ry: -0.36
+          rz: -1.74
+        hips:
+          rx: -6.66
+          ry: 1.5
+          rz: 4.08
+          tx: -0.35
+          ty: -0.52
+          tz: 0.2
+        lower_arm_L:
+          ry: -1.32
+          rz: 3.24
+        lower_arm_R:
+          ry: 2.88
+          rz: -7.02
+        lower_leg_L:
+          rx: -0.36
+        lower_leg_R:
+          rx: 15.0
+          ry: 0.48
+          rz: 2.22
+        neck:
+          rx: 2.1
+          ry: 0.3
+          rz: -3.48
+        shoulder_L:
+          rx: -0.6
+          ry: 1.02
+          rz: 1.14
+        shoulder_R:
+          rx: -2.04
+          rz: -8.22
+        spine:
+          rx: 0.72
+          rz: -3.06
+        spine1:
+          rx: 2.16
+          ry: 0.9
+          rz: -3.42
+        upper_arm_L:
+          rx: 0.54
+          ry: -11.7
+          rz: -4.56
+        upper_arm_R:
+          rx: -3.78
+          ry: 26.64
+          rz: 3.6
+        upper_leg_L:
+          rx: 17.64
+          ry: -4.2
+          rz: 9.72
+        upper_leg_R:
+          rx: -12.0
+          ry: 1.62
+          rz: 20.82
+        foot_L:
+          rx: -2.76
+          ry: 3.48
+          rz: 2.58
+        foot_R:
+          rx: -0.84
+          ry: 2.04
+          rz: -3.0
+    - t: 0.1526
+      bones:
+        hand_L:
+          rx: -6.24
+          ry: 10.32
+          rz: 3.0
+        hand_R:
+          rx: -5.52
+          ry: -30.3
+          rz: -8.46
+        head:
+          rx: 9.78
+          rz: -2.04
+        hips:
+          rx: -7.38
+          ry: 1.26
+          rz: 4.38
+          tx: -0.43
+          ty: -0.68
+          tz: 0.07
+        lower_arm_L:
+          ry: -1.56
+          rz: 3.9
+        lower_arm_R:
+          ry: 3.72
+          rz: -9.06
+        lower_leg_L:
+          rx: 1.2
+        lower_leg_R:
+          rx: 16.14
+          ry: 0.54
+          rz: 2.4
+        neck:
+          rx: 2.64
+          rz: -3.48
+        shoulder_L:
+          rx: -0.78
+          ry: 2.58
+          rz: 1.02
+        shoulder_R:
+          rx: -2.46
+          rz: -9.6
+        spine:
+          rx: 1.02
+          rz: -3.0
+        spine1:
+          rx: 2.7
+          ry: 0.9
+          rz: -3.42
+        upper_arm_L:
+          rx: 3.0
+          ry: -11.46
+          rz: -5.04
+        upper_arm_R:
+          rx: -4.86
+          ry: 27.48
+          rz: 4.26
+        upper_leg_L:
+          rx: 17.58
+          ry: -4.2
+          rz: 9.6
+        upper_leg_R:
+          rx: -12.0
+          ry: 1.38
+          rz: 21.3
+        foot_L:
+          rx: -3.12
+          ry: 3.36
+          rz: 2.52
+        foot_R:
+          rx: -1.08
+          ry: 1.92
+          rz: -3.12
+    - t: 0.173
+      bones:
+        hand_L:
+          rx: -7.2
+          ry: 9.9
+          rz: 2.82
+        hand_R:
+          rx: -8.1
+          ry: -32.52
+          rz: -10.86
+        head:
+          rx: 11.58
+          rz: -1.98
+        hips:
+          rx: -8.1
+          ry: 0.66
+          rz: 4.5
+          tx: -0.46
+          ty: -0.71
+          tz: -0.08
+        lower_arm_L:
+          rx: 0.3
+          ry: -1.92
+          rz: 4.62
+        lower_arm_R:
+          rx: 0.9
+          ry: 5.88
+          rz: -14.4
+        lower_leg_L:
+          rx: 2.52
+          rz: -0.42
+        lower_leg_R:
+          rx: 17.1
+          ry: 0.6
+          rz: 2.52
+        neck:
+          rx: 3.12
+          rz: -3.3
+        shoulder_L:
+          rx: -1.08
+          ry: 5.04
+          rz: 0.84
+        shoulder_R:
+          rx: -3.0
+          ry: -0.54
+          rz: -10.74
+        spine:
+          rx: 1.2
+          rz: -2.82
+        spine1:
+          rx: 3.18
+          ry: 0.72
+          rz: -3.24
+        upper_arm_L:
+          rx: 6.18
+          ry: -10.98
+          rz: -6.0
+        upper_arm_R:
+          rx: -5.34
+          ry: 28.8
+          rz: 5.76
+        upper_leg_L:
+          rx: 17.58
+          ry: -4.14
+          rz: 9.42
+        upper_leg_R:
+          rx: -12.0
+          ry: 1.32
+          rz: 21.66
+        foot_L:
+          rx: -3.36
+          ry: 3.18
+          rz: 2.28
+        foot_R:
+          rx: -1.2
+          ry: 1.74
+          rz: -3.3
+    - t: 0.1935
+      bones:
+        hand_L:
+          rx: -7.5
+          ry: 9.78
+          rz: 2.76
+        hand_R:
+          rx: -11.94
+          ry: -33.36
+          rz: -13.8
+        head:
+          rx: 13.26
+          ry: 0.6
+          rz: -1.98
+        hips:
+          rx: -8.4
+          rz: 4.44
+          tx: -0.46
+          ty: -0.62
+          tz: -0.26
+        lower_arm_L:
+          rx: 0.48
+          ry: -2.64
+          rz: 6.42
+        lower_arm_R:
+          rx: 2.16
+          ry: 8.22
+          rz: -20.94
+        lower_leg_L:
+          rx: 3.3
+          rz: -0.54
+        lower_leg_R:
+          rx: 17.34
+          ry: 0.6
+          rz: 2.58
+        neck:
+          rx: 3.36
+          rz: -2.88
+        shoulder_L:
+          rx: -1.14
+          ry: 7.44
+        shoulder_R:
+          rx: -3.54
+          ry: -1.2
+          rz: -11.34
+        spine:
+          rx: 1.26
+          rz: -2.64
+        spine1:
+          rx: 3.36
+          ry: 0.48
+          rz: -2.94
+        upper_arm_L:
+          rx: 8.88
+          ry: -9.72
+          rz: -7.68
+        upper_arm_R:
+          rx: -5.76
+          ry: 30.24
+          rz: 6.78
+        upper_leg_L:
+          rx: 17.34
+          ry: -4.2
+          rz: 9.06
+        upper_leg_R:
+          rx: -12.0
+          ry: 1.38
+          rz: 21.48
+        foot_L:
+          rx: -3.54
+          ry: 3.0
+          rz: 2.16
+        foot_R:
+          rx: -1.2
+          ry: 1.56
+          rz: -3.48
+    - t: 0.2139
+      bones:
+        hand_L:
+          rx: -7.26
+          ry: 9.66
+          rz: 3.06
+        hand_R:
+          rx: -17.04
+          ry: -32.04
+          rz: -17.4
+        head:
+          rx: 13.98
+          ry: 1.2
+          rz: -1.8
+        hips:
+          rx: -8.04
+          ry: -0.72
+          rz: 4.32
+          tx: -0.42
+          ty: -0.45
+          tz: -0.5
+        lower_arm_L:
+          rx: 0.84
+          ry: -3.6
+          rz: 9.0
+        lower_arm_R:
+          rx: 4.14
+          ry: 10.44
+          rz: -28.08
+        lower_leg_L:
+          rx: 3.48
+          rz: -0.54
+        lower_leg_R:
+          rx: 17.04
+          ry: 0.6
+          rz: 2.52
+        neck:
+          rx: 3.3
+          ry: -0.36
+          rz: -2.4
+        shoulder_L:
+          rx: -0.66
+          ry: 9.06
+          rz: -1.02
+        shoulder_R:
+          rx: -3.78
+          ry: -1.74
+          rz: -11.34
+        spine:
+          rx: 1.26
+          ry: -0.3
+          rz: -2.4
+        spine1:
+          rx: 3.3
+          rz: -2.52
+        upper_arm_L:
+          rx: 10.86
+          ry: -7.44
+          rz: -10.08
+        upper_arm_R:
+          rx: -6.36
+          ry: 31.2
+          rz: 6.9
+        upper_leg_L:
+          rx: 16.68
+          ry: -4.44
+          rz: 8.76
+        upper_leg_R:
+          rx: -12.24
+          ry: 1.38
+          rz: 20.94
+        foot_L:
+          rx: -3.54
+          ry: 2.88
+          rz: 1.92
+        foot_R:
+          rx: -1.02
+          ry: 1.32
+          rz: -3.54
+    - t: 0.2343
+      bones:
+        hand_L:
+          rx: -6.54
+          ry: 9.36
+          rz: 3.9
+        hand_R:
+          rx: -22.14
+          ry: -28.14
+          rz: -20.64
+        head:
+          rx: 13.74
+          ry: 1.86
+          rz: -1.32
+        hips:
+          rx: -7.2
+          ry: -1.44
+          rz: 4.2
+          tx: -0.37
+          ty: -0.25
+          tz: -0.8
+        lower_arm_L:
+          rx: 1.38
+          ry: -4.68
+          rz: 12.0
+        lower_arm_R:
+          rx: 6.6
+          ry: 12.12
+          rz: -35.1
+        lower_leg_L:
+          rx: 3.12
+          rz: -0.48
+        lower_leg_R:
+          rx: 16.32
+          ry: 0.54
+          rz: 2.46
+        neck:
+          rx: 3.12
+          ry: -0.6
+          rz: -1.92
+        shoulder_L:
+          ry: 9.9
+          rz: -2.52
+        shoulder_R:
+          rx: -3.78
+          ry: -2.04
+          rz: -10.74
+        spine:
+          rx: 1.2
+          ry: -0.54
+          rz: -2.1
+        spine1:
+          rx: 3.12
+          rz: -2.1
+        upper_arm_L:
+          rx: 12.06
+          ry: -4.44
+          rz: -12.84
+        upper_arm_R:
+          rx: -6.96
+          ry: 31.5
+          rz: 5.82
+        upper_leg_L:
+          rx: 15.72
+          ry: -4.74
+          rz: 8.52
+        upper_leg_R:
+          rx: -12.78
+          ry: 1.32
+          rz: 20.1
+        foot_L:
+          rx: -3.42
+          ry: 2.76
+          rz: 1.8
+        foot_R:
+          rx: -0.72
+          ry: 1.08
+          rz: -3.6
+    - t: 0.2548
+      bones:
+        hand_L:
+          rx: -5.4
+          ry: 9.06
+          rz: 5.16
+        hand_R:
+          rx: -26.52
+          ry: -21.66
+          rz: -22.74
+        head:
+          rx: 12.78
+          ry: 2.64
+          rz: -0.54
+        hips:
+          rx: -6.06
+          ry: -1.98
+          rz: 4.08
+          tx: -0.31
+          ty: -0.1
+          tz: -1.16
+        lower_arm_L:
+          rx: 2.04
+          ry: -5.76
+          rz: 15.06
+        lower_arm_R:
+          rx: 9.06
+          ry: 13.14
+          rz: -41.4
+        lower_leg_L:
+          rx: 2.46
+          rz: -0.42
+        lower_leg_R:
+          rx: 15.24
+          ry: 0.48
+          rz: 2.28
+        neck:
+          rx: 2.88
+          ry: -0.84
+          rz: -1.44
+        shoulder_L:
+          rx: 0.96
+          ry: 10.32
+          rz: -4.02
+        shoulder_R:
+          rx: -3.42
+          ry: -1.98
+          rz: -9.84
+        spine:
+          rx: 1.08
+          ry: -0.78
+          rz: -1.8
+        spine1:
+          rx: 2.82
+          ry: -0.54
+          rz: -1.68
+        upper_arm_L:
+          rx: 12.78
+          ry: -1.56
+          rz: -15.54
+        upper_arm_R:
+          rx: -7.44
+          ry: 31.2
+          rz: 3.42
+        upper_leg_L:
+          rx: 14.58
+          ry: -5.16
+          rz: 8.28
+        upper_leg_R:
+          rx: -13.38
+          ry: 1.32
+          rz: 19.08
+        foot_L:
+          rx: -3.24
+          ry: 2.76
+          rz: 1.62
+        foot_R:
+          rx: -0.36
+          ry: 0.84
+          rz: -3.54
+    - t: 0.2752
+      bones:
+        hand_L:
+          rx: -3.78
+          ry: 9.42
+          rz: 5.94
+        hand_R:
+          rx: -29.34
+          ry: -14.76
+          rz: -25.2
+        head:
+          rx: 11.22
+          ry: 3.42
+          rz: 0.48
+        hips:
+          rx: -4.5
+          ry: -2.52
+          rz: 4.08
+          tx: -0.26
+          ty: 0.02
+          tz: -1.54
+        lower_arm_L:
+          rx: 2.58
+          ry: -6.6
+          rz: 17.52
+        lower_arm_R:
+          rx: 11.22
+          ry: 13.5
+          rz: -46.2
+        lower_leg_L:
+          rx: 1.98
+          rz: -0.36
+        lower_leg_R:
+          rx: 14.22
+          ry: 0.42
+          rz: 2.16
+        neck:
+          rx: 2.7
+          ry: -1.02
+          rz: -0.9
+        shoulder_L:
+          rx: 1.74
+          ry: 11.16
+          rz: -5.28
+        shoulder_R:
+          rx: -3.18
+          ry: -1.86
+          rz: -9.24
+        spine:
+          rx: 1.02
+          ry: -1.02
+          rz: -1.44
+        spine1:
+          rx: 2.58
+          ry: -0.9
+          rz: -1.26
+        upper_arm_L:
+          rx: 13.56
+          ry: 0.6
+          rz: -17.22
+        upper_arm_R:
+          rx: -8.46
+          ry: 30.96
+          rz: -0.54
+        upper_leg_L:
+          rx: 12.84
+          ry: -5.76
+          rz: 8.1
+        upper_leg_R:
+          rx: -14.58
+          ry: 0.96
+          rz: 18.06
+        foot_L:
+          rx: -3.0
+          ry: 2.7
+          rz: 1.5
+        foot_R:
+          ry: 0.66
+          rz: -3.48
+    - t: 0.2957
+      bones:
+        hand_L:
+          rx: -2.58
+          ry: 9.9
+          rz: 6.36
+        hand_R:
+          rx: -30.6
+          ry: -8.46
+          rz: -27.12
+        head:
+          rx: 9.78
+          ry: 4.08
+          rz: 1.38
+        hips:
+          rx: -3.12
+          ry: -2.82
+          rz: 4.2
+          tx: -0.19
+          ty: 0.1
+          tz: -1.95
+        lower_arm_L:
+          rx: 3.24
+          ry: -7.26
+          rz: 19.68
+        lower_arm_R:
+          rx: 12.78
+          ry: 13.68
+          rz: -49.68
+        lower_leg_L:
+          rx: 1.44
+        lower_leg_R:
+          rx: 13.38
+          ry: 0.36
+          rz: 2.04
+        neck:
+          rx: 2.58
+          ry: -1.26
+          rz: -0.54
+        shoulder_L:
+          rx: 2.22
+          ry: 11.82
+          rz: -6.0
+        shoulder_R:
+          rx: -3.0
+          ry: -1.8
+          rz: -8.76
+        spine:
+          rx: 1.02
+          ry: -1.2
+          rz: -1.08
+        spine1:
+          rx: 2.52
+          ry: -1.14
+          rz: -0.84
+        spine2:
+          rz: 0.3
+        upper_arm_L:
+          rx: 14.16
+          ry: 2.34
+          rz: -18.54
+        upper_arm_R:
+          rx: -9.9
+          ry: 30.78
+          rz: -5.1
+        upper_leg_L:
+          rx: 11.28
+          ry: -6.3
+          rz: 8.1
+        upper_leg_R:
+          rx: -15.72
+          ry: 0.6
+          rz: 17.28
+        foot_L:
+          rx: -2.7
+          ry: 2.76
+          rz: 1.44
+        foot_R:
+          rx: 0.3
+          ry: 0.54
+          rz: -3.36
+    - t: 0.3161
+      bones:
+        hand_L:
+          rx: -2.04
+          ry: 10.2
+          rz: 6.48
+        hand_R:
+          rx: -32.1
+          ry: -3.0
+          rz: -28.02
+        head:
+          rx: 8.28
+          ry: 4.5
+          rz: 2.22
+        hips:
+          rx: -1.74
+          ry: -3.0
+          rz: 4.44
+          tx: -0.08
+          ty: 0.14
+          tz: -2.37
+        lower_arm_L:
+          rx: 3.9
+          ry: -7.92
+          rz: 21.84
+        lower_arm_R:
+          rx: 13.86
+          ry: 13.62
+          rz: -51.96
+        lower_leg_L:
+          rx: 0.9
+        lower_leg_R:
+          rx: 12.72
+          ry: 0.3
+          rz: 1.92
+        neck:
+          rx: 2.64
+          ry: -1.44
+        shoulder_L:
+          rx: 2.46
+          ry: 12.54
+          rz: -6.36
+        shoulder_R:
+          rx: -2.94
+          ry: -1.98
+          rz: -8.52
+        spine:
+          rx: 1.08
+          ry: -1.38
+          rz: -0.6
+        spine1:
+          rx: 2.52
+          ry: -1.38
+          rz: -0.48
+        spine2:
+          rz: 0.36
+        upper_arm_L:
+          rx: 14.7
+          ry: 4.08
+          rz: -19.92
+        upper_arm_R:
+          rx: -11.28
+          ry: 30.42
+          rz: -10.08
+        upper_leg_L:
+          rx: 9.78
+          ry: -6.84
+          rz: 8.22
+        upper_leg_R:
+          rx: -17.04
+          rz: 16.74
+        foot_L:
+          rx: -2.46
+          ry: 2.76
+          rz: 1.32
+        foot_R:
+          rx: 0.6
+          ry: 0.42
+          rz: -3.24
+    - t: 0.3365
+      bones:
+        hand_L:
+          rx: -2.1
+          ry: 10.2
+          rz: 6.48
+        hand_R:
+          rx: -33.78
+          ry: 1.32
+          rz: -27.72
+        head:
+          rx: 6.84
+          ry: 4.8
+          rz: 2.94
+        hips:
+          rx: -0.42
+          ry: -2.88
+          rz: 4.68
+          tx: -0.08
+          ty: 0.14
+          tz: -2.37
+        lower_arm_L:
+          rx: 4.62
+          ry: -8.52
+          rz: 24.12
+        lower_arm_R:
+          rx: 14.52
+          ry: 13.5
+          rz: -53.22
+        lower_leg_L:
+          rx: 0.54
+        lower_leg_R:
+          rx: 12.3
+          ry: 0.3
+          rz: 1.86
+        neck:
+          rx: 2.7
+          ry: -1.62
+        shoulder_L:
+          rx: 2.46
+          ry: 13.2
+          rz: -6.42
+        shoulder_R:
+          rx: -2.94
+          ry: -2.28
+          rz: -8.46
+        spine:
+          rx: 1.2
+          ry: -1.5
+        spine1:
+          rx: 2.64
+          ry: -1.56
+        spine2:
+          rz: 0.42
+        upper_arm_L:
+          rx: 15.3
+          ry: 5.88
+          rz: -21.36
+        upper_arm_R:
+          rx: -12.66
+          ry: 30.06
+          rz: -15.48
+        upper_leg_L:
+          rx: 8.28
+          ry: -7.32
+          rz: 8.58
+        upper_leg_R:
+          rx: -18.54
+          ry: -0.48
+          rz: 16.38
+        foot_L:
+          rx: -2.16
+          ry: 2.88
+          rz: 1.32
+        foot_R:
+          rx: 0.9
+          ry: 0.36
+          rz: -3.12
+    - t: 0.357
+      bones:
+        hand_L:
+          rx: -2.4
+          ry: 9.96
+          rz: 6.54
+        hand_R:
+          rx: -34.68
+          ry: 4.62
+          rz: -27.42
+        head:
+          rx: 5.88
+          ry: 4.98
+          rz: 3.48
+        hips:
+          rx: 0.72
+          ry: -2.64
+          rz: 4.92
+          tx: 0.01
+          ty: 0.16
+          tz: -2.76
+        lower_arm_L:
+          rx: 5.4
+          ry: -9.06
+          rz: 26.4
+        lower_arm_R:
+          rx: 14.88
+          ry: 13.38
+          rz: -53.7
+        lower_leg_L:
+          rx: 0.3
+        lower_leg_R:
+          rx: 12.12
+          rz: 1.8
+        neck:
+          rx: 2.88
+          ry: -1.74
+          rz: 0.48
+        shoulder_L:
+          rx: 2.22
+          ry: 13.74
+          rz: -6.12
+        shoulder_R:
+          rx: -3.12
+          ry: -2.58
+          rz: -8.7
+        spine:
+          rx: 1.32
+          ry: -1.56
+        spine1:
+          rx: 2.82
+          ry: -1.62
+        spine2:
+          rz: 0.48
+        upper_arm_L:
+          rx: 15.6
+          ry: 7.32
+          rz: -22.68
+        upper_arm_R:
+          rx: -14.34
+          ry: 30.12
+          rz: -20.46
+        upper_leg_L:
+          rx: 6.96
+          ry: -7.86
+          rz: 8.82
+        upper_leg_R:
+          rx: -19.92
+          ry: -1.08
+          rz: 16.2
+        foot_L:
+          rx: -1.92
+          ry: 3.0
+          rz: 1.32
+        foot_R:
+          rx: 1.08
+          ry: 0.36
+          rz: -3.0
+    - t: 0.3774
+      bones:
+        hand_L:
+          rx: -2.22
+          ry: 9.84
+          rz: 6.9
+        hand_R:
+          rx: -35.46
+          ry: 1.5
+          rz: -24.48
+        head:
+          rx: 5.46
+          ry: 4.74
+          rz: 3.24
+        hips:
+          rx: 1.5
+          ry: -2.4
+          rz: 5.16
+          tx: 0.09
+          ty: 0.13
+          tz: -3.18
+        lower_arm_L:
+          rx: 5.94
+          ry: -9.36
+          rz: 27.96
+        lower_arm_R:
+          rx: 14.76
+          ry: 13.26
+          rz: -53.34
+        lower_leg_L:
+          rx: 0.36
+        lower_leg_R:
+          rx: 12.3
+          ry: 0.3
+          rz: 1.86
+        neck:
+          rx: 3.12
+          ry: -1.68
+          rz: 0.84
+        shoulder_L:
+          rx: 1.98
+          ry: 14.34
+          rz: -5.82
+        shoulder_R:
+          rx: -3.42
+          ry: -2.76
+          rz: -9.54
+        spine:
+          rx: 1.5
+          ry: -1.56
+          rz: 0.54
+        spine1:
+          rx: 3.06
+          ry: -1.62
+          rz: 0.48
+        spine2:
+          rz: 0.48
+        upper_arm_L:
+          rx: 15.48
+          ry: 8.4
+          rz: -23.16
+        upper_arm_R:
+          rx: -15.42
+          ry: 32.64
+          rz: -24.54
+        upper_leg_L:
+          rx: 5.82
+          ry: -8.28
+          rz: 9.18
+        upper_leg_R:
+          rx: -21.24
+          ry: -1.68
+          rz: 16.14
+        foot_L:
+          rx: -1.8
+          ry: 3.12
+          rz: 1.32
+        foot_R:
+          rx: 1.2
+          ry: 0.36
+          rz: -2.82
+    - t: 0.3978
+      bones:
+        hand_L:
+          rx: -2.22
+          ry: 9.9
+          rz: 6.84
+        hand_R:
+          rx: -35.82
+          ry: -3.66
+          rz: -19.68
+        head:
+          rx: 5.34
+          ry: 4.56
+          rz: 2.94
+        hips:
+          rx: 2.1
+          ry: -2.28
+          rz: 5.34
+          tx: 0.17
+          ty: 0.13
+          tz: -3.6
+        lower_arm_L:
+          rx: 6.42
+          ry: -9.6
+          rz: 29.28
+        lower_arm_R:
+          rx: 13.5
+          ry: 13.08
+          rz: -50.34
+        lower_leg_L:
+          rx: 0.42
+        lower_leg_R:
+          rx: 12.42
+          ry: 0.3
+          rz: 1.86
+        neck:
+          rx: 3.3
+          ry: -1.56
+          rz: 1.14
+        shoulder_L:
+          rx: 1.74
+          ry: 14.88
+          rz: -5.46
+        shoulder_R:
+          rx: -3.84
+          ry: -3.0
+          rz: -10.32
+        spine:
+          rx: 1.68
+          ry: -1.56
+          rz: 0.84
+        spine1:
+          rx: 3.3
+          ry: -1.56
+          rz: 0.78
+        spine2:
+          rz: 0.54
+        upper_arm_L:
+          rx: 15.0
+          ry: 8.82
+          rz: -23.1
+        upper_arm_R:
+          rx: -15.0
+          ry: 37.08
+          rz: -28.38
+        upper_leg_L:
+          rx: 4.86
+          ry: -8.64
+          rz: 9.36
+        upper_leg_R:
+          rx: -22.26
+          ry: -2.22
+          rz: 16.08
+        foot_L:
+          rx: -1.62
+          ry: 3.24
+          rz: 1.26
+        foot_R:
+          rx: 1.32
+          ry: 0.36
+          rz: -2.7
+    - t: 0.4183
+      bones:
+        hand_L:
+          rx: -2.76
+          ry: 9.78
+          rz: 6.6
+        hand_R:
+          rx: -35.82
+          ry: -7.32
+          rz: -14.82
+        head:
+          rx: 5.1
+          ry: 4.5
+          rz: 2.64
+        hips:
+          rx: 2.64
+          ry: -2.16
+          rz: 5.52
+          tx: 0.2
+          ty: 0.14
+          tz: -3.98
+        lower_arm_L:
+          rx: 6.84
+          ry: -9.78
+          rz: 30.36
+        lower_arm_R:
+          rx: 11.88
+          ry: 12.78
+          rz: -46.38
+        lower_leg_L:
+          rx: 0.42
+        lower_leg_R:
+          rx: 12.42
+          ry: 0.3
+          rz: 1.86
+        neck:
+          rx: 3.48
+          ry: -1.44
+          rz: 1.38
+        shoulder_L:
+          rx: 1.38
+          ry: 15.36
+          rz: -5.1
+        shoulder_R:
+          rx: -4.14
+          ry: -3.3
+          rz: -10.86
+        spine:
+          rx: 1.8
+          ry: -1.5
+          rz: 1.08
+        spine1:
+          rx: 3.42
+          ry: -1.44
+          rz: 1.02
+        spine2:
+          rz: 0.54
+        upper_arm_L:
+          rx: 14.46
+          ry: 8.94
+          rz: -22.92
+        upper_arm_R:
+          rx: -14.52
+          ry: 40.8
+          rz: -31.56
+        upper_leg_L:
+          rx: 3.96
+          ry: -9.0
+          rz: 9.48
+        upper_leg_R:
+          rx: -23.1
+          ry: -2.58
+          rz: 15.9
+        foot_L:
+          rx: -1.44
+          ry: 3.3
+          rz: 1.26
+        foot_R:
+          rx: 1.5
+          ry: 0.3
+          rz: -2.64
+    - t: 0.4387
+      bones:
+        hand_L:
+          rx: -3.78
+          ry: 9.36
+          rz: 6.3
+        hand_R:
+          rx: -35.04
+          ry: -6.78
+          rz: -12.0
+        head:
+          rx: 4.8
+          ry: 4.5
+          rz: 2.4
+        hips:
+          rx: 3.24
+          ry: -2.1
+          rz: 5.7
+          tx: 0.17
+          ty: 0.14
+          tz: -4.31
+        lower_arm_L:
+          rx: 7.26
+          ry: -9.96
+          rz: 31.38
+        lower_arm_R:
+          rx: 10.74
+          ry: 12.48
+          rz: -43.38
+        lower_leg_L:
+          rx: 0.36
+        lower_leg_R:
+          rx: 12.3
+          ry: 0.3
+          rz: 1.86
+        neck:
+          rx: 3.54
+          ry: -1.38
+          rz: 1.62
+        shoulder_L:
+          rx: 1.08
+          ry: 15.78
+          rz: -4.68
+        shoulder_R:
+          rx: -4.32
+          ry: -3.6
+          rz: -11.04
+        spine:
+          rx: 1.92
+          ry: -1.5
+          rz: 1.26
+        spine1:
+          rx: 3.54
+          ry: -1.38
+          rz: 1.26
+        spine2:
+          rz: 0.54
+        upper_arm_L:
+          rx: 14.28
+          ry: 8.94
+          rz: -22.98
+        upper_arm_R:
+          rx: -15.06
+          ry: 41.94
+          rz: -33.3
+        upper_leg_L:
+          rx: 3.12
+          ry: -9.3
+          rz: 9.54
+        upper_leg_R:
+          rx: -23.88
+          ry: -2.94
+          rz: 15.66
+        foot_L:
+          rx: -1.32
+          ry: 3.3
+          rz: 1.26
+        foot_R:
+          rx: 1.56
+          rz: -2.52
+    - t: 0.4591
+      bones:
+        hand_L:
+          rx: -4.62
+          ry: 8.94
+          rz: 6.24
+        hand_R:
+          rx: -33.18
+          rz: -14.34
+        head:
+          rx: 4.26
+          ry: 4.5
+          rz: 2.22
+        hips:
+          rx: 3.78
+          ry: -2.1
+          rz: 6.0
+          tx: 0.07
+          ty: 0.12
+          tz: -4.56
+        lower_arm_L:
+          rx: 7.62
+          ry: -10.08
+          rz: 32.34
+        lower_arm_R:
+          rx: 10.8
+          ry: 12.36
+          rz: -42.96
+        lower_leg_L:
+          rx: 0.3
+        lower_leg_R:
+          rx: 12.3
+          ry: 0.3
+          rz: 1.8
+        neck:
+          rx: 3.66
+          ry: -1.32
+          rz: 1.74
+        shoulder_L:
+          rx: 0.84
+          ry: 16.2
+          rz: -4.44
+        shoulder_R:
+          rx: -4.38
+          ry: -3.96
+          rz: -10.92
+        spine:
+          rx: 1.98
+          ry: -1.44
+          rz: 1.44
+        spine1:
+          rx: 3.66
+          ry: -1.32
+          rz: 1.44
+        spine2:
+          rz: 0.54
+        upper_arm_L:
+          rx: 14.64
+          ry: 9.06
+          rz: -23.58
+        upper_arm_R:
+          rx: -16.62
+          ry: 39.12
+          rz: -33.18
+        upper_leg_L:
+          rx: 2.4
+          ry: -9.6
+          rz: 9.6
+        upper_leg_R:
+          rx: -24.66
+          ry: -3.24
+          rz: 15.48
+        foot_L:
+          rx: -1.2
+          ry: 3.3
+          rz: 1.2
+        foot_R:
+          rx: 1.68
+          rz: -2.46
+    - t: 0.4796
+      bones:
+        hand_L:
+          rx: -4.14
+          ry: 9.0
+          rz: 6.6
+        hand_R:
+          rx: -29.94
+          ry: 8.4
+          rz: -20.76
+        head:
+          rx: 3.96
+          ry: 4.68
+          rz: 2.52
+        hips:
+          rx: 4.08
+          ry: -2.1
+          rz: 6.18
+          tx: -0.04
+          ty: 0.14
+          tz: -4.73
+        lower_arm_L:
+          rx: 8.04
+          ry: -10.2
+          rz: 33.3
+        lower_arm_R:
+          rx: 11.16
+          ry: 12.42
+          rz: -43.44
+        lower_leg_R:
+          rx: 12.12
+          ry: 0.3
+          rz: 1.8
+        neck:
+          rx: 3.72
+          ry: -1.32
+          rz: 1.8
+        shoulder_L:
+          rx: 0.6
+          ry: 16.68
+          rz: -4.14
+        shoulder_R:
+          rx: -4.44
+          ry: -3.96
+          rz: -11.1
+        spine:
+          rx: 2.1
+          ry: -1.44
+          rz: 1.5
+        spine1:
+          rx: 3.78
+          ry: -1.32
+          rz: 1.5
+        spine2:
+          rz: 0.48
+        upper_arm_L:
+          rx: 15.48
+          ry: 9.3
+          rz: -24.6
+        upper_arm_R:
+          rx: -17.88
+          ry: 37.08
+          rz: -32.34
+        upper_leg_L:
+          rx: 2.04
+          ry: -9.72
+          rz: 9.66
+        upper_leg_R:
+          rx: -25.02
+          ry: -3.42
+          rz: 15.3
+        foot_L:
+          rx: -1.08
+          ry: 3.24
+          rz: 1.2
+        foot_R:
+          rx: 1.74
+          rz: -2.4
+    - t: 0.5
+      bones:
+        hand_L:
+          rx: -3.24
+          ry: 9.3
+          rz: 6.96
+        hand_R:
+          rx: -28.56
+          ry: 9.96
+          rz: -23.4
+        head:
+          rx: 3.72
+          ry: 4.8
+          rz: 2.76
+        hips:
+          rx: 4.26
+          ry: -2.04
+          rz: 6.24
+          tx: -0.08
+          ty: 0.17
+          tz: -4.93
+        lower_arm_L:
+          rx: 8.46
+          ry: -10.38
+          rz: 34.32
+        lower_arm_R:
+          rx: 11.46
+          ry: 12.42
+          rz: -43.8
+        lower_leg_R:
+          rx: 11.88
+          ry: 0.3
+          rz: 1.74
+        neck:
+          rx: 3.84
+          ry: -1.26
+          rz: 1.86
+        shoulder_L:
+          ry: 16.98
+          rz: -3.6
+        shoulder_R:
+          rx: -4.5
+          ry: -4.02
+          rz: -11.1
+        spine:
+          rx: 2.16
+          ry: -1.44
+          rz: 1.56
+        spine1:
+          rx: 3.84
+          ry: -1.26
+          rz: 1.5
+        spine2:
+          rz: 0.48
+        upper_arm_L:
+          rx: 16.32
+          ry: 9.3
+          rz: -25.62
+        upper_arm_R:
+          rx: -18.18
+          ry: 37.68
+          rz: -31.5
+        upper_leg_L:
+          rx: 1.8
+          ry: -9.84
+          rz: 9.66
+        upper_leg_R:
+          rx: -25.2
+          ry: -3.48
+          rz: 15.12
+        foot_L:
+          rx: -0.9
+          ry: 3.3
+          rz: 1.2
+        foot_R:
+          rx: 1.8
+          rz: -2.34
+    - t: 0.5204
+      bones:
+        hand_L:
+          rx: -2.46
+          ry: 9.54
+          rz: 7.26
+        hand_R:
+          rx: -30.3
+          ry: 7.08
+          rz: -20.94
+        head:
+          rx: 3.6
+          ry: 4.8
+          rz: 2.88
+        hips:
+          rx: 4.38
+          ry: -1.92
+          rz: 6.18
+          tx: -0.06
+          ty: 0.19
+          tz: -5.12
+        lower_arm_L:
+          rx: 8.82
+          ry: -10.44
+          rz: 35.1
+        lower_arm_R:
+          rx: 11.64
+          ry: 12.36
+          rz: -44.16
+        lower_leg_L:
+          rx: -0.48
+        lower_leg_R:
+          rx: 11.64
+          ry: 0.3
+          rz: 1.74
+        neck:
+          rx: 3.96
+          ry: -1.2
+          rz: 1.86
+        shoulder_L:
+          rx: -0.42
+          ry: 17.16
+          rz: -2.82
+        shoulder_R:
+          rx: -4.38
+          ry: -4.02
+          rz: -10.8
+        spine:
+          rx: 2.22
+          ry: -1.44
+          rz: 1.62
+        spine1:
+          rx: 3.96
+          ry: -1.26
+          rz: 1.62
+        spine2:
+          rz: 0.48
+        upper_arm_L:
+          rx: 17.1
+          ry: 9.12
+          rz: -26.4
+        upper_arm_R:
+          rx: -18.54
+          ry: 39.48
+          rz: -30.48
+        upper_leg_L:
+          rx: 1.62
+          ry: -9.96
+          rz: 9.66
+        upper_leg_R:
+          rx: -25.38
+          ry: -3.54
+          rz: 14.94
+        foot_L:
+          rx: -0.78
+          ry: 3.36
+          rz: 1.2
+        foot_R:
+          rx: 1.92
+          rz: -2.28
+    - t: 0.5409
+      bones:
+        hand_L:
+          rx: -2.1
+          ry: 9.6
+          rz: 7.44
+        hand_R:
+          rx: -34.68
+          ry: 1.62
+          rz: -15.24
+        head:
+          rx: 3.42
+          ry: 4.74
+          rz: 2.94
+        hips:
+          rx: 4.5
+          ry: -1.86
+          rz: 6.06
+          tx: 0.02
+          ty: 0.2
+          tz: -5.28
+        lower_arm_L:
+          rx: 9.0
+          ry: -10.5
+          rz: 35.52
+        lower_arm_R:
+          rx: 11.7
+          ry: 12.24
+          rz: -44.34
+        lower_leg_L:
+          rx: -0.72
+        lower_leg_R:
+          rx: 11.46
+          ry: 0.3
+          rz: 1.68
+        neck:
+          rx: 3.96
+          ry: -1.2
+          rz: 1.92
+        shoulder_L:
+          rx: -0.96
+          ry: 17.28
+          rz: -2.04
+        shoulder_R:
+          rx: -4.2
+          ry: -3.9
+          rz: -10.44
+        spine:
+          rx: 2.22
+          ry: -1.44
+          rz: 1.62
+        spine1:
+          rx: 3.96
+          ry: -1.26
+          rz: 1.68
+        spine2:
+          rx: 0.3
+          rz: 0.54
+        upper_arm_L:
+          rx: 17.88
+          ry: 8.7
+          rz: -26.94
+        upper_arm_R:
+          rx: -19.86
+          ry: 41.1
+          rz: -29.1
+        upper_leg_L:
+          rx: 1.5
+          ry: -10.02
+          rz: 9.66
+        upper_leg_R:
+          rx: -25.38
+          ry: -3.54
+          rz: 14.82
+        foot_L:
+          rx: -0.66
+          ry: 3.42
+          rz: 1.2
+        foot_R:
+          rx: 1.98
+          rz: -2.22
+    - t: 0.5613
+      bones:
+        hand_L:
+          rx: -2.28
+          ry: 9.42
+          rz: 7.44
+        hand_R:
+          rx: -39.3
+          ry: -3.66
+          rz: -8.94
+        head:
+          rx: 3.18
+          ry: 4.74
+          rz: 2.88
+        hips:
+          rx: 4.5
+          ry: -1.8
+          rz: 6.0
+          tx: 0.09
+          ty: 0.22
+          tz: -5.38
+        lower_arm_L:
+          rx: 9.0
+          ry: -10.5
+          rz: 35.52
+        lower_arm_R:
+          rx: 11.7
+          ry: 12.0
+          rz: -44.46
+        lower_leg_L:
+          rx: -0.84
+        lower_leg_R:
+          rx: 11.28
+          ry: 0.3
+          rz: 1.68
+        neck:
+          rx: 3.96
+          ry: -1.2
+          rz: 1.98
+        shoulder_L:
+          rx: -1.5
+          ry: 17.58
+          rz: -1.44
+        shoulder_R:
+          rx: -3.96
+          ry: -3.72
+          rz: -10.08
+        spine:
+          rx: 2.22
+          ry: -1.5
+          rz: 1.62
+        spine1:
+          rx: 3.96
+          ry: -1.32
+          rz: 1.68
+        spine2:
+          rx: 0.3
+          rz: 0.54
+        upper_arm_L:
+          rx: 18.66
+          ry: 8.16
+          rz: -27.24
+        upper_arm_R:
+          rx: -22.68
+          ry: 40.68
+          rz: -26.82
+        upper_leg_L:
+          rx: 1.44
+          ry: -10.02
+          rz: 9.66
+        upper_leg_R:
+          rx: -25.38
+          ry: -3.48
+          rz: 14.76
+        foot_L:
+          rx: -0.6
+          ry: 3.48
+          rz: 1.26
+        foot_R:
+          rx: 2.04
+          rz: -2.16
+    - t: 0.5817
+      bones:
+        hand_L:
+          rx: -2.28
+          ry: 9.42
+          rz: 7.5
+        hand_R:
+          rx: -39.96
+          ry: -7.98
+          rz: -4.26
+        head:
+          rx: 2.64
+          ry: 4.68
+          rz: 2.82
+        hips:
+          rx: 4.32
+          ry: -1.86
+          rz: 5.94
+          tx: 0.11
+          ty: 0.26
+          tz: -5.38
+        lower_arm_L:
+          rx: 8.76
+          ry: -10.38
+          rz: 34.98
+        lower_arm_R:
+          rx: 12.06
+          ry: 11.94
+          rz: -45.36
+        lower_leg_L:
+          rx: -1.14
+        lower_leg_R:
+          rx: 11.1
+          rz: 1.62
+        neck:
+          rx: 3.96
+          ry: -1.2
+          rz: 1.92
+        shoulder_L:
+          rx: -1.98
+          ry: 17.64
+          rz: -0.84
+        shoulder_R:
+          rx: -3.9
+          ry: -3.66
+          rz: -9.9
+        spine:
+          rx: 2.22
+          ry: -1.5
+          rz: 1.5
+        spine1:
+          rx: 3.9
+          ry: -1.32
+          rz: 1.56
+        spine2:
+          rx: 0.3
+          rz: 0.54
+        upper_arm_L:
+          rx: 19.14
+          ry: 7.38
+          rz: -27.0
+        upper_arm_R:
+          rx: -25.86
+          ry: 37.68
+          rz: -24.18
+        upper_leg_L:
+          rx: 1.8
+          ry: -9.9
+          rz: 9.72
+        upper_leg_R:
+          rx: -25.02
+          ry: -3.3
+          rz: 14.76
+        foot_L:
+          rx: -0.54
+          ry: 3.48
+          rz: 1.26
+        foot_R:
+          rx: 2.1
+          rz: -2.16
+    - t: 0.6022
+      bones:
+        hand_L:
+          rx: -2.04
+          ry: 9.42
+          rz: 7.56
+        hand_R:
+          rx: -36.48
+          ry: -11.76
+          rz: -4.92
+        head:
+          rx: 2.22
+          ry: 4.56
+          rz: 2.76
+        hips:
+          rx: 3.84
+          ry: -1.92
+          rz: 5.82
+          tx: 0.07
+          ty: 0.37
+          tz: -5.29
+        lower_arm_L:
+          rx: 8.28
+          ry: -10.2
+          rz: 33.6
+        lower_arm_R:
+          rx: 12.42
+          ry: 12.0
+          rz: -46.14
+        lower_leg_L:
+          rx: -1.74
+        lower_leg_R:
+          rx: 10.86
+          rz: 1.62
+        neck:
+          rx: 3.9
+          ry: -1.14
+          rz: 1.74
+        shoulder_L:
+          rx: -2.22
+          ry: 17.4
+          rz: -0.42
+        shoulder_R:
+          rx: -3.72
+          ry: -3.24
+          rz: -9.78
+        spine:
+          rx: 2.16
+          ry: -1.5
+          rz: 1.38
+        spine1:
+          rx: 3.84
+          ry: -1.26
+          rz: 1.44
+        spine2:
+          rx: 0.36
+          rz: 0.48
+        upper_arm_L:
+          rx: 19.38
+          ry: 6.96
+          rz: -26.64
+        upper_arm_R:
+          rx: -28.02
+          ry: 33.6
+          rz: -21.96
+        upper_leg_L:
+          rx: 2.64
+          ry: -9.66
+          rz: 9.72
+        upper_leg_R:
+          rx: -24.36
+          ry: -3.0
+          rz: 14.82
+        foot_L:
+          rx: -0.48
+          ry: 3.48
+          rz: 1.26
+        foot_R:
+          rx: 2.1
+          rz: -2.16
+    - t: 0.6226
+      bones:
+        hand_L:
+          rx: -1.68
+          ry: 9.36
+          rz: 7.92
+        hand_R:
+          rx: -30.18
+          ry: -15.24
+          rz: -7.5
+        head:
+          rx: 1.98
+          ry: 4.5
+          rz: 2.64
+        hips:
+          rx: 3.3
+          ry: -1.98
+          rz: 5.7
+          tx: -0.03
+          ty: 0.52
+          tz: -5.05
+        lower_arm_L:
+          rx: 7.5
+          ry: -9.84
+          rz: 31.56
+        lower_arm_R:
+          rx: 12.3
+          ry: 12.06
+          rz: -45.48
+        lower_leg_L:
+          rx: -2.34
+          rz: 0.36
+        lower_leg_R:
+          rx: 10.5
+          rz: 1.56
+        neck:
+          rx: 3.72
+          ry: -1.02
+          rz: 1.56
+        shoulder_L:
+          rx: -2.1
+          ry: 16.98
+          rz: -0.48
+        shoulder_R:
+          rx: -3.54
+          ry: -2.7
+          rz: -9.6
+        spine:
+          rx: 1.98
+          ry: -1.44
+          rz: 1.2
+        spine1:
+          rx: 3.66
+          ry: -1.14
+          rz: 1.2
+        spine2:
+          rx: 0.3
+          rz: 0.42
+        upper_arm_L:
+          rx: 19.38
+          ry: 6.96
+          rz: -25.98
+        upper_arm_R:
+          rx: -28.8
+          ry: 28.74
+          rz: -20.16
+        upper_leg_L:
+          rx: 3.72
+          ry: -9.3
+          rz: 9.66
+        upper_leg_R:
+          rx: -23.34
+          ry: -2.58
+          rz: 14.82
+        foot_L:
+          rx: -0.42
+          ry: 3.42
+          rz: 1.32
+        foot_R:
+          rx: 2.04
+          rz: -2.22
+    - t: 0.643
+      bones:
+        hand_L:
+          rx: -1.26
+          ry: 9.18
+          rz: 8.46
+        hand_R:
+          rx: -23.88
+          ry: -17.94
+          rz: -10.62
+        head:
+          rx: 2.04
+          ry: 4.38
+          rz: 2.58
+        hips:
+          rx: 2.64
+          ry: -2.04
+          rz: 5.4
+          tx: -0.17
+          ty: 0.66
+          tz: -4.64
+        lower_arm_L:
+          rx: 6.6
+          ry: -9.36
+          rz: 29.04
+        lower_arm_R:
+          rx: 11.28
+          ry: 11.94
+          rz: -42.78
+        lower_leg_L:
+          rx: -2.94
+          rz: 0.42
+        lower_leg_R:
+          rx: 10.14
+          rz: 1.56
+        neck:
+          rx: 3.36
+          ry: -0.96
+          rz: 1.32
+        shoulder_L:
+          rx: -1.8
+          ry: 16.32
+          rz: -0.78
+        shoulder_R:
+          rx: -3.3
+          ry: -2.28
+          rz: -9.36
+        spine:
+          rx: 1.8
+          ry: -1.38
+          rz: 0.96
+        spine1:
+          rx: 3.36
+          ry: -1.08
+          rz: 0.96
+        spine2:
+          rz: 0.36
+        upper_arm_L:
+          rx: 18.96
+          ry: 7.14
+          rz: -24.9
+        upper_arm_R:
+          rx: -28.08
+          ry: 23.52
+          rz: -18.72
+        upper_leg_L:
+          rx: 4.98
+          ry: -8.82
+          rz: 9.48
+        upper_leg_R:
+          rx: -22.08
+          ry: -1.98
+          rz: 14.82
+        foot_L:
+          rx: -0.48
+          ry: 3.36
+          rz: 1.38
+        foot_R:
+          rx: 1.92
+          rz: -2.28
+    - t: 0.6635
+      bones:
+        hand_L:
+          rx: -0.9
+          ry: 9.12
+          rz: 8.88
+        hand_R:
+          rx: -18.54
+          ry: -20.1
+          rz: -10.14
+        head:
+          rx: 2.34
+          ry: 4.26
+          rz: 2.64
+        hips:
+          rx: 2.04
+          ry: -2.04
+          rz: 5.04
+          tx: -0.31
+          ty: 0.74
+          tz: -4.13
+        lower_arm_L:
+          rx: 5.7
+          ry: -8.88
+          rz: 26.46
+        lower_arm_R:
+          rx: 9.6
+          ry: 11.46
+          rz: -38.52
+        lower_leg_L:
+          rx: -3.42
+          rz: 0.54
+        lower_leg_R:
+          rx: 9.84
+          rz: 1.5
+        neck:
+          rx: 3.0
+          ry: -0.96
+          rz: 1.08
+        shoulder_L:
+          rx: -1.56
+          ry: 15.42
+          rz: -1.02
+        shoulder_R:
+          rx: -3.06
+          ry: -2.04
+          rz: -9.0
+        spine:
+          rx: 1.5
+          ry: -1.32
+          rz: 0.66
+        spine1:
+          rx: 3.0
+          ry: -0.96
+          rz: 0.66
+        spine2:
+          rz: 0.3
+        upper_arm_L:
+          rx: 18.0
+          ry: 6.84
+          rz: -23.46
+        upper_arm_R:
+          rx: -25.92
+          ry: 18.54
+          rz: -17.28
+        upper_leg_L:
+          rx: 6.18
+          ry: -8.4
+          rz: 9.18
+        upper_leg_R:
+          rx: -20.76
+          ry: -1.32
+          rz: 14.76
+        foot_L:
+          rx: -0.54
+          ry: 3.24
+          rz: 1.44
+        foot_R:
+          rx: 1.8
+          rz: -2.34
+    - t: 0.6839
+      bones:
+        hand_L:
+          rx: -0.6
+          ry: 9.12
+          rz: 9.12
+        hand_R:
+          rx: -13.98
+          ry: -20.4
+          rz: -8.04
+        head:
+          rx: 2.46
+          ry: 4.26
+          rz: 3.0
+        hips:
+          rx: 1.2
+          ry: -1.98
+          rz: 4.62
+          tx: -0.31
+          ty: 0.74
+          tz: -4.13
+        lower_arm_L:
+          rx: 5.1
+          ry: -8.28
+          rz: 24.42
+        lower_arm_R:
+          rx: 7.08
+          ry: 10.5
+          rz: -32.04
+        lower_leg_L:
+          rx: -3.54
+          rz: 0.6
+        lower_leg_R:
+          rx: 9.66
+          rz: 1.44
+        neck:
+          rx: 2.58
+          ry: -0.96
+          rz: 0.66
+        shoulder_L:
+          rx: -1.44
+          ry: 14.22
+          rz: -1.02
+        shoulder_R:
+          rx: -2.82
+          ry: -1.98
+          rz: -8.34
+        spine:
+          rx: 1.32
+          ry: -1.26
+          rz: 0.36
+        spine1:
+          rx: 2.64
+          ry: -0.9
+          rz: 0.3
+        spine2:
+          rz: 0.36
+        upper_arm_L:
+          rx: 16.32
+          ry: 5.88
+          rz: -21.78
+        upper_arm_R:
+          rx: -23.58
+          ry: 14.52
+          rz: -16.02
+        upper_leg_L:
+          rx: 7.44
+          ry: -7.92
+          rz: 8.76
+        upper_leg_R:
+          rx: -19.2
+          ry: -0.6
+          rz: 14.76
+        foot_L:
+          rx: -0.66
+          ry: 3.24
+          rz: 1.62
+        foot_R:
+          rx: 1.56
+          ry: 0.36
+          rz: -2.34
+    - t: 0.7043
+      bones:
+        hand_L:
+          rx: -0.3
+          ry: 9.06
+          rz: 9.36
+        hand_R:
+          rx: -10.2
+          ry: -20.1
+          rz: -5.52
+        head:
+          rx: 2.64
+          ry: 4.08
+          rz: 2.94
+        hips:
+          rx: 0.36
+          ry: -1.8
+          rz: 4.14
+          tx: -0.44
+          ty: 0.78
+          tz: -3.57
+        lower_arm_L:
+          rx: 4.44
+          ry: -7.8
+          rz: 22.44
+        lower_arm_R:
+          rx: 4.86
+          ry: 9.06
+          rz: -25.56
+        lower_leg_L:
+          rx: -3.48
+          rz: 0.54
+        lower_leg_R:
+          rx: 9.72
+          rz: 1.44
+        neck:
+          rx: 2.28
+          ry: -0.96
+          rz: 0.36
+        shoulder_L:
+          rx: -1.14
+          ry: 13.2
+          rz: -1.32
+        shoulder_R:
+          rx: -2.64
+          ry: -1.86
+          rz: -7.98
+        spine:
+          rx: 1.08
+          ry: -1.2
+        spine1:
+          rx: 2.34
+          ry: -0.84
+        spine2:
+          rz: 0.3
+        upper_arm_L:
+          rx: 14.88
+          ry: 4.98
+          rz: -20.1
+        upper_arm_R:
+          rx: -20.7
+          ry: 11.88
+          rz: -14.76
+        upper_leg_L:
+          rx: 8.52
+          ry: -7.5
+          rz: 8.28
+        upper_leg_R:
+          rx: -17.7
+          rz: 14.76
+        foot_L:
+          rx: -0.84
+          ry: 3.18
+          rz: 1.8
+        foot_R:
+          rx: 1.32
+          ry: 0.54
+          rz: -2.34
+    - t: 0.7248
+      bones:
+        hand_L:
+          ry: 8.94
+          rz: 9.6
+        hand_R:
+          rx: -7.26
+          ry: -18.9
+          rz: -3.06
+        head:
+          rx: 2.88
+          ry: 3.66
+          rz: 2.64
+        hips:
+          rx: -0.42
+          ry: -1.56
+          rz: 3.66
+          tx: -0.57
+          ty: 0.77
+          tz: -3.03
+        lower_arm_L:
+          rx: 3.96
+          ry: -7.32
+          rz: 20.76
+        lower_arm_R:
+          rx: 3.24
+          ry: 7.56
+          rz: -20.04
+        lower_leg_L:
+          rx: -3.24
+          rz: 0.54
+        lower_leg_R:
+          rx: 9.72
+          rz: 1.44
+        neck:
+          rx: 2.04
+          ry: -0.9
+        shoulder_L:
+          rx: -0.9
+          ry: 12.0
+          rz: -1.38
+        shoulder_R:
+          rx: -2.46
+          ry: -1.5
+          rz: -7.92
+        spine:
+          rx: 0.9
+          ry: -1.08
+          rz: -0.3
+        spine1:
+          rx: 2.1
+          ry: -0.72
+          rz: -0.3
+        spine2:
+          rz: 0.3
+        upper_arm_L:
+          rx: 13.26
+          ry: 3.96
+          rz: -18.54
+        upper_arm_R:
+          rx: -17.46
+          ry: 10.44
+          rz: -13.08
+        upper_leg_L:
+          rx: 9.48
+          ry: -7.14
+          rz: 7.92
+        upper_leg_R:
+          rx: -16.32
+          ry: 0.72
+          rz: 14.76
+        foot_L:
+          rx: -1.08
+          ry: 3.18
+          rz: 1.92
+        foot_R:
+          rx: 1.08
+          ry: 0.66
+          rz: -2.4
+    - t: 0.7452
+      bones:
+        hand_L:
+          ry: 8.76
+          rz: 9.72
+        hand_R:
+          rx: -5.1
+          ry: -16.86
+          rz: -1.2
+        head:
+          rx: 3.06
+          ry: 3.06
+          rz: 2.22
+        hips:
+          rx: -1.2
+          ry: -1.26
+          rz: 3.3
+          tx: -0.65
+          ty: 0.73
+          tz: -2.55
+        lower_arm_L:
+          rx: 3.54
+          ry: -7.02
+          rz: 19.56
+        lower_arm_R:
+          rx: 2.16
+          ry: 6.24
+          rz: -15.96
+        lower_leg_L:
+          rx: -2.94
+          rz: 0.48
+        lower_leg_R:
+          rx: 9.9
+          rz: 1.5
+        neck:
+          rx: 1.92
+          ry: -0.72
+          rz: -0.3
+        shoulder_L:
+          rx: -0.84
+          ry: 10.44
+          rz: -1.2
+        shoulder_R:
+          rx: -2.28
+          ry: -0.9
+          rz: -7.98
+        spine:
+          rx: 0.78
+          ry: -0.9
+          rz: -0.66
+        spine1:
+          rx: 1.98
+          ry: -0.48
+          rz: -0.6
+        spine2:
+          rz: 0.3
+        upper_arm_L:
+          rx: 11.46
+          ry: 2.88
+          rz: -17.22
+        upper_arm_R:
+          rx: -13.86
+          ry: 10.2
+          rz: -10.98
+        upper_leg_L:
+          rx: 10.44
+          ry: -6.78
+          rz: 7.62
+        upper_leg_R:
+          rx: -15.12
+          ry: 1.26
+          rz: 14.94
+        foot_L:
+          rx: -1.26
+          ry: 3.18
+          rz: 2.04
+        foot_R:
+          rx: 0.84
+          ry: 0.84
+          rz: -2.4
+    - t: 0.7657
+      bones:
+        hand_L:
+          rx: -0.6
+          ry: 8.58
+          rz: 9.72
+        hand_R:
+          rx: -3.84
+          ry: -14.1
+        head:
+          rx: 3.12
+          ry: 2.22
+          rz: 1.56
+        hips:
+          rx: -2.04
+          ry: -0.9
+          rz: 3.12
+          tx: -0.69
+          ty: 0.67
+          tz: -2.13
+        lower_arm_L:
+          rx: 3.24
+          ry: -6.72
+          rz: 18.6
+        lower_arm_R:
+          rx: 1.62
+          ry: 5.34
+          rz: -13.32
+        lower_leg_L:
+          rx: -2.7
+          rz: 0.42
+        lower_leg_R:
+          rx: 10.38
+          rz: 1.56
+        neck:
+          rx: 1.86
+          ry: -0.42
+          rz: -0.72
+        shoulder_L:
+          rx: -0.78
+          ry: 8.58
+          rz: -0.96
+        shoulder_R:
+          rx: -2.1
+          ry: -0.42
+          rz: -7.86
+        spine:
+          rx: 0.72
+          ry: -0.72
+          rz: -1.02
+        spine1:
+          rx: 1.86
+          rz: -0.9
+        spine2:
+          rz: 0.3
+        upper_arm_L:
+          rx: 9.36
+          ry: 1.92
+          rz: -15.9
+        upper_arm_R:
+          rx: -9.9
+          ry: 10.92
+          rz: -8.82
+        upper_leg_L:
+          rx: 11.52
+          ry: -6.42
+          rz: 7.56
+        upper_leg_R:
+          rx: -14.22
+          ry: 1.56
+          rz: 15.36
+        foot_L:
+          rx: -1.44
+          ry: 3.24
+          rz: 2.22
+        foot_R:
+          rx: 0.6
+          ry: 1.02
+          rz: -2.4
+    - t: 0.7861
+      bones:
+        hand_L:
+          rx: -1.38
+          ry: 8.22
+          rz: 9.48
+        hand_R:
+          rx: -3.72
+          ry: -10.68
+          rz: 0.3
+        head:
+          rx: 3.0
+          ry: 1.56
+          rz: 1.08
+        hips:
+          rx: -2.88
+          ry: -0.36
+          rz: 3.06
+          tx: -0.68
+          ty: 0.56
+          tz: -1.76
+        lower_arm_L:
+          rx: 3.0
+          ry: -6.48
+          rz: 17.64
+        lower_arm_R:
+          rx: 1.32
+          ry: 4.74
+          rz: -11.52
+        lower_leg_L:
+          rx: -2.58
+          rz: 0.42
+        lower_leg_R:
+          rx: 11.22
+          rz: 1.68
+        neck:
+          rx: 1.92
+          rz: -1.2
+        shoulder_L:
+          rx: -0.72
+          ry: 6.6
+          rz: -0.48
+        shoulder_R:
+          rx: -1.92
+          rz: -7.26
+        spine:
+          rx: 0.78
+          ry: -0.54
+          rz: -1.38
+        spine1:
+          rx: 1.92
+          rz: -1.32
+        spine2:
+          rz: 0.3
+        upper_arm_L:
+          rx: 7.14
+          ry: 0.84
+          rz: -14.46
+        upper_arm_R:
+          rx: -6.6
+          ry: 12.18
+          rz: -6.96
+        upper_leg_L:
+          rx: 12.66
+          ry: -6.12
+          rz: 7.86
+        upper_leg_R:
+          rx: -13.74
+          ry: 1.68
+          rz: 16.14
+        foot_L:
+          rx: -1.56
+          ry: 3.36
+          rz: 2.34
+        foot_R:
+          rx: 0.3
+          ry: 1.26
+          rz: -2.4
+    - t: 0.8065
+      bones:
+        hand_L:
+          rx: -2.4
+          ry: 7.92
+          rz: 8.94
+        hand_R:
+          rx: -4.2
+          ry: -7.38
+        head:
+          rx: 3.06
+          ry: 1.26
+          rz: 0.9
+        hips:
+          rx: -3.6
+          ry: 0.3
+          rz: 3.12
+          tx: -0.62
+          ty: 0.44
+          tz: -1.48
+        lower_arm_L:
+          rx: 2.64
+          ry: -6.12
+          rz: 16.5
+        lower_arm_R:
+          rx: 1.02
+          ry: 4.08
+          rz: -9.72
+        lower_leg_L:
+          rx: -2.4
+          rz: 0.42
+        lower_leg_R:
+          rx: 12.12
+          ry: 0.3
+          rz: 1.8
+        neck:
+          rx: 1.98
+          rz: -1.74
+        shoulder_L:
+          rx: -0.66
+          ry: 4.56
+        shoulder_R:
+          rx: -1.74
+          rz: -7.14
+        spine:
+          rx: 0.78
+          ry: -0.42
+          rz: -1.86
+        spine1:
+          rx: 1.92
+          ry: 0.3
+          rz: -1.86
+        upper_arm_L:
+          rx: 4.74
+          ry: -0.66
+          rz: -13.08
+        upper_arm_R:
+          rx: -4.32
+          ry: 14.22
+          rz: -5.52
+        upper_leg_L:
+          rx: 13.68
+          ry: -5.82
+          rz: 8.22
+        upper_leg_R:
+          rx: -13.32
+          ry: 1.68
+          rz: 16.98
+        foot_L:
+          rx: -1.74
+          ry: 3.48
+          rz: 2.52
+        foot_R:
+          ry: 1.44
+          rz: -2.4
+    - t: 0.827
+      bones:
+        hand_L:
+          rx: -3.3
+          ry: 7.86
+          rz: 8.22
+        hand_R:
+          rx: -4.56
+          ry: -4.8
+        head:
+          rx: 3.3
+          ry: 1.02
+          rz: 0.78
+        hips:
+          rx: -4.26
+          ry: 0.9
+          rz: 3.24
+          tx: -0.55
+          ty: 0.31
+          tz: -1.22
+        lower_arm_L:
+          rx: 2.34
+          ry: -5.76
+          rz: 15.36
+        lower_arm_R:
+          rx: 0.72
+          ry: 3.42
+          rz: -7.92
+        lower_leg_L:
+          rx: -2.28
+          rz: 0.36
+        lower_leg_R:
+          rx: 12.78
+          ry: 0.3
+          rz: 1.92
+        neck:
+          rx: 1.98
+          rz: -2.28
+        shoulder_L:
+          rx: -0.66
+          ry: 2.94
+          rz: 0.6
+        shoulder_R:
+          rx: -1.68
+          ry: 0.36
+          rz: -7.14
+        spine:
+          rx: 0.78
+          ry: -0.3
+          rz: -2.22
+        spine1:
+          rx: 1.98
+          ry: 0.48
+          rz: -2.34
+        upper_arm_L:
+          rx: 2.64
+          ry: -2.46
+          rz: -11.7
+        upper_arm_R:
+          rx: -2.88
+          ry: 16.32
+          rz: -4.5
+        upper_leg_L:
+          rx: 14.64
+          ry: -5.52
+          rz: 8.58
+        upper_leg_R:
+          rx: -13.02
+          ry: 1.68
+          rz: 17.7
+        foot_L:
+          rx: -1.8
+          ry: 3.54
+          rz: 2.64
+        foot_R:
+          ry: 1.68
+          rz: -2.4
+    - t: 0.8474
+      bones:
+        hand_L:
+          rx: -3.9
+          ry: 8.1
+          rz: 7.38
+        hand_R:
+          rx: -4.62
+          ry: -3.36
+          rz: -1.14
+        head:
+          rx: 3.48
+          ry: 0.72
+          rz: 0.48
+        hips:
+          rx: -4.74
+          ry: 1.38
+          rz: 3.3
+          tx: -0.47
+          ty: 0.2
+          tz: -0.99
+        lower_arm_L:
+          rx: 1.98
+          ry: -5.4
+          rz: 14.04
+        lower_arm_R:
+          rx: 0.48
+          ry: 2.64
+          rz: -5.94
+        lower_leg_L:
+          rx: -2.4
+          rz: 0.42
+        lower_leg_R:
+          rx: 13.2
+          ry: 0.36
+          rz: 1.98
+        neck:
+          rx: 2.04
+          rz: -2.7
+        shoulder_L:
+          rx: -0.66
+          ry: 1.8
+          rz: 1.14
+        shoulder_R:
+          rx: -1.74
+          ry: 0.3
+          rz: -7.2
+        spine:
+          rx: 0.78
+          rz: -2.52
+        spine1:
+          rx: 1.98
+          ry: 0.72
+          rz: -2.76
+        upper_arm_L:
+          rx: 1.02
+          ry: -4.56
+          rz: -10.44
+        upper_arm_R:
+          rx: -1.92
+          ry: 18.18
+          rz: -3.78
+        upper_leg_L:
+          rx: 15.48
+          ry: -5.22
+          rz: 8.88
+        upper_leg_R:
+          rx: -12.72
+          ry: 1.74
+          rz: 18.36
+        foot_L:
+          rx: -1.86
+          ry: 3.66
+          rz: 2.76
+        foot_R:
+          rx: -0.42
+          ry: 1.86
+          rz: -2.4
+    - t: 0.8678
+      bones:
+        hand_L:
+          rx: -3.96
+          ry: 8.52
+          rz: 6.78
+        hand_R:
+          rx: -4.32
+          ry: -3.12
+          rz: -2.64
+        head:
+          rx: 3.66
+          ry: 0.3
+        hips:
+          rx: -5.04
+          ry: 1.74
+          rz: 3.36
+          tx: -0.38
+          ty: 0.13
+          tz: -0.76
+        lower_arm_L:
+          rx: 1.56
+          ry: -4.74
+          rz: 12.18
+        lower_arm_R:
+          ry: 1.8
+          rz: -3.9
+        lower_leg_L:
+          rx: -2.64
+          rz: 0.42
+        lower_leg_R:
+          rx: 13.38
+          ry: 0.36
+          rz: 1.98
+        neck:
+          rx: 2.04
+          ry: 0.54
+          rz: -3.06
+        shoulder_L:
+          rx: -0.66
+          ry: 1.08
+          rz: 1.44
+        shoulder_R:
+          rx: -1.86
+          rz: -7.32
+        spine:
+          rx: 0.78
+          rz: -2.76
+        spine1:
+          rx: 1.98
+          ry: 1.02
+          rz: -3.06
+        upper_arm_L:
+          rx: -0.36
+          ry: -6.78
+          rz: -8.94
+        upper_arm_R:
+          rx: -1.2
+          ry: 20.16
+          rz: -3.12
+        upper_leg_L:
+          rx: 16.2
+          ry: -4.98
+          rz: 9.18
+        upper_leg_R:
+          rx: -12.42
+          ry: 1.8
+          rz: 18.78
+        foot_L:
+          rx: -1.92
+          ry: 3.72
+          rz: 2.82
+        foot_R:
+          rx: -0.54
+          ry: 1.98
+          rz: -2.4
+    - t: 0.8883
+      bones:
+        hand_L:
+          rx: -3.78
+          ry: 8.7
+          rz: 6.6
+        hand_R:
+          rx: -3.96
+          ry: -3.9
+          rz: -4.5
+        head:
+          rx: 3.96
+          rz: -0.42
+        hips:
+          rx: -5.1
+          ry: 1.98
+          rz: 3.36
+          tx: -0.29
+          ty: 0.08
+          tz: -0.54
+        lower_arm_L:
+          rx: 1.02
+          ry: -3.66
+          rz: 9.24
+        lower_arm_R:
+          ry: 0.84
+          rz: -1.74
+        lower_leg_L:
+          rx: -2.76
+          rz: 0.48
+        lower_leg_R:
+          rx: 13.38
+          ry: 0.36
+          rz: 1.98
+        neck:
+          rx: 1.98
+          ry: 0.78
+          rz: -3.3
+        shoulder_L:
+          rx: -0.66
+          ry: 0.6
+          rz: 1.62
+        shoulder_R:
+          rx: -1.92
+          rz: -7.44
+        spine:
+          rx: 0.78
+          rz: -2.94
+        spine1:
+          rx: 1.92
+          ry: 1.26
+          rz: -3.24
+        upper_arm_L:
+          rx: -1.38
+          ry: -9.0
+          rz: -7.14
+        upper_arm_R:
+          rx: -1.08
+          ry: 22.14
+          rz: -2.76
+        upper_leg_L:
+          rx: 16.56
+          ry: -4.8
+          rz: 9.36
+        upper_leg_R:
+          rx: -12.3
+          ry: 1.86
+          rz: 19.08
+        foot_L:
+          rx: -1.98
+          ry: 3.78
+          rz: 2.88
+        foot_R:
+          rx: -0.6
+          ry: 2.1
+          rz: -2.46
+    - t: 0.9087
+      bones:
+        hand_L:
+          rx: -3.66
+          ry: 8.76
+          rz: 6.54
+        hand_R:
+          rx: -3.66
+          ry: -5.34
+          rz: -6.12
+        head:
+          rx: 4.26
+          ry: -0.48
+          rz: -0.9
+        hips:
+          rx: -5.16
+          ry: 2.1
+          rz: 3.36
+          tx: -0.19
+          ty: 0.05
+          tz: -0.35
+        lower_arm_L:
+          rx: 0.54
+          ry: -2.52
+          rz: 6.18
+        lower_leg_L:
+          rx: -2.88
+          rz: 0.48
+        lower_leg_R:
+          rx: 13.32
+          ry: 0.36
+          rz: 1.98
+        neck:
+          rx: 1.86
+          ry: 0.9
+          rz: -3.36
+        shoulder_L:
+          rx: -0.72
+          ry: 0.3
+          rz: 1.98
+        shoulder_R:
+          rx: -1.92
+          rz: -7.44
+        spine:
+          rx: 0.72
+          ry: 0.3
+          rz: -3.0
+        spine1:
+          rx: 1.8
+          ry: 1.38
+          rz: -3.3
+        upper_arm_L:
+          rx: -1.92
+          ry: -11.04
+          rz: -5.46
+        upper_arm_R:
+          rx: -1.32
+          ry: 23.82
+          rz: -2.64
+        upper_leg_L:
+          rx: 16.8
+          ry: -4.68
+          rz: 9.48
+        upper_leg_R:
+          rx: -12.18
+          ry: 1.92
+          rz: 19.32
+        foot_L:
+          rx: -1.98
+          ry: 3.78
+          rz: 2.88
+        foot_R:
+          rx: -0.6
+          ry: 2.16
+          rz: -2.46
+    - t: 0.9291
+      bones:
+        hand_L:
+          rx: -3.72
+          ry: 8.94
+          rz: 6.3
+        hand_R:
+          rx: -3.42
+          ry: -7.38
+          rz: -7.08
+        head:
+          rx: 4.5
+          ry: -0.72
+          rz: -1.26
+        hips:
+          rx: -5.1
+          ry: 2.22
+          rz: 3.3
+          tx: -0.08
+          ty: 0.03
+          tz: -0.19
+        lower_arm_L:
+          rx: 0.3
+          ry: -1.56
+          rz: 3.84
+        lower_arm_R:
+          ry: -0.66
+          rz: 1.62
+        lower_leg_L:
+          rx: -2.94
+          rz: 0.48
+        lower_leg_R:
+          rx: 13.26
+          ry: 0.36
+          rz: 1.98
+        neck:
+          rx: 1.68
+          ry: 0.9
+          rz: -3.42
+        shoulder_L:
+          rx: -0.84
+          rz: 2.46
+        shoulder_R:
+          rx: -1.98
+          rz: -7.38
+        spine:
+          rx: 0.66
+          ry: 0.36
+          rz: -3.06
+        spine1:
+          rx: 1.68
+          ry: 1.44
+          rz: -3.3
+        upper_arm_L:
+          rx: -2.1
+          ry: -12.66
+          rz: -4.26
+        upper_arm_R:
+          rx: -1.62
+          ry: 24.96
+          rz: -2.58
+        upper_leg_L:
+          rx: 16.92
+          ry: -4.62
+          rz: 9.6
+        upper_leg_R:
+          rx: -12.18
+          ry: 1.98
+          rz: 19.44
+        foot_L:
+          rx: -2.04
+          ry: 3.84
+          rz: 2.88
+        foot_R:
+          rx: -0.6
+          ry: 2.22
+          rz: -2.52
+    - t: 0.9496
+      bones:
+        hand_L:
+          rx: -3.9
+          ry: 9.18
+          rz: 5.82
+        hand_R:
+          rx: -3.06
+          ry: -9.6
+          rz: -7.68
+        head:
+          rx: 4.56
+          ry: -0.78
+          rz: -1.44
+        hips:
+          rx: -5.04
+          ry: 2.28
+          rz: 3.3
+          tx: -0.01
+          ty: 0.02
+          tz: -0.08
+        lower_arm_L:
+          ry: -1.08
+          rz: 2.58
+        lower_arm_R:
+          ry: -0.96
+          rz: 2.1
+        lower_leg_L:
+          rx: -3.0
+          rz: 0.48
+        lower_leg_R:
+          rx: 13.14
+          ry: 0.36
+          rz: 1.98
+        neck:
+          rx: 1.56
+          ry: 0.9
+          rz: -3.42
+        shoulder_L:
+          rx: -1.08
+          rz: 3.06
+        shoulder_R:
+          rx: -2.04
+          ry: -0.54
+          rz: -7.32
+        spine:
+          rx: 0.54
+          ry: 0.36
+          rz: -3.06
+        spine1:
+          rx: 1.5
+          ry: 1.38
+          rz: -3.3
+        upper_arm_L:
+          rx: -1.98
+          ry: -13.8
+          rz: -3.72
+        upper_arm_R:
+          rx: -1.8
+          ry: 25.5
+          rz: -2.46
+        upper_leg_L:
+          rx: 16.98
+          ry: -4.56
+          rz: 9.66
+        upper_leg_R:
+          rx: -12.18
+          ry: 2.04
+          rz: 19.5
+        foot_L:
+          rx: -2.04
+          ry: 3.84
+          rz: 2.88
+        foot_R:
+          rx: -0.54
+          ry: 2.22
+          rz: -2.52
+    - t: 0.97
+      bones:
+        hand_L:
+          rx: -3.96
+          ry: 9.24
+          rz: 5.64
+        hand_R:
+          rx: -2.64
+          ry: -11.04
+          rz: -9.06
+        head:
+          rx: 4.56
+          ry: -0.84
+          rz: -1.44
+        hips:
+          rx: -5.04
+          ry: 2.28
+          rz: 3.3
+          tx: 0.01
+          ty: 0.01
+          tz: -0.01
+        lower_arm_L:
+          ry: -1.02
+          rz: 2.52
+        lower_arm_R:
+          ry: -0.9
+          rz: 1.98
+        lower_leg_L:
+          rx: -2.94
+          rz: 0.48
+        lower_leg_R:
+          rx: 13.14
+          ry: 0.36
+          rz: 1.98
+        neck:
+          rx: 1.5
+          ry: 0.9
+          rz: -3.42
+        shoulder_L:
+          rx: -1.32
+          rz: 3.72
+        shoulder_R:
+          rx: -2.16
+          ry: -0.78
+          rz: -7.32
+        spine:
+          rx: 0.54
+          ry: 0.36
+          rz: -3.06
+        spine1:
+          rx: 1.5
+          ry: 1.38
+          rz: -3.3
+        upper_arm_L:
+          rx: -1.8
+          ry: -14.52
+          rz: -3.78
+        upper_arm_R:
+          rx: -1.8
+          ry: 25.44
+          rz: -2.28
+        upper_leg_L:
+          rx: 16.98
+          ry: -4.56
+          rz: 9.66
+        upper_leg_R:
+          rx: -12.18
+          ry: 2.1
+          rz: 19.56
+        foot_L:
+          rx: -2.04
+          ry: 3.84
+          rz: 2.88
+        foot_R:
+          rx: -0.6
+          ry: 2.22
+          rz: -2.52
+    - t: 1.0
+      bones: {}
+homoestase:
+  letzte_regulation: '2026-03-01T17:55:54'
+  zyklus_durchschnitt:
+    SEEKING: 0.774
+    ACTION: 0.672
+    LEARNING: 0.594
+    CARE: 0.5
+    PLAY: 0.423
+    FEAR: 0.309
+    RAGE: 0.071
+    GRIEF: 0.057
+    LUST: 0.222
+    PANIC: 0.486
+  _messungen: 2

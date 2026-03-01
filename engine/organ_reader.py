@@ -87,6 +87,167 @@ _REVERSE_LAYER_ALIASES = {v: k for k, v in LAYER_ALIASES.items()}
 
 
 # ================================================================
+# v3 → v2 State-Normalisierung
+# ================================================================
+# Wenn innenwelt.yaml v3-Keys hat (ueberleben, entfaltung, empfindungen, lebenskraft),
+# erzeugt diese Funktion v2-Alias-Keys (survive, thrive, express, drives).
+# So funktioniert der gesamte Engine-Code ohne Aenderung.
+
+# Drive-Mapping: v3 (deutsch) → v2 (Panksepp-English)
+_DRIVE_V3_TO_V2 = {
+    'neugier': 'SEEKING', 'tatendrang': 'ACTION', 'lerndrang': 'LEARNING',
+    'fuersorge': 'CARE', 'spieltrieb': 'PLAY', 'furcht': 'FEAR',
+    'zorn': 'RAGE', 'trauer': 'GRIEF', 'sehnsucht': 'LUST', 'panik': 'PANIC',
+}
+_DRIVE_V2_TO_V3 = {v: k for k, v in _DRIVE_V3_TO_V2.items()}
+
+# Survive-Mapping: v3 → v2
+_SURVIVE_MAP = {
+    'lebenskraft': 'energy', 'geborgenheit': 'safety', 'innerer_zusammenhalt': 'coherence',
+}
+
+# Thrive-Mapping: v3 → v2
+_THRIVE_MAP = {
+    'zugehoerigkeit': 'belonging', 'vertrauen': 'trust_owner',
+    'grundstimmung': 'mood', 'sinn': 'purpose',
+}
+
+# Emotion-Feld-Mapping: v3 → v2
+_EMOTION_FIELD_MAP = {
+    'art': 'type', 'staerke': 'intensity', 'ursache': 'cause',
+    'beginn': 'onset', 'verblassklasse': 'decay_class', 'anker': 'verbal_anchor',
+}
+
+# Decay-Class Mapping: v3 → v2
+_DECAY_V3_TO_V2 = {
+    'blitz': 'flash', 'schnell': 'fast', 'langsam': 'slow', 'glazial': 'glacial',
+}
+
+
+def _normalize_v3_state(state: dict) -> dict:
+    """Erzeugt v2-Alias-Keys fuer v3-State.
+
+    Wenn state v3-Keys hat (ueberleben, entfaltung, empfindungen, lebenskraft),
+    werden die entsprechenden v2-Keys (survive, thrive, express, drives) hinzugefuegt.
+    Originalwerte bleiben erhalten. Beide Key-Sets zeigen auf dieselben Daten.
+
+    Wird automatisch nach dem Laden von innenwelt.yaml aufgerufen.
+    """
+    # Erkennung: Ist das ein v3-State?
+    is_v3 = ('ueberleben' in state or 'empfindungen' in state
+             or 'lebenskraft' in state or 'entfaltung' in state)
+    if not is_v3:
+        return state  # v2-State, nichts zu tun
+
+    # --- dna_profil → dna_profile ---
+    if 'dna_profil' in state and 'dna_profile' not in state:
+        state['dna_profile'] = state['dna_profil']
+
+    # --- lebenskraft → drives ---
+    if 'lebenskraft' in state and 'drives' not in state:
+        lk = state['lebenskraft']
+        if isinstance(lk, dict):
+            drives = {}
+            for v3_key, v2_key in _DRIVE_V3_TO_V2.items():
+                if v3_key in lk:
+                    drives[v2_key] = lk[v3_key]
+            # Fehlende Drives mit Default auffuellen
+            for v2_key in ['SEEKING', 'ACTION', 'LEARNING', 'CARE', 'PLAY',
+                           'FEAR', 'RAGE', 'GRIEF', 'LUST', 'PANIC']:
+                if v2_key not in drives:
+                    drives[v2_key] = 0.5
+            state['drives'] = drives
+
+    # --- ueberleben → survive ---
+    if 'ueberleben' in state and 'survive' not in state:
+        ub = state['ueberleben']
+        if isinstance(ub, dict):
+            survive = {}
+            for v3_key, v2_key in _SURVIVE_MAP.items():
+                if v3_key in ub:
+                    sub = ub[v3_key]
+                    if isinstance(sub, dict):
+                        survive[v2_key] = {
+                            'value': sub.get('wert', 0.5),
+                            'verbal': sub.get('verbal', ''),
+                        }
+                    else:
+                        survive[v2_key] = {'value': float(sub) if sub else 0.5, 'verbal': ''}
+            # Fehlende Felder auffuellen
+            for v2_key in ['energy', 'safety', 'coherence']:
+                if v2_key not in survive:
+                    survive[v2_key] = {'value': 0.5, 'verbal': ''}
+            state['survive'] = survive
+
+    # --- entfaltung → thrive ---
+    if 'entfaltung' in state and 'thrive' not in state:
+        ent = state['entfaltung']
+        if isinstance(ent, dict):
+            thrive = {}
+            for v3_key, v2_key in _THRIVE_MAP.items():
+                if v3_key in ent:
+                    sub = ent[v3_key]
+                    if isinstance(sub, dict):
+                        thrive[v2_key] = {
+                            'value': sub.get('wert', 0.5),
+                            'verbal': sub.get('verbal', ''),
+                        }
+                    else:
+                        thrive[v2_key] = {'value': float(sub) if sub else 0.5, 'verbal': ''}
+            for v2_key in ['belonging', 'trust_owner', 'mood', 'purpose']:
+                if v2_key not in thrive:
+                    thrive[v2_key] = {'value': 0.5, 'verbal': ''}
+            state['thrive'] = thrive
+
+    # --- empfindungen → express ---
+    if 'empfindungen' in state and 'express' not in state:
+        emp = state['empfindungen']
+        if isinstance(emp, dict):
+            express = {}
+            # aktive_gefuehle → active_emotions
+            gefuehle = emp.get('aktive_gefuehle', [])
+            if isinstance(gefuehle, list):
+                emotions = []
+                for g in gefuehle:
+                    if isinstance(g, dict):
+                        emo = {}
+                        for v3_f, v2_f in _EMOTION_FIELD_MAP.items():
+                            if v3_f in g:
+                                val = g[v3_f]
+                                # Decay-Class uebersetzen
+                                if v3_f == 'verblassklasse' and val in _DECAY_V3_TO_V2:
+                                    val = _DECAY_V3_TO_V2[val]
+                                emo[v2_f] = val
+                        # Felder die in v3 gleich heissen
+                        for keep in ['type', 'intensity', 'cause', 'onset', 'decay_class']:
+                            if keep in g and keep not in emo:
+                                emo[keep] = g[keep]
+                        emotions.append(emo)
+                express['active_emotions'] = emotions
+            else:
+                express['active_emotions'] = []
+
+            # schwerkraft → emotional_gravity
+            schwerkraft = emp.get('schwerkraft', {})
+            if isinstance(schwerkraft, dict) and schwerkraft:
+                state.setdefault('emotional_gravity', {
+                    'baseline_mood': schwerkraft.get('grundstimmung', 0.5),
+                    'bias': schwerkraft.get('deutungstendenz', 'neutral'),
+                })
+            state['express'] = express
+
+    # --- selbstbild → self_assessment ---
+    if 'selbstbild' in state and 'self_assessment' not in state:
+        sb = state['selbstbild']
+        if isinstance(sb, dict):
+            state['self_assessment'] = {'verbal': sb.get('verbal', '')}
+        elif isinstance(sb, str):
+            state['self_assessment'] = {'verbal': sb}
+
+    return state
+
+
+# ================================================================
 # Hilfsfunktionen
 # ================================================================
 
@@ -211,6 +372,11 @@ def read_yaml_organ(egon_id: str, layer: str, filename: str) -> dict:
             except Exception as e2:
                 print(f'[organ_reader] Kaskaden-Rollback fehlgeschlagen: {e2}')
         return {}
+
+    # v3→v2 Normalisierung: Erzeugt v2-Alias-Keys aus v3-State
+    # MUSS vor dem Validator laufen, damit der v2-Schema-Check greift
+    if _is_state_file(layer, filename) and data:
+        data = _normalize_v3_state(data)
 
     # Patch 9: State-Validierung
     if _is_state_file(layer, filename) and data:

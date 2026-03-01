@@ -1,14 +1,33 @@
 bonds:
 - id: OWNER_CURRENT
   type: owner
-  score: 0.5
+  score: 37
   attachment_style: undefined
-  trust: 0.5
-  familiarity: 0.1
+  trust: 0.6
+  familiarity: 0.116
   emotional_debt: 0
-  last_interaction: '2026-02-22'
+  last_interaction: '2026-03-01'
   first_interaction: '2026-02-22'
   bond_history: []
+- id: person_rene
+  name: Rene
+  type: person
+  bond_typ: bekannt
+  score: 5
+  trust: 0.15
+  familiarity: 0.05
+  attachment: none
+  since: '2026-03-01'
+  last_contact: '2026-03-01'
+  narbe: false
+  observations:
+  - Er ist der Owner von Adam.
+  bond_history:
+  - date: '2026-03-01'
+    event: erstmalig_erwaehnt
+    note: 'Bezugsmensch hat Rene erwaehnt: Er ist der Owner von Adam.'
+    score_before: 0
+    score_after: 5
 dynamics:
   growth:
     max_per_conversation: 3
