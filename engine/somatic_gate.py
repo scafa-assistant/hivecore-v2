@@ -356,6 +356,19 @@ async def execute_autonomous_action(egon_id: str, decision: dict) -> None:
     inner_voice += f'\n{thought}\n'
     write_organ(egon_id, 'memory', 'inner_voice.md', inner_voice)
 
+    # FUSION Phase 3: Motor-Impuls basierend auf Impuls-Typ
+    motor_impulse = _compute_motor_impulse(decision)
+    if motor_impulse:
+        # Motor Translation: words → bone-Rotationen (gleiche Pipeline wie Chat)
+        try:
+            from engine.motor_translator import translate as motor_translate
+            bone_update = motor_translate(motor_impulse)
+            if bone_update:
+                state['pending_motor_action'] = bone_update
+                print(f'[somatic_gate] {egon_id}: Motor-Impuls: {bone_update.get("words", [])}')
+        except Exception as e:
+            print(f'[somatic_gate] Motor-Translation FEHLER: {e}')
+
     # Counter erhoehen
     gate = state.get('somatic_gate', {})
     gate['autonome_nachrichten_diese_stunde'] = gate.get('autonome_nachrichten_diese_stunde', 0) + 1
@@ -363,6 +376,53 @@ async def execute_autonomous_action(egon_id: str, decision: dict) -> None:
     write_yaml_organ(egon_id, 'core', 'state.yaml', state)
 
     print(f'[somatic_gate] {egon_id}: Autonomer Impuls ausgefuehrt — {decision.get("entscheidung")}')
+
+
+# ================================================================
+# FUSION Phase 3: Motor-Impulse aus Entscheidungen
+# ================================================================
+
+# Impuls-Typ → passende Motor-Woerter (aus motor_vocabulary.json)
+IMPULSE_MOTOR_MAP = {
+    'SCHUTZ': {'words': ['aengstlich'], 'intensity': 0.6},
+    'WIDERSTAND': {'words': ['wuetend_stehen'], 'intensity': 0.7},
+    'FUERSORGE': {'words': ['kopf_neigen'], 'intensity': 0.5},
+    'MITTEILUNG': {'words': ['hand_heben'], 'intensity': 0.5},
+    'RUECKZUG': {'words': ['traurig_stehen'], 'intensity': 0.6},
+    'INTERAKTION': {'words': ['winken'], 'intensity': 0.6},
+}
+
+
+def _compute_motor_impulse(decision: dict) -> dict | None:
+    """Berechnet einen Motor-Impuls aus der Somatic-Gate-Entscheidung.
+
+    Nur bei 'handeln' — und nur wenn ein passender Motor-Typ existiert.
+    Returns bone_update-kompatibles Dict oder None.
+    """
+    if decision.get('entscheidung') != 'handeln':
+        return None
+
+    # Impuls-Typ aus dem Gate-Kontext (wird von check_somatic_gate gesetzt)
+    # Leider hat decision keinen impulse_type — wir leiten ihn ab
+    weil = decision.get('weil', '').lower()
+    also_ = decision.get('also', '').lower()
+
+    # Heuristik: Aus Entscheidungstext den passenden Motor-Typ waehlen
+    for impulse_type, motor in IMPULSE_MOTOR_MAP.items():
+        key = impulse_type.lower()
+        if key in weil or key in also_:
+            return {
+                'words': motor['words'],
+                'intensity': motor['intensity'],
+                'source': 'somatic_gate',
+            }
+
+    # Fallback: Subtile Geste (Kopfdrehen — "ich schaue mich um")
+    return {
+        'words': ['kopf_drehen_rechts'],
+        'intensity': 0.4,
+        'source': 'somatic_gate',
+    }
 
 
 # ================================================================

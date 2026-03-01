@@ -1,0 +1,104 @@
+# EGON Projekt — Glossar (maschinenlesbar)
+# Claude Code: Nutze diese Datei für programmatische Lookups.
+# Für menschliche Leser: docs/GLOSSAR.md
+
+# === KERN-BEGRIFFE ===
+egon:
+  bedeutet: "Emergent Generative Organic Network — Persistente KI-Identität"
+  siehe: CLAUDE.md
+
+hivecore:
+  bedeutet: "Server-Backend (Python/FastAPI) das EGONs hostet"
+  siehe: docs/server/README.md
+
+egonsdash:
+  bedeutet: "React Native App mit 3D-Avatar"
+  siehe: docs/app/README.md
+
+moonshot:
+  bedeutet: "LLM-Provider (Kimi) der EGONs Antworten generiert"
+  siehe: docs/server/README.md
+
+# === MOTOR-SYSTEM ===
+motor_wort:
+  bedeutet: "Einzelnes Bewegungs-Keyword aus motor_vocabulary.json"
+  beispiel: "kopf_neigen, hand_heben, gewicht_links"
+  siehe: docs/motor/VOKABULAR.md
+
+bone_update:
+  bedeutet: "JSON-Block in API-Response mit Motor-Wörtern und Intensität"
+  beispiel: '{"words": ["kopf_neigen"], "intensity": 0.6}'
+  siehe: docs/motor/PIPELINE.md
+
+body_block:
+  bedeutet: "###BODY### markierter Abschnitt in Moonshot-Response"
+  siehe: docs/motor/PIPELINE.md
+
+drift_bug:
+  bedeutet: "Bone-Rotationen akkumulieren unkontrolliert (+=)"
+  fix: "Snapshot-basierte absolute Offsets"
+  siehe: docs/BUGS.md#BUG-002
+
+t_pose_flash:
+  bedeutet: "Avatar springt kurz in Bind-Pose (Arme seitlich)"
+  fix: "Layer-System, Mixer nie stoppen"
+  siehe: docs/BUGS.md#BUG-003
+
+layer_system:
+  bedeutet: "Zwei-Schicht Architektur: Mixer (immer) + Motor-Pose (on demand)"
+  siehe: docs/motor/LAYER_SYSTEM.md
+
+glb_fallback:
+  bedeutet: "Motor-Wort löst echten GLB-Clip aus statt Keyframe-Interpolation"
+  siehe: docs/motor/GLB_CLIPS.md
+
+# === SERVER ===
+organ:
+  bedeutet: "Funktionale Komponente eines EGON (z.B. episodes, markers, ego)"
+  siehe: docs/server/ORGANE.md
+
+episode:
+  bedeutet: "Einzelne Konversation/Interaktion mit einem EGON"
+  siehe: docs/server/ORGANE.md
+
+experience:
+  bedeutet: "Aggregiertes Muster aus mehreren Episodes (wie Erinnerung)"
+  siehe: docs/server/ORGANE.md
+
+spark:
+  bedeutet: "Autonomer Gedanke/Impuls eines EGON zwischen Interaktionen"
+  siehe: docs/server/ORGANE.md
+
+# === USER-SLANG → FACHBEGRIFF ===
+slang:
+  hubschrauber:
+    bedeutet: "Falsche Rotationsachse in motor_vocabulary"
+    siehe: docs/motor/ACHSEN.md
+
+  haengt_sich_auf:
+    bedeutet: "Drift-Bug (Bone-Werte akkumulieren)"
+    siehe: docs/BUGS.md#BUG-002
+
+  springt_in_ausgangsform:
+    bedeutet: "T-Pose Flash"
+    siehe: docs/BUGS.md#BUG-003
+
+  kruemmt_sich_zusammen:
+    bedeutet: "Motor überschreibt falsche Bones"
+    siehe: docs/motor/ACHSEN.md
+
+  will_nicht_mehr:
+    bedeutet: "Moonshot generiert keinen ###BODY### Block"
+    siehe: docs/BUGS.md#BUG-007
+
+  das_gruene:
+    bedeutet: "Debug-Overlay (entfernt)"
+    siehe: docs/app/README.md
+
+  der_tanzt:
+    bedeutet: "Mehrere Achsen gleichzeitig falsch → chaotische Bewegung"
+    siehe: docs/motor/ACHSEN.md
+
+  arme_oben:
+    bedeutet: "T-Pose (Bind-Pose des Skeletts)"
+    siehe: docs/BUGS.md#BUG-003

@@ -7,14 +7,33 @@ Der Avatar im Dashboard zeigt den emotionalen Zustand visuell:
 """
 
 from pathlib import Path
+from typing import Optional
 
 import yaml
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 from config import EGON_DATA_DIR
-from engine.organ_reader import read_yaml_organ
+from engine.organ_reader import read_yaml_organ, write_yaml_organ
+from engine.body_state_engine import compute_body_state
 
 router = APIRouter()
+
+
+# ================================================================
+# FUSION Phase 4: Body Feedback (POST Request Model)
+# ================================================================
+
+class BodyFeedbackModel(BaseModel):
+    position: Optional[dict] = None
+    facing: Optional[float] = None
+    is_walking: Optional[bool] = None
+    last_motor_word: Optional[str] = None
+    seconds_since_last_gesture: Optional[int] = None
+    seconds_since_last_chat: Optional[int] = None
+
+class AvatarStateRequest(BaseModel):
+    body_feedback: Optional[BodyFeedbackModel] = None
 
 
 # ================================================================
@@ -147,6 +166,16 @@ async def get_avatar_state(egon_id: str):
     # Animation bestimmen
     animation = _resolve_animation(state)
 
+    # FUSION Phase 3: Body State + Behavior Params
+    body = compute_body_state(egon_id)
+
+    # Autonome Motor-Aktion (falls vom Somatic Gate geschrieben)
+    autonomous_bone_update = _pop_pending_motor_action(egon_id)
+
+    # Circadian Phase
+    zirkadian = state.get('zirkadian', {})
+    circadian_phase = zirkadian.get('aktuelle_phase', 'aktivitaet')
+
     return {
         'activity': 'idle',
         'primary_emotion': top_emotion,
@@ -155,7 +184,48 @@ async def get_avatar_state(egon_id: str):
         'energy': round(energy_value, 2),
         'animation': animation,
         'special_event': None,
+        # FUSION Phase 3
+        'body_state': body['body_state'],
+        'behavior_params': body['behavior_params'],
+        'autonomous_bone_update': autonomous_bone_update,
+        'circadian_phase': circadian_phase,
     }
+
+
+@router.post('/egon/{egon_id}/avatar-state')
+async def post_avatar_state(egon_id: str, request: AvatarStateRequest = None):
+    """POST version — empfaengt body_feedback, gibt gleichen avatar-state zurueck.
+
+    FUSION Phase 4: Die App sendet alle 15s body_feedback mit Position,
+    Facing, Walking-Status, letzter Geste und Idle-Zeiten.
+    Rueckwaerts-kompatibel: GET ohne body_feedback funktioniert weiterhin.
+    """
+    if request and request.body_feedback:
+        try:
+            from engine.proprioception import process_body_feedback
+            process_body_feedback(egon_id, request.body_feedback.dict())
+        except Exception as e:
+            print(f'[avatar] body_feedback error: {e}')
+
+    return await get_avatar_state(egon_id)
+
+
+def _pop_pending_motor_action(egon_id: str) -> dict | None:
+    """Liest und loescht eine ausstehende autonome Motor-Aktion.
+
+    Wird vom Somatic Gate geschrieben, vom avatar-state Endpoint abgeholt.
+    Einmal gelesen = geloescht (Consume-Semantik).
+    """
+    state = read_yaml_organ(egon_id, 'core', 'state.yaml')
+    if not state:
+        return None
+    pending = state.get('pending_motor_action')
+    if not pending:
+        return None
+    # Consume: Entfernen nach Lesen
+    del state['pending_motor_action']
+    write_yaml_organ(egon_id, 'core', 'state.yaml', state)
+    return pending
 
 
 def _load_animation_config(egon_id: str) -> dict:

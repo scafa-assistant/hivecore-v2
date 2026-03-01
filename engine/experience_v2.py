@@ -384,7 +384,52 @@ async def generate_dream(egon_id: str) -> dict | None:
 
     write_yaml_organ(egon_id, 'memory', 'experience.yaml', exp_data)
     print(f'[dream] {egon_name} traeumt: {new_dream["id"]} ({dream_type}) — erinnert: {erinnert}')
+
+    # FUSION Phase 5: Dream-Motor-Verbindung
+    _dream_motor_connection(egon_id, dream_type, new_dream)
+
     return new_dream
+
+
+def _dream_motor_connection(egon_id: str, dream_type: str, dream: dict) -> None:
+    """FUSION Phase 5: Traeume beeinflussen Motor-Skills.
+
+    - Verarbeitungstraeume festigen Motor-Skills (confidence += 0.1)
+    - Kreativtraeume schlagen Motor-Experimente vor (inner_voice Eintrag)
+    """
+    try:
+        from engine.motor_learning import update_skill_confidence
+
+        skills_data = read_yaml_organ(egon_id, 'capabilities', 'skills.yaml')
+        if not skills_data:
+            return
+        learned = skills_data.get('motor_skills', {}).get('learned', [])
+        if not learned:
+            return
+
+        if dream_type == 'verarbeitungstraum':
+            # Verarbeitungstraeume festigen alle Skills leicht
+            for skill in learned:
+                if skill.get('confidence', 0) > 0.3:
+                    update_skill_confidence(egon_id, skill['name'], 0.05)
+                    print(f'[dream-motor] Festigung: {skill["name"]} +0.05')
+                    break  # Nur einen Skill pro Traum festigen
+
+        elif dream_type == 'kreativtraum' and dream.get('spark_potential'):
+            # Kreativtraeume mit Spark-Potenzial → Motor-Experiment in inner_voice
+            from engine.organ_reader import read_md_organ, write_organ
+            iv_text = read_md_organ(egon_id, 'memory', 'inner_voice.md') or ''
+            now = datetime.now().strftime('%Y-%m-%d %H:%M')
+            experiment_note = (
+                f'\n\n## {now} — Traum-Koerper-Impuls\n'
+                f'Im Traum habe ich mich anders bewegt... '
+                f'Vielleicht sollte ich neue Kombinationen ausprobieren.'
+            )
+            write_organ(egon_id, 'memory', 'inner_voice.md', iv_text + experiment_note)
+            print(f'[dream-motor] Kreativ-Impuls in inner_voice geschrieben')
+
+    except Exception as e:
+        print(f'[dream-motor] FEHLER: {e}')
 
 
 # ================================================================
@@ -662,6 +707,83 @@ async def generate_mental_time_travel(egon_id: str) -> dict | None:
     write_yaml_organ(egon_id, 'memory', 'experience.yaml', exp_data)
     print(f'[mtt] {egon_name}: {new_mtt["id"]} ({mtt_type})')
     return new_mtt
+
+
+# ================================================================
+# 5. Motor Reflection (im Pulse, FUSION Phase 4)
+# ================================================================
+
+MOTOR_REFLECTION_PROMPT = '''Du bist {egon_name}s koerperliches Bewusstsein.
+Schau dir an wie {egon_name} seinen Koerper heute genutzt hat.
+
+Reflektiere in 2-3 Saetzen:
+- Welche Bewegungen hast du oft gemacht?
+- Haben sich bestimmte Gesten natuerlich angefuehlt?
+- Gibt es etwas Neues das du ausprobieren moechtest?
+
+ICH-Perspektive. Ehrlich. Koerperlich.
+Antworte NUR mit der Reflexion (kein JSON, kein Prefix).'''
+
+
+async def generate_motor_reflection(egon_id: str) -> str | None:
+    """Generiert eine Motor-Reflexion basierend auf dem motor_log.
+
+    Wird im Pulse aufgerufen. Liest motor_log.yaml und body_awareness.
+    Output wird in inner_voice.md geschrieben.
+    """
+    from engine.naming import get_display_name
+    egon_name = get_display_name(egon_id)
+
+    # Motor-Log laden
+    motor_log = read_yaml_organ(egon_id, 'memory', 'motor_log.yaml')
+    entries = (motor_log or {}).get('entries', [])
+    if not entries:
+        print(f'[motor_reflection] Kein motor_log fuer {egon_name}')
+        return None
+
+    # Letzte 20 Eintraege zusammenfassen
+    recent = entries[-20:]
+    word_counts: dict[str, int] = {}
+    for entry in recent:
+        for word in entry.get('words', []):
+            word_counts[word] = word_counts.get(word, 0) + 1
+
+    if not word_counts:
+        return None
+
+    # Top-Woerter
+    sorted_words = sorted(word_counts.items(), key=lambda x: x[1], reverse=True)
+    words_text = ', '.join(f'{w} ({c}x)' for w, c in sorted_words[:8])
+
+    # Body Awareness (wenn vorhanden)
+    state_data = read_yaml_organ(egon_id, 'core', 'state.yaml')
+    ba = (state_data or {}).get('body_awareness', {})
+    ba_text = ''
+    if ba:
+        pos = ba.get('position', {})
+        ba_text = (
+            f'\nAktuelle Position: x={pos.get("x", 0)}, z={pos.get("z", 0)}. '
+            f'Laufe: {"ja" if ba.get("is_walking") else "nein"}.'
+        )
+
+    try:
+        result = await llm_chat(
+            system_prompt=MOTOR_REFLECTION_PROMPT.format(egon_name=egon_name),
+            messages=[{
+                'role': 'user',
+                'content': (
+                    f'Motor-Woerter der letzten Stunden:\n{words_text}\n'
+                    f'Insgesamt {len(recent)} Gesten.{ba_text}'
+                ),
+            }],
+            tier='1',
+        )
+        reflection = result['content'].strip()
+        print(f'[motor_reflection] {egon_name}: {reflection[:80]}')
+        return reflection
+    except Exception as e:
+        print(f'[motor_reflection] FEHLER: {e}')
+        return None
 
 
 # ================================================================

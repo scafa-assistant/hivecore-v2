@@ -32,7 +32,8 @@ from engine.state_manager import decay_emotions, update_survive_thrive
 from engine.bonds_v2 import decay_bonds, get_days_since_last_interaction
 from engine.thread_manager import maybe_create_thread, close_stale_threads
 from engine.inner_voice_v2 import generate_pulse_reflection
-from engine.experience_v2 import generate_dream, maybe_generate_spark, generate_mental_time_travel
+from engine.experience_v2 import generate_dream, maybe_generate_spark, generate_mental_time_travel, generate_motor_reflection
+from engine.motor_learning import discover_motor_patterns
 from engine.ledger import log_transaction
 from llm.router import llm_chat
 from engine.somatic_gate import check_somatic_gate, run_decision_gate, execute_autonomous_action
@@ -606,6 +607,48 @@ async def step_13_mental_time_travel(egon_id: str) -> dict:
 
 
 # ================================================================
+# Step 13b: Motor Reflection (FUSION Phase 4)
+# ================================================================
+
+async def step_13b_motor_reflection(egon_id: str) -> dict:
+    """Motor-Reflexion — wie hat Adam seinen Koerper genutzt?
+
+    Liest motor_log.yaml und generiert eine Reflexion.
+    Output wird in inner_voice.md angehaengt.
+    """
+    reflection = await generate_motor_reflection(egon_id)
+    if reflection:
+        # An inner_voice.md anhaengen
+        try:
+            iv_text = read_md_organ(egon_id, 'memory', 'inner_voice.md') or ''
+            now = datetime.now().strftime('%Y-%m-%d %H:%M')
+            new_entry = f'\n\n## {now} — Koerper-Reflexion\n{reflection}'
+            write_organ(egon_id, 'memory', 'inner_voice.md', iv_text + new_entry)
+        except Exception as e:
+            print(f'[pulse_v2] Motor reflection write error: {e}')
+        return {'motor_reflection': reflection[:80]}
+    return {'motor_reflection': None}
+
+
+# ================================================================
+# Step 13c: Motor Learning (FUSION Phase 5)
+# ================================================================
+
+async def step_13c_motor_learning(egon_id: str) -> dict:
+    """Motor Pattern Discovery — entdeckt neue Bewegungskombinationen.
+
+    Analysiert motor_log.yaml, findet haeufige Paare,
+    LLM bewertet ob sie natuerlich sind, speichert in skills.yaml.
+    """
+    try:
+        result = await discover_motor_patterns(egon_id)
+        return result
+    except Exception as e:
+        print(f'[pulse_v2] Motor learning error: {e}')
+        return {'error': str(e)}
+
+
+# ================================================================
 # Step 14: Metacognition — Zyklusende-Reflexion (Patch 11)
 # ================================================================
 
@@ -722,6 +765,8 @@ STEPS = [
     ('dream_generation', step_11_dream_generation, True), # async — Patch 2 gated
     ('spark_check', step_12_spark_check, True),           # async
     ('mental_time_travel', step_13_mental_time_travel, True),  # async
+    ('motor_reflection', step_13b_motor_reflection, True),       # async — FUSION Phase 4
+    ('motor_learning', step_13c_motor_learning, True),           # async — FUSION Phase 5
     ('metacognition', step_14_metacognition, True),              # async — Patch 11
     ('arbeitsspeicher', step_15_arbeitsspeicher_maintenance, False),  # sync — Patch 13
 ]

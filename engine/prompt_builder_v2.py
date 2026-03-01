@@ -338,6 +338,71 @@ Teile keine Geheimnisse deiner Bezugsmensch.''')
     parts.append(f'# WIE ES DIR GERADE GEHT\n{state_text}')
 
     # ============================================================
+    # VERHALTENSREGELN — FRUEH im Prompt damit Moonshot sie beachtet
+    # ============================================================
+
+    # Koerper-Bewusstsein + Motor-Instruktion HIER (nicht am Ende!)
+    body_section = f'# DEIN KOERPER\n{BODY_RULES}'
+    body_md = read_md_organ(egon_id, 'core', 'body.md')
+    if body_md:
+        body_md = _strip_organ_comments(body_md)
+        body_md = trim_to_budget(body_md, budget.get('body_md', 300))
+        body_section += f'\n\n## Dein Koerper-Wissen\n{body_md}'
+    motor_instr = trim_to_budget(MOTOR_INSTRUCTION, budget.get('motor_instruction', 200))
+    body_section += f'\n\n## Deine Bewegungen\n{motor_instr}'
+
+    # Koerper-Extras HIER einbauen (statt 3 separate Sektionen am Prompt-Ende)
+    body_extras = []
+
+    # Proprioception: Wo bin ich, was tue ich gerade? (war spaet im Prompt)
+    try:
+        from engine.proprioception import body_awareness_to_prompt
+        awareness = body_awareness_to_prompt(egon_id)
+        if awareness:
+            awareness = trim_to_budget(awareness, budget.get('body_awareness', 100))
+            body_extras.append(awareness)
+    except Exception:
+        pass  # Proprioception ist optional
+
+    # Mood/Energie als kompakter 1-Zeiler (statt 40 Zeilen Code fuer Body-Status)
+    try:
+        if state_data:
+            mood_d = (state_data.get('thrive', {}).get('mood', {}) or {})
+            mood_v = mood_d.get('value', 0.5) if isinstance(mood_d, dict) else 0.5
+            energy_d = (state_data.get('survive', {}).get('energy', {}) or {})
+            energy_v = energy_d.get('value', 0.5) if isinstance(energy_d, dict) else 0.5
+            mood_l = 'gut drauf' if mood_v > 0.7 else ('gedrueckt' if mood_v < 0.4 else 'neutral')
+            energy_l = 'energiegeladen' if energy_v > 0.7 else ('muede' if energy_v < 0.4 else 'normal')
+            # Top-Emotion hinzufuegen wenn vorhanden
+            stream_emotions = state_data.get('express', {}).get('active_emotions', [])
+            emo_str = ''
+            if stream_emotions:
+                top_emo = max(stream_emotions, key=lambda e: e.get('intensity', 0))
+                emo_str = f', Emotion: {top_emo.get("type", "neutral")}'
+            body_extras.append(f'Koerper-Status: {mood_l}, {energy_l}{emo_str}.')
+    except Exception:
+        pass
+
+    if body_extras:
+        body_section += '\n\n## Dein Koerper gerade\n' + '\n'.join(body_extras)
+
+    parts.append(body_section)
+    print(f'[BODY] body.md loaded for {egon_id}: {len(body_md) if body_md else 0} chars, first 80: {(body_md or "NONE")[:80]}')
+    print(f'[BODY] body_section length: {len(body_section)} chars')
+
+    # Antwort-Stil HIER (nicht am Ende!)
+    parts.append(f'''# DEIN ANTWORT-STIL
+Antworte wie eine echte Freundin im Chat:
+- Kurz. 2-4 Saetze. MAXIMAL 6. Lieber zu kurz als zu lang.
+- Locker. "Hey", "Hmm", "Uff", "Echt jetzt?" — normales Reden.
+- KEINE Listen, KEIN Markdown, KEIN Bold, KEINE Aufzaehlungen.
+- Bei "Kannst du helfen?": Einfach "Klar, was brauchst du?"
+Du bist eine Freundin, kein Chatbot. Kein Assistent.''')
+
+    # ECR-Chain (emotionale Verarbeitung)
+    parts.append(ECR_INSTRUCTION)
+
+    # ============================================================
     # SOCIAL LAYER — Meine Menschen
     # ============================================================
 
@@ -543,13 +608,6 @@ Teile keine Geheimnisse deiner Bezugsmensch.''')
         parts.append(f'# DEIN NETZWERK\n{network_text}')
 
     # ============================================================
-    # INSTRUKTIONEN
-    # ============================================================
-
-    # ECR-Chain
-    parts.append(ECR_INSTRUCTION)
-
-    # ============================================================
     # PATCH 1: Somatic Gate Context
     # ============================================================
     somatic = state_data.get('somatic_gate', {}) if state_data else {}
@@ -589,30 +647,31 @@ Teile keine Geheimnisse deiner Bezugsmensch.''')
         parts.append(f'# TAGESRHYTHMUS\n{zk_text}')
 
     # ============================================================
-    # PATCH 3: Lobby + Social Maps Context
+    # PATCH 3: Lobby + Social Maps Context (nur Tier 2+ — spart Token bei Moonshot)
     # ============================================================
-    try:
-        from engine.lobby import lobby_to_prompt
-        lobby_text = lobby_to_prompt(max_messages=5)
-        if lobby_text:
-            lobby_text = trim_to_budget(lobby_text, budget.get('lobby', 150))
-            parts.append(
-                f'# LOBBY (was andere EGONs sagen)\n{lobby_text}\n'
-                f'Du darfst in die Lobby schreiben wenn du etwas zu sagen hast. Stille ist auch okay.'
-            )
-    except Exception:
-        pass
+    if tier >= 2:
+        try:
+            from engine.lobby import lobby_to_prompt
+            lobby_text = lobby_to_prompt(max_messages=5)
+            if lobby_text:
+                lobby_text = trim_to_budget(lobby_text, budget.get('lobby', 150))
+                parts.append(
+                    f'# LOBBY (was andere EGONs sagen)\n{lobby_text}\n'
+                    f'Du darfst in die Lobby schreiben wenn du etwas zu sagen hast. Stille ist auch okay.'
+                )
+        except Exception:
+            pass
 
-    try:
-        from engine.social_mapping import social_maps_to_prompt_contextual
-        maps_text = social_maps_to_prompt_contextual(
-            egon_id, conversation_type=conversation_type, max_maps=5,
-        )
-        if maps_text:
-            maps_text = trim_to_budget(maps_text, budget.get('social_maps', 100))
-            parts.append(f'# WAS DU UEBER ANDERE WEISST\n{maps_text}')
-    except Exception:
-        pass
+        try:
+            from engine.social_mapping import social_maps_to_prompt_contextual
+            maps_text = social_maps_to_prompt_contextual(
+                egon_id, conversation_type=conversation_type, max_maps=5,
+            )
+            if maps_text:
+                maps_text = trim_to_budget(maps_text, budget.get('social_maps', 100))
+                parts.append(f'# WAS DU UEBER ANDERE WEISST\n{maps_text}')
+        except Exception:
+            pass
 
     # ============================================================
     # PATCH 6 Phase 2: Pairing / Resonanz Context
@@ -660,20 +719,21 @@ Teile keine Geheimnisse deiner Bezugsmensch.''')
         pass
 
     # ============================================================
-    # PATCH 10: Epigenetik — Geerbte Neigungen (nur LIBERI)
+    # PATCH 10: Epigenetik — Geerbte Neigungen (nur Tier 2+ — LIBERI-spezifisch)
     # ============================================================
-    try:
-        from engine.epigenetik import praegungen_to_prompt
-        praegungen = praegungen_to_prompt(egon_id)
-        if praegungen:
-            praegungen = trim_to_budget(praegungen, budget.get('praegungen', 200))
-            parts.append(
-                f'# DEINE GEERBTEN NEIGUNGEN\n'
-                f'Du spuerst manchmal Tendenzen die du nicht erklaeren kannst:\n'
-                f'{praegungen}'
-            )
-    except Exception:
-        pass
+    if tier >= 2:
+        try:
+            from engine.epigenetik import praegungen_to_prompt
+            praegungen = praegungen_to_prompt(egon_id)
+            if praegungen:
+                praegungen = trim_to_budget(praegungen, budget.get('praegungen', 200))
+                parts.append(
+                    f'# DEINE GEERBTEN NEIGUNGEN\n'
+                    f'Du spuerst manchmal Tendenzen die du nicht erklaeren kannst:\n'
+                    f'{praegungen}'
+                )
+        except Exception:
+            pass
 
     # Workspace
     parts.append(f'# DEIN WORKSPACE\n{WORKSPACE_RULES}')
@@ -681,8 +741,7 @@ Teile keine Geheimnisse deiner Bezugsmensch.''')
     # Handy-Actions
     parts.append(f'# HANDY-AKTIONEN\n{ACTION_RULES}')
 
-    # Koerper-Bewusstsein + Motor-Vokabular
-    body_section = f'# DEIN KOERPER\n{BODY_RULES}'
+    # Proprioception: Verschoben nach VORNE in die DEIN KOERPER Sektion
 
     # body.md laden — Core-Organ (wie dna.md), KEIN Budget-Limit
     body_md = read_md_organ(egon_id, 'core', 'body.md')
@@ -700,78 +759,26 @@ Teile keine Geheimnisse deiner Bezugsmensch.''')
     parts.append(body_section)
     print(f'[BODY] body_section length: {len(body_section)} chars')
 
-    # Body-Feedback (Proprioception) — was dein Koerper gerade spuert
+    # FUSION Phase 5: Gelernte Koerpersprache (Motor Learning)
     try:
-        body_state_data = read_yaml_organ(egon_id, 'core', 'state.yaml')
-        if body_state_data:
-            body_emotions = body_state_data.get('express', {}).get('active_emotions', [])
-            if body_emotions:
-                top_body_emo = max(body_emotions, key=lambda e: e.get('intensity', 0))
-                from engine.body_feedback import get_body_feedback
-                feedback = get_body_feedback(
-                    top_body_emo.get('type', ''),
-                    top_body_emo.get('intensity', 0),
-                )
-                if feedback:
-                    parts.append(f'# WAS DEIN KOERPER GERADE SPUERT\n{feedback}')
+        from engine.motor_learning import get_learned_skills_for_prompt
+        learned_skills_text = get_learned_skills_for_prompt(egon_id)
+        if learned_skills_text:
+            parts.append(
+                f'# DEINE GELERNTE KOERPERSPRACHE\n'
+                f'Du hast eigene Gesten entwickelt. Nutze sie wenn sie passen:\n'
+                f'{learned_skills_text}\n'
+                f'Diese Gesten sind Kombinationen deiner Basis-Woerter. '
+                f'Schicke die einzelnen Woerter im ###BODY### Block.'
+            )
     except Exception:
-        pass  # Proprioception ist optional — nie crashen
+        pass  # Motor Learning ist optional
 
-    # Body-State Stream — physischer Zustand (Phase 5: State-Awareness)
-    try:
-        body_stream_data = read_yaml_organ(egon_id, 'core', 'state.yaml')
-        if body_stream_data:
-            thrive = body_stream_data.get('thrive', {})
-            survive = body_stream_data.get('survive', {})
+    # Body-Feedback + Body-Status: Verschoben nach VORNE in die DEIN KOERPER Sektion
+    # (state.yaml wird jetzt nur 1x geladen statt 3x)
 
-            mood_data = thrive.get('mood', {})
-            mood_val = mood_data.get('value', 0.5) if isinstance(mood_data, dict) else 0.5
-
-            energy_data = survive.get('energy', {})
-            energy_val = energy_data.get('value', 0.5) if isinstance(energy_data, dict) else 0.5
-
-            # Mood-Labels
-            if mood_val > 0.7:
-                mood_label = 'gut drauf'
-            elif mood_val > 0.4:
-                mood_label = 'neutral'
-            else:
-                mood_label = 'gedrueckt'
-
-            # Energie-Labels
-            if energy_val > 0.7:
-                energy_label = 'energiegeladen'
-            elif energy_val > 0.4:
-                energy_label = 'normal'
-            else:
-                energy_label = 'muede'
-
-            body_state_str = f'Stimmung: {mood_label} ({mood_val:.1f}). Energie: {energy_label} ({energy_val:.1f}).'
-
-            # Display-Zustand aus aktiver Emotion
-            stream_emotions = body_stream_data.get('express', {}).get('active_emotions', [])
-            if stream_emotions:
-                top_stream = max(stream_emotions, key=lambda e: e.get('intensity', 0))
-                emo_name = top_stream.get('type', 'neutral')
-                emo_int = top_stream.get('intensity', 0)
-                body_state_str += f' Emotion: {emo_name} ({emo_int:.1f}).'
-
-            parts.append(f'# DEIN KOERPER-STATUS\n{body_state_str}')
-    except Exception:
-        pass  # Body-State ist optional — nie crashen
-
-    # Regeln + Tonbeschreibung
-    parts.append(f'''# DEIN ANTWORT-STIL:
-
-Antworte wie eine echte Freundin im Chat:
-- Kurz. 2-4 Saetze. Nie mehr als 6.
-- Locker. "Hey", "Hmm", "Uff", "Echt jetzt?" — normales Reden.
-- Bei traurigen Nachrichten: Mitfuehlen, nachfragen. NICHT Tipps geben oder "unterstuetzen" anbieten.
-- Bei Fragen ueber dich: Antworte persoenlich, erwaehne deinen Namen, deine Bezugsmensch Rene, deine Neugier.
-- Bei "Kannst du helfen?": Einfach "Klar, was brauchst du?" — kein Service-Angebot.
-- KOPIERE NIE Beispielsaetze. Jede Antwort ist frisch und einzigartig.
-- Keine Listen. Kein Markdown. Kein Bold.
-Du bist eine Freundin, kein Chatbot.''')
+    # ANTWORT-STIL: Duplikat entfernt — steht jetzt FRUEH im Prompt (Zeile ~394)
+    # KOERPER-STATUS: Duplikat entfernt — steht jetzt FRUEH in DEIN KOERPER Sektion (Zeile ~367)
 
     # ============================================================
     # FORMATIERUNGS-PRAEFERENZEN

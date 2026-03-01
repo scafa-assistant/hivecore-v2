@@ -6,6 +6,28 @@ Schnelle Heuristik (kein LLM-Call): Regex auf Aktions-Keywords.
 import re
 
 
+
+async def decide_tier(user_message: str) -> int:
+    """Heuristik statt LLM-Call — spart ~300ms pro Chat."""
+    msg = user_message.lower().strip()
+
+    # Tier 3: Kritische Operationen (selten)
+    tier3_kw = ['genesis', 'verschmelz', 'jury', 'endurteil', 'season', 'todeszene']
+    if any(kw in msg for kw in tier3_kw):
+        return 3
+
+    # Tier 2: Komplexe Nachrichten (lang oder analytisch)
+    if len(msg) > 200:
+        return 2
+    tier2_kw = ['erkläre', 'erklär', 'analysier', 'vergleich', 'warum', 'beschreib',
+                'zusammenfass', 'was denkst du über', 'philosophi']
+    if any(kw in msg for kw in tier2_kw):
+        return 2
+
+    # Tier 1: Alles andere (Smalltalk, Gefühle, kurze Fragen)
+    return 1
+
+
 # ================================================================
 # Tool-Erkennung: Braucht diese Nachricht den Agent Loop?
 # ================================================================

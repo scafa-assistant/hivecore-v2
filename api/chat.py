@@ -16,6 +16,7 @@ Multi-EGON Chat-Types:
   pulse            → Interner Pulse
 """
 
+import asyncio
 import json
 import os
 import re
@@ -45,6 +46,34 @@ router = APIRouter()
 # ================================================================
 # Emotion → Body-Action / Display-State Maps (Phase 3: Embodiment)
 # ================================================================
+def _log_motor_words(egon_id: str, body_data: dict, context: str = 'chat') -> None:
+    """Loggt Motor-Word-Nutzung fuer spaetere Pattern-Analyse (Phase 5).
+
+    Schreibt in memory/motor_log.yaml — wird von motor_learning.py gelesen.
+    """
+    try:
+        from engine.organ_reader import read_yaml_organ, write_yaml_organ
+        words = body_data.get('words', [])
+        intensity = body_data.get('intensity', 0.5)
+        if not words:
+            return
+        log = read_yaml_organ(egon_id, 'memory', 'motor_log.yaml') or {}
+        entries = log.get('entries', [])
+        entries.append({
+            'timestamp': datetime.now().isoformat(),
+            'words': words,
+            'intensity': round(intensity, 2),
+            'context': context,
+        })
+        # Max 200 Eintraege behalten (FIFO)
+        if len(entries) > 200:
+            entries = entries[-200:]
+        log['entries'] = entries
+        write_yaml_organ(egon_id, 'memory', 'motor_log.yaml', log)
+    except Exception as e:
+        print(f'[motor_log] FEHLER: {e}')
+
+
 EMOTION_BODY_MAP = {
     'joy': 'chains_swing',
     'excitement': 'display_glitch',
@@ -175,6 +204,253 @@ def parse_action(text: str) -> tuple[str, Optional[dict]]:
             action = None
 
     return display_text, action
+
+
+# ================================================================
+# Post-Processing — laeuft async im Background NACH dem Response
+# ================================================================
+
+async def _post_process_chat(
+    egon_id: str,
+    message: str,
+    display_text: str,
+    body_data: dict | None,
+    history_snapshot: list,
+    conversation_type: str,
+):
+    """Laeuft im Hintergrund NACH dem Response-Return.
+
+    Jeder Schritt hat eigenes try/except — ein Fehler stoppt nicht den Rest.
+    history_snapshot ist eine KOPIE der History zum Zeitpunkt des Calls.
+    """
+    try:
+        # Thalamus-Gate — Relevanzfilter bestimmt welche Schritte laufen
+        gate = None
+        if BRAIN_VERSION == 'v2':
+            try:
+                from engine.thalamus import thalamus_gate, soll_schritt_laufen
+                gate = await thalamus_gate(egon_id, history_snapshot, conversation_type)
+                print(f'[post] Thalamus: {gate["pfad"]} (Relevanz: {gate["relevanz"]:.2f})')
+            except Exception as e:
+                print(f'[post] thalamus FEHLER: {e} — volle Verarbeitung als Fallback')
+                gate = None
+
+        if BRAIN_VERSION == 'v2':
+            from engine.state_manager import (
+                update_emotion_after_chat,
+                update_drives_after_chat,
+            )
+            from engine.bonds_v2 import update_bond_after_chat as update_bond_v2
+            from engine.episodes_v2 import maybe_create_episode
+            from engine.owner_portrait import maybe_update_owner_portrait
+            from engine.contact_manager import detect_and_process_mentions
+
+            def _soll(schritt):
+                if gate is None:
+                    return True
+                return soll_schritt_laufen(gate, schritt)
+
+            ep = None
+
+            if _soll('emotion'):
+                try:
+                    await update_emotion_after_chat(egon_id, message, display_text)
+                except Exception as e:
+                    print(f'[post] update_emotion FEHLER: {e}')
+
+            if _soll('drives'):
+                try:
+                    update_drives_after_chat(egon_id, message, display_text)
+                except Exception as e:
+                    print(f'[post] update_drives FEHLER: {e}')
+
+            if _soll('bond'):
+                try:
+                    await update_bond_v2(egon_id, message, display_text)
+                except Exception as e:
+                    print(f'[post] update_bond FEHLER: {e}')
+
+            if _soll('episode'):
+                try:
+                    ep = await maybe_create_episode(egon_id, message, display_text, motor_data=body_data)
+                    if ep:
+                        print(f'[post] Episode erstellt: {ep.get("id")} — {ep.get("summary", "")[:60]}')
+                    else:
+                        print(f'[post] Keine Episode erstellt (nicht bedeutsam genug)')
+                except Exception as e:
+                    print(f'[post] maybe_create_episode FEHLER: {e}')
+
+            if ep:
+                try:
+                    from engine.cue_index import inkrementeller_update
+                    inkrementeller_update(egon_id, [ep])
+                except Exception as e:
+                    print(f'[post] cue_index FEHLER: {e}')
+
+            if _soll('experience'):
+                try:
+                    from engine.experience_v2 import maybe_extract_experience
+                    ep_id = ep.get('id') if ep else None
+                    xp = await maybe_extract_experience(egon_id, message, display_text, source_episode_id=ep_id)
+                    if xp:
+                        print(f'[post] Experience: {xp.get("id")} — {xp.get("insight", "")[:60]}')
+                except Exception as e:
+                    print(f'[post] Experience FEHLER: {e}')
+
+            if _soll('owner_portrait'):
+                try:
+                    await maybe_update_owner_portrait(egon_id, message, display_text)
+                except Exception as e:
+                    print(f'[post] owner_portrait FEHLER: {e}')
+
+            if _soll('contact_manager'):
+                try:
+                    await detect_and_process_mentions(egon_id, message, display_text)
+                except Exception as e:
+                    print(f'[post] contact_manager FEHLER: {e}')
+
+            if _soll('somatic_gate'):
+                try:
+                    from engine.somatic_gate import check_somatic_gate, run_decision_gate, execute_autonomous_action
+                    impulse = check_somatic_gate(egon_id)
+                    if impulse:
+                        decision = await run_decision_gate(egon_id, impulse)
+                        if decision.get('entscheidung') == 'handeln':
+                            await execute_autonomous_action(egon_id, decision)
+                        print(f'[post] somatic_gate: {impulse.get("marker")} -> {decision.get("entscheidung")}')
+                except Exception as e:
+                    print(f'[post] somatic_gate FEHLER: {e}')
+
+            try:
+                from engine.neuroplastizitaet import regionen_nutzung_erhoehen
+                chat_regionen = ['thalamus', 'praefrontal']
+                if ep:
+                    chat_regionen.append('hippocampus')
+                regionen_nutzung_erhoehen(egon_id, chat_regionen)
+            except Exception:
+                pass
+
+            if _soll('circadian'):
+                try:
+                    from engine.circadian import update_energy, check_phase_transition
+                    update_energy(egon_id)
+                    await check_phase_transition(egon_id)
+                except Exception as e:
+                    print(f'[post] circadian FEHLER: {e}')
+        else:
+            # v1: Altes System
+            try:
+                await append_memory(egon_id, message, display_text)
+                await compress_if_needed(egon_id, max_entries=50)
+                await maybe_generate_marker(egon_id, message, display_text)
+                update_bond_after_chat(egon_id, user_msg=message)
+            except Exception as e:
+                print(f'[post] v1 post-processing FEHLER: {e}')
+
+        # Recent Memory (v1 + v2)
+        summary = None
+        if gate is None or soll_schritt_laufen(gate, 'recent_memory'):
+            try:
+                from engine.recent_memory import generate_chat_summary, append_to_recent_memory
+                if len(history_snapshot) >= 6:
+                    summary = await generate_chat_summary(egon_id, message, display_text)
+                    if summary:
+                        append_to_recent_memory(egon_id, summary)
+                        print(f'[post] recent_memory: {summary[:80]}')
+                else:
+                    print(f'[post] recent_memory: Uebersprungen ({len(history_snapshot)} Messages, brauche >=6)')
+            except Exception as e:
+                print(f'[post] recent_memory FEHLER: {e}')
+
+        # Arbeitsspeicher-Decay (v2 only)
+        if BRAIN_VERSION == 'v2' and summary:
+            try:
+                from engine.decay import speichere_arbeitsspeicher_eintrag, stabilisiere_nach_cue
+                em = 0.2
+                pe = 0.0
+                staerkstes = ''
+                try:
+                    from engine.organ_reader import read_yaml_organ as _read_state
+                    _st = _read_state(egon_id, 'core', 'state.yaml')
+                    if _st:
+                        drives = _st.get('drives', {})
+                        if drives:
+                            max_drive = max(drives.items(), key=lambda x: x[1] if isinstance(x[1], (int, float)) else 0)
+                            staerkstes = max_drive[0]
+                            em = min(1.0, max_drive[1]) if isinstance(max_drive[1], (int, float)) else 0.2
+                except Exception:
+                    pass
+                cue_tags = [w.lower() for w in message.split() if len(w) > 3][:5]
+                speichere_arbeitsspeicher_eintrag(
+                    egon_id=egon_id,
+                    zusammenfassung=summary,
+                    emotional_marker=round(em, 3),
+                    prediction_error=pe,
+                    partner='owner' if conversation_type == 'owner_chat' else '',
+                    cue_tags=cue_tags,
+                    staerkstes_system=staerkstes,
+                )
+                print(f'[post] arbeitsspeicher: Eintrag gespeichert (em={em:.2f}, sys={staerkstes})')
+                stabilisiert = stabilisiere_nach_cue(egon_id, cue_tags)
+                if stabilisiert:
+                    print(f'[post] arbeitsspeicher: {stabilisiert} alte Eintraege stabilisiert')
+            except Exception as e:
+                print(f'[post] arbeitsspeicher FEHLER: {e}')
+
+        # Social Mapping (v1 + v2)
+        if gate is None or soll_schritt_laufen(gate, 'social_mapping'):
+            try:
+                from engine.social_mapping import generate_social_map_update
+                interaction = f'Owner: {message[:300]}\n{egon_id}: {display_text[:300]}'
+                await generate_social_map_update(egon_id, 'owner', interaction)
+            except Exception as e:
+                print(f'[post] social_mapping owner FEHLER: {e}')
+
+        # Formatting (v1 + v2)
+        if gate is None or soll_schritt_laufen(gate, 'formatting'):
+            try:
+                from engine.formatting_detector import maybe_update_formatting
+                await maybe_update_formatting(egon_id, message)
+            except Exception as e:
+                print(f'[post] formatting FEHLER: {e}')
+
+        # Epigenetik (v2 only)
+        if BRAIN_VERSION == 'v2' and ep:
+            try:
+                from engine.epigenetik import praegung_update
+                praeg_updates = praegung_update(egon_id, ep)
+                if praeg_updates:
+                    for pu in praeg_updates:
+                        print(f'[post] praegung: {pu["praegung"][:40]} — {pu["aktion"]} (staerke={pu["neue_staerke"]:.2f})')
+            except Exception as e:
+                print(f'[post] epigenetik FEHLER: {e}')
+
+        # Metacognition (v2 only)
+        if BRAIN_VERSION == 'v2':
+            try:
+                from engine.metacognition import metacognition_post_chat
+                thal_pfad = gate.get('pfad', 'D_BURST') if gate else 'D_BURST'
+                mc_alarm = metacognition_post_chat(egon_id, thal_pfad, ep)
+                if mc_alarm:
+                    print(f'[post] metacognition: {mc_alarm["typ"]} — {mc_alarm.get("frage", "")[:60]}')
+            except Exception as e:
+                print(f'[post] metacognition FEHLER: {e}')
+
+        # Homoestase (v2 only, IMMER am Ende)
+        if BRAIN_VERSION == 'v2':
+            try:
+                from engine.homoestase import echtzeit_homoestase, aktualisiere_zyklus_durchschnitt
+                homo_result = echtzeit_homoestase(egon_id)
+                if homo_result.get('reguliert'):
+                    print(f'[post] homoestase: {len(homo_result.get("korrekturen", {}))} Systeme reguliert')
+                aktualisiere_zyklus_durchschnitt(egon_id)
+            except Exception as e:
+                print(f'[post] homoestase FEHLER: {e}')
+
+        print(f'[post] Background-Verarbeitung abgeschlossen fuer {egon_id}')
+
+    except Exception as e:
+        print(f'[post] Background FATAL: {e}')
 
 
 @router.post('/chat', response_model=ChatResponse)
@@ -312,10 +588,15 @@ async def chat(req: ChatRequest):
         except Exception as e:
             print(f'[chat] Follow-Up Hint FEHLER: {e}')
 
+    # Aufraemen: Falls vorheriger Chat mit Fehler abgebrochen hat,
+    # steht noch eine User-Nachricht ohne Assistant-Antwort in der History.
+    # Moonshot verlangt strikte User/Assistant-Alternierung.
+    if history and history[-1]['role'] == 'user':
+        history.pop()
     history.append({'role': 'user', 'content': message})
-    # Max 10 Messages in History
+    # Max 10 Messages in History — Few-Shot Primer (erste 2) IMMER behalten
     if len(history) > 10:
-        history = history[-10:]
+        history = history[:2] + history[-8:]
 
     # 6. LLM Call — Agent Loop oder normaler Chat
     needs_tools = should_use_tools(message) if BRAIN_VERSION == 'v2' else False
@@ -361,6 +642,16 @@ async def chat(req: ChatRequest):
             if bone_update:
                 print(f'[motor] {bone_update["words"]} intensity={bone_update["intensity"]}')
                 ilog.log_bone_update(bone_update)
+                # FUSION Phase 3: Motor-Word-Logging fuer Pattern-Analyse (Phase 5)
+                _log_motor_words(egon_id, body_data, 'chat')
+                # FUSION Phase 5: Pose-Naturalness Check
+                try:
+                    from engine.motor_translator import check_pose_naturalness
+                    naturalness = check_pose_naturalness(bone_update)
+                    if not naturalness['natural']:
+                        print(f'[motor] Naturalness WARNING: {naturalness["warnings"]}')
+                except Exception:
+                    pass
         except Exception as e:
             print(f'[motor] translate FEHLER: {e}')
             ilog.log_error('motor_translate', str(e))
@@ -713,6 +1004,8 @@ async def chat(req: ChatRequest):
         pass
 
     # 10. Emotion + Body-Action aus state.yaml extrahieren (Phase 3: Embodiment)
+    # HINWEIS: Emotion ist vom vorherigen Chat (Post-Processing laeuft noch im Background).
+    # Das ist OK — bone_update (aus ###BODY###) hat die aktuelle Bewegung.
     primary_emotion = None
     emotion_intensity = None
     body_action = None
