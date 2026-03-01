@@ -1,0 +1,32 @@
+wort_index:
+  geburt:
+  - E0001
+  anfang:
+  - E0001
+  existenz:
+  - E0001
+  geboren:
+  - E0001
+  owner:
+  - E0001
+  mich:
+  - E0001
+  erschaffen:
+  - E0001
+  existiere:
+  - E0001
+emotions_index:
+  CURIOSITY:
+  - E0001
+  EXCITEMENT:
+  - E0001
+  ANXIETY:
+  - E0001
+partner_index: {}
+faden_index: {}
+stark_index:
+- E0001
+meta:
+  letzte_aktualisierung: '2026-02-26T16:09:07'
+  eintraege_total: 1
+  index_eintraege: 8

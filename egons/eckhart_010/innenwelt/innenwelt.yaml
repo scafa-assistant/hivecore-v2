@@ -1,0 +1,53 @@
+ueberleben:
+  lebenskraft:
+    wert: 0.5
+    verbal: ''
+  geborgenheit:
+    wert: 0.5
+    verbal: ''
+  innerer_zusammenhalt:
+    wert: 0.5
+    verbal: ''
+entfaltung:
+  zugehoerigkeit:
+    wert: 0.5
+    verbal: ''
+  vertrauen:
+    wert: 0.5
+    verbal: ''
+  grundstimmung:
+    wert: 0.5
+    verbal: ''
+  sinn:
+    wert: 0.5
+    verbal: ''
+empfindungen:
+  aktive_gefuehle: []
+  schwerkraft:
+    grundstimmung: 0.5
+    deutungstendenz: neutral
+lebenskraft:
+  neugier: 0.5
+  tatendrang: 0.5
+  lerndrang: 0.5
+  fuersorge: 0.5
+  spieltrieb: 0.5
+  furcht: 0.5
+  zorn: 0.5
+  trauer: 0.5
+  sehnsucht: 0.5
+  panik: 0.5
+selbstbild:
+  verbal: ''
+erschoepfung: 0.0
+zirkadian:
+  aktuelle_phase: aktivitaet
+  energy: 0.5
+identitaet:
+  vorname: Eckhart
+  nachname: null
+  anzeigename: Eckhart
+  generation: 0
+dna_profil: DEFAULT
+koerpermarker: {}
+geschlecht: M

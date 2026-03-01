@@ -29,8 +29,10 @@ V1_TO_V2_FALLBACK = {
 
 def _detect_brain_version(egon_id: str) -> str:
     """Erkennt ob ein EGON v1 oder v2 Brain hat."""
-    v2_path = os.path.join(EGON_DATA_DIR, egon_id, 'core', 'dna.md')
-    if os.path.isfile(v2_path):
+    # v2: core/soul.md (neue Benennung) oder core/dna.md (legacy)
+    v2_soul = os.path.join(EGON_DATA_DIR, egon_id, 'core', 'soul.md')
+    v2_dna = os.path.join(EGON_DATA_DIR, egon_id, 'core', 'dna.md')
+    if os.path.isfile(v2_soul) or os.path.isfile(v2_dna):
         return 'v2'
     return 'v1'
 

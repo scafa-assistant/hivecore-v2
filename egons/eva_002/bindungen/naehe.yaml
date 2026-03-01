@@ -1,0 +1,26 @@
+bonds:
+- id: OWNER_CURRENT
+  type: owner
+  score: 0.5
+  attachment_style: undefined
+  trust: 0.4
+  familiarity: 0.05
+  emotional_debt: 0
+  last_interaction: '2026-02-22'
+  first_interaction: '2026-02-22'
+  bond_history: []
+dynamics:
+  growth:
+    max_per_conversation: 3
+    max_per_day: 5
+  damage:
+    min_per_betrayal: -10
+    max_per_betrayal: -30
+  natural_decay:
+    per_month_no_contact: -1
+    former_owner_decay: -0.2
+    deep_bond_decay: -0.5
+  attachment_shift:
+    evaluation_period: 30
+  emotional_debt_rules:
+    max_debt: 10

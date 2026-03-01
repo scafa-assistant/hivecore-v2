@@ -111,9 +111,16 @@ def write_lobby(egon_id: str, message: str, emotional_context: str = '') -> dict
     data['messages'].append(msg)
     data.setdefault('meta', {})['last_message'] = msg['timestamp']
 
-    # Trim: nur letzte N Nachrichten behalten
+    # Intelligentes Limit: Emotional bedeutsame Nachrichten ueberleben laenger
     if len(data['messages']) > MAX_LOBBY_MESSAGES:
-        data['messages'] = data['messages'][-MAX_LOBBY_MESSAGES:]
+        emotional = [m for m in data['messages'] if m.get('emotional_context')]
+        normal = [m for m in data['messages'] if not m.get('emotional_context')]
+        platz = max(0, MAX_LOBBY_MESSAGES - len(emotional))
+        normal = normal[-platz:] if platz > 0 else []
+        # Chronologisch sortieren (Lobby braucht Reihenfolge)
+        combined = normal + emotional
+        combined.sort(key=lambda m: m.get('timestamp', ''))
+        data['messages'] = combined[-MAX_LOBBY_MESSAGES:]
 
     _write_lobby_data(data)
     print(f'[lobby] {egon_id}: "{message[:50]}..." ({msg["id"]})')

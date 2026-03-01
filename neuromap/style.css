@@ -1,0 +1,553 @@
+/* ============================================================
+   EGON NeuroMap v7 — Styles
+   Dark-Theme, Glass-Panels, responsive
+   ============================================================ */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #13161e;
+  color: #dde0ec;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+#root {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+}
+
+/* ---- Loading Screen ---- */
+.loading-screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 50% 35%, #1c2030 0%, #13161e 55%, #0e1018 100%);
+  z-index: 100;
+  gap: 16px;
+}
+
+.loading-screen .spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(94, 124, 224, 0.15);
+  border-top-color: #5e7ce0;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-screen .label {
+  color: #8890aa;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+/* ---- Glass Panel (reusable) ---- */
+.glass {
+  background: rgba(20, 23, 34, 0.88);
+  border: 1px solid rgba(90, 110, 170, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* ---- Top Bar ---- */
+.topbar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  pointer-events: none;
+}
+.topbar > * { pointer-events: auto; }
+
+.topbar .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.topbar .brand .name {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.topbar .brand .sub {
+  color: #4a5270;
+  font-size: 11px;
+}
+
+/* EGON Selector */
+.egon-selector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+}
+.egon-selector select {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #dde0ec;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 16px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%238890aa'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0 center;
+}
+.egon-selector select option {
+  background: #1a1e2e;
+  color: #dde0ec;
+}
+
+/* ---- Search Bar (v7 — centered) ---- */
+.search-bar {
+  position: absolute;
+  top: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  min-width: 320px;
+}
+.search-bar input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: 12px;
+  flex: 1;
+}
+.search-bar input::placeholder {
+  color: rgba(136, 144, 170, 0.5);
+}
+
+/* Search Results Dropdown */
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 4px;
+  border-radius: 12px;
+  background: rgba(13, 16, 23, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(90, 110, 170, 0.15);
+  padding: 4px;
+}
+.search-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.search-item:hover {
+  background: rgba(94, 124, 224, 0.12);
+}
+.search-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+.search-label {
+  font-size: 11px;
+  font-weight: 500;
+}
+.search-match {
+  font-size: 9px;
+  color: rgba(136, 144, 170, 0.7);
+  line-height: 1.3;
+  margin-top: 2px;
+}
+
+/* Theme Toggle */
+.theme-toggle {
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 11px;
+  color: #8890aa;
+  font-family: inherit;
+}
+
+/* ---- Left Panel: Regions ---- */
+.panel-regions {
+  position: absolute;
+  top: 60px; left: 16px;
+  z-index: 10;
+  padding: 10px 12px;
+  min-width: 220px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+
+.panel-header {
+  color: #4a5270;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-bottom: 6px;
+}
+
+.region-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 0;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.region-item:hover { opacity: 0.8; }
+
+.region-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.region-label { font-size: 11px; font-weight: 500; line-height: 1; }
+.region-sub { color: #4a5270; font-size: 9px; }
+
+/* Intensity bar */
+.region-intensity {
+  width: 30px; height: 3px;
+  background: rgba(90, 110, 170, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-left: auto;
+}
+.region-intensity-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s;
+}
+
+/* ---- Bottom-Left Panel: Threads (Lebensfaeden) ---- */
+.panel-threads {
+  position: absolute;
+  bottom: 16px; left: 16px;
+  z-index: 10;
+  padding: 10px 12px;
+  max-height: 420px;
+  min-width: 220px;
+  overflow-y: auto;
+}
+
+.thread-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.thread-item:hover { background: rgba(90, 110, 170, 0.08); }
+.thread-item.active { background: rgba(90, 110, 170, 0.15); }
+
+.thread-swatch {
+  width: 16px; height: 2.5px;
+  border-radius: 2px;
+  transition: box-shadow 0.3s;
+}
+.thread-item.active .thread-swatch {
+  box-shadow: 0 0 8px currentColor;
+}
+
+.thread-name { font-size: 10px; color: #8890aa; }
+.thread-item.active .thread-name { color: #dde0ec; font-weight: 500; }
+.thread-count { font-size: 9px; color: #4a5270; margin-left: auto; }
+
+/* ---- Right Panel: Info (selected node) ---- */
+.panel-info {
+  position: absolute;
+  top: 60px; right: 16px;
+  z-index: 10;
+  padding: 14px;
+  width: 400px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
+.panel-info .close-btn {
+  background: none;
+  border: none;
+  color: #4a5270;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.info-marker-bar {
+  width: 100%; height: 3px;
+  background: rgba(90, 110, 170, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.info-marker-fill {
+  height: 100%;
+  border-radius: 2px;
+}
+
+.info-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 8px;
+}
+.info-tag {
+  background: rgba(90, 110, 170, 0.1);
+  color: #8890aa;
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.info-tag:hover { background: rgba(90, 110, 170, 0.2); }
+
+/* ---- Right Panel: DNA + Drives ---- */
+.panel-dna {
+  position: absolute;
+  bottom: 16px; right: 16px;
+  z-index: 10;
+  padding: 10px 12px;
+  width: 280px;
+}
+
+.drive-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.drive-label {
+  font-size: 9px;
+  color: #8890aa;
+  width: 55px;
+  text-align: right;
+}
+.drive-bar {
+  flex: 1;
+  height: 4px;
+  background: rgba(90, 110, 170, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.drive-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: #5e7ce0;
+  transition: width 0.5s;
+}
+.drive-value {
+  font-size: 9px;
+  color: #4a5270;
+  width: 30px;
+}
+
+/* ---- Hover Tooltip ---- */
+.hover-tooltip {
+  position: absolute;
+  bottom: 16px; right: 16px;
+  z-index: 10;
+  padding: 8px 12px;
+  max-width: 240px;
+  pointer-events: none;
+}
+
+/* ---- Hint ---- */
+.hint {
+  position: absolute;
+  bottom: 16px; right: 16px;
+  z-index: 5;
+  color: #4a5270;
+  font-size: 9px;
+  text-align: right;
+  line-height: 1.6;
+}
+
+/* ---- Stats Badge ---- */
+.stats-badge {
+  position: absolute;
+  top: 60px; right: 16px;
+  z-index: 8;
+  padding: 6px 10px;
+  font-size: 9px;
+  color: #4a5270;
+  display: flex;
+  gap: 12px;
+}
+.stats-badge .stat-val {
+  color: #8890aa;
+  font-weight: 600;
+}
+
+/* ---- Canvas ---- */
+#three-canvas {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+#three-canvas.hovering { cursor: pointer; }
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(90, 110, 170, 0.2); border-radius: 2px; }
+
+/* ---- Breadcrumb ---- */
+.breadcrumb-bar {
+  position: absolute; top: 86px; left: 50%; transform: translateX(-50%);
+  z-index: 15; padding: 6px 16px; display: flex; align-items: center; gap: 6px; font-size: 11px;
+}
+.breadcrumb-item { color: #8890aa; cursor: default; }
+.breadcrumb-item.clickable { cursor: pointer; }
+.breadcrumb-item.clickable:hover { color: #dde0ec; }
+.breadcrumb-item.active { color: #dde0ec; font-weight: 600; }
+.breadcrumb-sep { color: #4a5270; font-size: 14px; }
+
+/* ---- Deep Dive button ---- */
+.deep-dive-btn {
+  background: rgba(94,124,224,0.15); border: 1px solid rgba(94,124,224,0.3);
+  border-radius: 6px; color: #5e7ce0; font-size: 10px; padding: 4px 10px;
+  cursor: pointer; margin-top: 8px; font-family: inherit; transition: all 0.2s;
+}
+.deep-dive-btn:hover { background: rgba(94,124,224,0.25); border-color: rgba(94,124,224,0.5); }
+
+/* ---- Sub-node detail text area ---- */
+.detail-text-area {
+  background: rgba(0,0,0,0.2); border-radius: 6px; padding: 8px;
+  font-size: 10px; line-height: 1.5; max-height: 400px; overflow-y: auto;
+  white-space: pre-wrap; word-break: break-word;
+}
+
+/* ---- History timeline ---- */
+.history-item { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 10px; }
+.history-date { color: #8890aa; font-size: 9px; }
+.history-delta-pos { color: #4ade80; }
+.history-delta-neg { color: #ef4444; }
+
+/* ---- Gauge bar ---- */
+.gauge-bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.08); overflow: hidden; margin: 4px 0; }
+.gauge-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+
+/* ---- Back button ---- */
+.back-btn {
+  background: none; border: none; color: #5e7ce0; font-size: 11px;
+  cursor: pointer; padding: 0; margin-bottom: 8px; font-family: inherit;
+}
+.back-btn:hover { text-decoration: underline; }
+
+/* ---- Tag chips ---- */
+.tag-chip {
+  display: inline-block; background: rgba(94,124,224,0.12); border-radius: 10px;
+  padding: 2px 8px; font-size: 9px; margin: 2px; color: #8890aa;
+}
+
+/* ---- Formation Path Label (bottom center overlay) ---- */
+.formation-path-label {
+  position: absolute;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  padding: 6px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-align: center;
+  animation: fpFadeIn 0.3s ease-out;
+  pointer-events: none;
+}
+@keyframes fpFadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ---- Formation Button ---- */
+.formation-btn {
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  border-radius: 6px;
+  color: #fbbf24;
+  font-size: 10px;
+  padding: 4px 10px;
+  cursor: pointer;
+  margin-top: 8px;
+  font-family: inherit;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.formation-btn:hover {
+  background: rgba(251, 191, 36, 0.2);
+  border-color: rgba(251, 191, 36, 0.4);
+}
+
+/* ---- Zoom Button ---- */
+.zoom-btn {
+  background: rgba(94, 124, 224, 0.1);
+  border: 1px solid rgba(94, 124, 224, 0.25);
+  border-radius: 6px;
+  color: #5e7ce0;
+  font-size: 10px;
+  padding: 4px 10px;
+  cursor: pointer;
+  margin-top: 4px;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.zoom-btn:hover {
+  background: rgba(94, 124, 224, 0.2);
+}
+
+/* ---- Scrollable observation list ---- */
+.obs-scroll {
+  max-height: 300px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+/* ---- Social map card ---- */
+.social-card {
+  background: rgba(0,0,0,0.15);
+  border-radius: 8px;
+  padding: 8px;
+  margin-top: 6px;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .panel-dna { display: none; }
+  .panel-info { width: 300px; }
+  .panel-regions { min-width: 180px; }
+  .panel-threads { min-width: 180px; max-height: 300px; }
+  .search-bar { min-width: 260px; }
+}

@@ -31,6 +31,7 @@ except ImportError:
 
 EGON_DATA_DIR = os.environ.get('EGON_DATA_DIR', '/opt/hivecore-v2/egons')
 DRY_RUN = False  # Wird per CLI-Flag gesetzt
+FORCE = False    # Wird per CLI-Flag gesetzt — keine interaktiven Prompts
 
 
 # ================================================================
@@ -1312,7 +1313,7 @@ def migrate(egon_id: str):
     if (egon_path / 'core').exists():
         print(f"WARNUNG: {egon_id} hat bereits ein core/ Verzeichnis!")
         print("  Soll die Migration trotzdem ausgefuehrt werden?")
-        if not DRY_RUN:
+        if not DRY_RUN and not FORCE:
             answer = input("  [j/N]: ").strip().lower()
             if answer != 'j':
                 print("Abbruch.")
@@ -1400,6 +1401,30 @@ def migrate(egon_id: str):
     # 4.3: core/state.yaml (aus markers.md -> NDCF)
     log("\n--- 4.3: core/state.yaml ---")
     state_data = convert_markers_to_state(markers_text, bonds_text)
+
+    # Patch: Bestehende Runtime-Felder aus state.yaml bewahren
+    existing_state_path = egon_path / 'core' / 'state.yaml'
+    if existing_state_path.exists():
+        try:
+            existing = yaml.safe_load(existing_state_path.read_text(encoding='utf-8'))
+            if existing and isinstance(existing, dict):
+                PRESERVE_KEYS = [
+                    'identitaet', 'geschlecht', 'pairing', 'zirkadian',
+                    'somatic_gate', 'dna_profile', 'metacognition',
+                    'neuroplastizitaet', 'ego_widersprueche',
+                ]
+                for key in PRESERVE_KEYS:
+                    if key in existing and key not in state_data:
+                        state_data[key] = existing[key]
+                        log_ok(f"Bewahrt aus bestehender state.yaml: {key}")
+
+                # Live-Drives bewahren (aktueller als markers.md-Konvertierung)
+                if 'drives' in existing and existing['drives']:
+                    state_data['drives'] = existing['drives']
+                    log_ok("Live-Drives aus bestehender state.yaml uebernommen")
+        except Exception as e:
+            log_warn(f"Bestehende state.yaml nicht lesbar: {e}")
+
     write_yaml(egon_path / 'core' / 'state.yaml', state_data)
 
     # 4.4: social/bonds.yaml (aus bonds.md -> Bowlby)
@@ -1622,8 +1647,11 @@ def rollback(egon_id: str):
             log_ok(f"Wiederhergestellt: {f.name}")
 
     # v2-Verzeichnisse entfernen (optional)
-    print("\n  v2-Verzeichnisse entfernen? [j/N]: ", end='')
-    answer = input().strip().lower()
+    if FORCE:
+        answer = 'j'
+    else:
+        print("\n  v2-Verzeichnisse entfernen? [j/N]: ", end='')
+        answer = input().strip().lower()
     if answer == 'j':
         for d in ['core', 'social', 'memory', 'capabilities']:
             dir_path = egon_path / d
@@ -1645,7 +1673,7 @@ def rollback(egon_id: str):
 # ================================================================
 
 def main():
-    global DRY_RUN, EGON_DATA_DIR
+    global DRY_RUN, FORCE, EGON_DATA_DIR
 
     parser = argparse.ArgumentParser(
         description='EGON v1 -> v2 Gehirn-Migration'
@@ -1656,6 +1684,8 @@ def main():
                         help='Nur Simulation, keine Dateien schreiben')
     parser.add_argument('--rollback', action='store_true',
                         help='Rollback: v1-Dateien wiederherstellen')
+    parser.add_argument('--force', action='store_true',
+                        help='Keine interaktiven Rueckfragen (fuer Server-Ausfuehrung)')
     parser.add_argument('--data-dir', default=None,
                         help='EGON-Datenverzeichnis (default: /opt/hivecore-v2/egons)')
 
@@ -1665,6 +1695,7 @@ def main():
         EGON_DATA_DIR = args.data_dir
 
     DRY_RUN = args.dry_run
+    FORCE = args.force
 
     if DRY_RUN:
         print("\n  *** DRY RUN — keine Dateien werden geschrieben ***\n")

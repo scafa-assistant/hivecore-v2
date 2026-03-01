@@ -177,6 +177,141 @@ def _update_lust_system(
 
 
 # ================================================================
+# Auto-Bond-Erstellung bei Resonanz-Erkennung
+# ================================================================
+
+# Mindest-Resonanz bevor ein initialer Bond erstellt wird
+RESONANZ_BOND_THRESHOLD = 0.10
+
+def _ensure_resonanz_bond(egon_id: str, partner_id: str, resonanz_score: float) -> bool:
+    """Erstellt einen initialen Freundschafts-Bond wenn Resonanz erkannt wird.
+
+    Ohne Bond kann die Resonanz nie ueber ~70% steigen (Bond-Tiefe = 30% Gewicht).
+    Und ohne Bond kann _apply_phase_transition_effects() den Bond-Typ nie aendern.
+
+    Wird aufgerufen wenn:
+    - Resonanz-Score > RESONANZ_BOND_THRESHOLD (0.10)
+    - Noch kein Bond zum Partner existiert
+
+    Erstellt minimalen Bond: score=5, trust=0.2, bond_typ='freundschaft'
+    Das repraesentiert "bewusste Wahrnehmung" — der EGON hat diesen Partner bemerkt.
+
+    Returns:
+        True wenn ein neuer Bond erstellt wurde, False wenn bereits vorhanden.
+    """
+    if resonanz_score < RESONANZ_BOND_THRESHOLD:
+        return False
+
+    bonds_data = read_yaml_organ(egon_id, 'social', 'bonds.yaml')
+    if not bonds_data:
+        bonds_data = {'bonds': []}
+
+    # Pruefen ob Bond bereits existiert
+    for b in bonds_data.get('bonds', []):
+        if b.get('id') == partner_id:
+            return False  # Existiert bereits
+
+    # Partner-Name ermitteln
+    try:
+        from engine.naming import get_display_name
+        partner_name = get_display_name(partner_id, fmt='vorname')
+    except Exception:
+        partner_name = partner_id.split('_')[0].capitalize()
+
+    # Initialen Bond erstellen
+    today = datetime.now().strftime('%Y-%m-%d')
+    new_bond = {
+        'id': partner_id,
+        'name': partner_name,
+        'type': 'egon',
+        'bond_typ': 'freundschaft',
+        'score': 5,
+        'trust': 0.20,
+        'familiarity': 0.05,
+        'attachment': 'none',
+        'since': today,
+        'last_contact': today,
+        'narbe': False,
+        'bond_history': [
+            {
+                'date': today,
+                'event': 'resonanz_erkennung',
+                'note': f'Resonanz erkannt (Score: {resonanz_score:.3f})',
+                'score_before': 0,
+                'score_after': 5,
+            }
+        ],
+    }
+
+    bonds_data.setdefault('bonds', []).append(new_bond)
+    write_yaml_organ(egon_id, 'social', 'bonds.yaml', bonds_data)
+
+    # Struktur-Event fuer NeuroMap
+    try:
+        from engine.neuroplastizitaet import emittiere_struktur_event
+        emittiere_struktur_event(egon_id, 'BOND_NEU', {
+            'partner': partner_id,
+            'bond_typ': 'freundschaft',
+            'score': 5,
+            'quelle': 'resonanz',
+        })
+    except Exception:
+        pass
+
+    print(f'[resonanz] {egon_id}: NEUER BOND zu {partner_id} erstellt '
+          f'(Resonanz={resonanz_score:.3f}, Score=5, freundschaft)')
+
+    # --- Bidirektional: Partner bekommt auch einen Bond zurueck ---
+    partner_bonds = read_yaml_organ(partner_id, 'social', 'bonds.yaml')
+    if partner_bonds:
+        has_reverse = any(b.get('id') == egon_id for b in partner_bonds.get('bonds', []))
+        if not has_reverse:
+            try:
+                own_name = get_display_name(egon_id, fmt='vorname')
+            except Exception:
+                own_name = egon_id.split('_')[0].capitalize()
+
+            reverse_bond = {
+                'id': egon_id,
+                'name': own_name,
+                'type': 'egon',
+                'bond_typ': 'freundschaft',
+                'score': 5,
+                'trust': 0.20,
+                'familiarity': 0.05,
+                'attachment': 'none',
+                'since': today,
+                'last_contact': today,
+                'narbe': False,
+                'bond_history': [
+                    {
+                        'date': today,
+                        'event': 'resonanz_erkennung',
+                        'note': f'Resonanz erkannt (Score: {resonanz_score:.3f})',
+                        'score_before': 0,
+                        'score_after': 5,
+                    }
+                ],
+            }
+            partner_bonds.setdefault('bonds', []).append(reverse_bond)
+            write_yaml_organ(partner_id, 'social', 'bonds.yaml', partner_bonds)
+
+            try:
+                emittiere_struktur_event(partner_id, 'BOND_NEU', {
+                    'partner': egon_id,
+                    'bond_typ': 'freundschaft',
+                    'score': 5,
+                    'quelle': 'resonanz_bidirektional',
+                })
+            except Exception:
+                pass
+
+            print(f'[resonanz] {partner_id}: REVERSE-BOND zu {egon_id} erstellt (bidirektional)')
+
+    return True
+
+
+# ================================================================
 # Phase-Transition Effects (romantisch_fest, Exklusivitaet)
 # ================================================================
 
@@ -210,7 +345,19 @@ def _apply_phase_transition_effects(
             bond = b
             break
     if not bond:
-        return
+        # Safety-Net: Bond sollte durch _ensure_resonanz_bond() existieren,
+        # aber falls nicht, erstelle ihn hier
+        print(f'[resonanz] {egon_id}: WARN Bond zu {partner_id} fehlt in phase_transition, '
+              f'erstelle via _ensure_resonanz_bond()')
+        _ensure_resonanz_bond(egon_id, partner_id, 0.50)
+        # Nochmal lesen
+        bonds_data = read_yaml_organ(egon_id, 'social', 'bonds.yaml')
+        for b in bonds_data.get('bonds', []):
+            if b.get('id') == partner_id:
+                bond = b
+                break
+        if not bond:
+            return  # Wirklich nicht moeglich
 
     changed = False
     today = datetime.now().strftime('%Y-%m-%d')
@@ -316,6 +463,24 @@ def update_resonanz(egon_id: str) -> dict:
             best_score = score
             best_partner = other_id
 
+    # --- Auto-Bond bei Resonanz: Bond erstellen wenn noetig ---
+    # Fuer ALLE Partner mit Resonanz > Threshold einen initialen Bond sicherstellen
+    # So kann Bond-Tiefe in der naechsten Berechnung einfliessen
+    for partner_id, partner_score in all_scores.items():
+        bond_created = _ensure_resonanz_bond(egon_id, partner_id, partner_score)
+        if bond_created:
+            # Resonanz mit neuem Bond nochmal berechnen (Bond-Tiefe jetzt > 0)
+            other_state = read_yaml_organ(partner_id, 'core', 'state.yaml')
+            if other_state:
+                new_score = _calculate_resonanz(
+                    egon_id, state, drives_self,
+                    partner_id, other_state, geschlecht,
+                )
+                all_scores[partner_id] = round(new_score, 3)
+                if new_score > best_score:
+                    best_score = new_score
+                    best_partner = partner_id
+
     # --- Pairing-State aktualisieren ---
     old_phase = pairing.get('pairing_phase', 'keine')
     old_partner = pairing.get('resonanz_partner')
@@ -360,6 +525,13 @@ def update_resonanz(egon_id: str) -> dict:
     if new_phase != old_phase:
         print(f'[resonanz] {egon_id}: Phase {old_phase} -> {new_phase} '
               f'(Partner: {best_partner}, Score: {best_score:.3f})')
+
+        try:
+            from engine.neuroplastizitaet import ne_emit
+            ne_emit(egon_id, 'SIGNAL', 'amygdala', 'praefrontal', label=f'Resonanz: {new_phase}', intensitaet=0.7, animation='flow', dauer=3.0)
+        except Exception:
+            pass
+
     # Log LUST-Aenderung
     if lust_result.get('activation_type'):
         print(f'[resonanz] {egon_id}: LUST {lust_result["activation_type"]} '
@@ -408,7 +580,10 @@ def _calculate_resonanz(
     drives_other = state_other.get('drives', {})
 
     # --- Faktor 1: Komplementaritaet (40%) ---
-    komplementaritaet = _calc_komplementaritaet(drives_self, drives_other)
+    # Patch 6: Mit Agent-IDs fuer Skill-Komplementaritaet
+    komplementaritaet = _calc_komplementaritaet(
+        drives_self, drives_other, egon_id, other_id,
+    )
 
     # --- Faktor 2: Kompatibilitaet (30%) ---
     kompatibilitaet = _calc_kompatibilitaet(state_self, state_other)
@@ -438,35 +613,70 @@ def _calculate_resonanz(
 # Faktor 1: Komplementaritaet (40%)
 # ================================================================
 
-def _calc_komplementaritaet(drives_a: dict, drives_b: dict) -> float:
+def _calc_komplementaritaet(
+    drives_a: dict, drives_b: dict,
+    egon_id_a: str = '', egon_id_b: str = '',
+) -> float:
     """Berechnet wie UNTERSCHIEDLICH die Staerken zweier Agents sind.
 
-    Euclidean Distance der Drive-Vektoren, normalisiert auf 0.0-1.0.
-    HOCH wenn Partner stark ist wo ich schwach bin → "Zusammen sind wir mehr".
+    Zwei Sub-Faktoren (Patch 6: Skill-Komplementaritaet):
+    - Drive-Komplementaritaet (60%): Euclidean Distance der Drive-Vektoren
+    - Skill-Komplementaritaet (40%): Heterosis — Skills die nur einer hat
 
-    Args:
-        drives_a: Drive-Dict Agent A (SEEKING, ACTION, CARE, ...)
-        drives_b: Drive-Dict Agent B
+    HOCH wenn Partner stark ist wo ich schwach bin → "Zusammen sind wir mehr".
 
     Returns:
         0.0 (identisch) bis 1.0 (maximal verschieden)
     """
-    if not drives_a or not drives_b:
-        return 0.0
+    # --- Drive-Komplementaritaet (60%) ---
+    drive_komp = 0.0
+    if drives_a and drives_b:
+        vec_a = [float(drives_a.get(k, 0.0)) for k in DRIVE_KEYS]
+        vec_b = [float(drives_b.get(k, 0.0)) for k in DRIVE_KEYS]
 
-    # Drive-Vektoren aufbauen
-    vec_a = [float(drives_a.get(k, 0.0)) for k in DRIVE_KEYS]
-    vec_b = [float(drives_b.get(k, 0.0)) for k in DRIVE_KEYS]
+        sum_sq = sum((a - b) ** 2 for a, b in zip(vec_a, vec_b))
+        distance = math.sqrt(sum_sq)
 
-    # Euclidean Distance
-    sum_sq = sum((a - b) ** 2 for a, b in zip(vec_a, vec_b))
-    distance = math.sqrt(sum_sq)
+        max_distance = math.sqrt(len(DRIVE_KEYS))
+        drive_komp = distance / max_distance if max_distance > 0 else 0.0
 
-    # Normalisieren: max moegliche Distanz = sqrt(N * 1.0^2) = sqrt(10) ≈ 3.16
-    max_distance = math.sqrt(len(DRIVE_KEYS))
-    normalized = distance / max_distance if max_distance > 0 else 0.0
+    # --- Skill-Komplementaritaet (40%) — Patch 6: Heterosis ---
+    skill_komp = 0.5  # Default wenn keine Skills vorhanden
+    if egon_id_a and egon_id_b:
+        try:
+            skills_a_data = read_yaml_organ(egon_id_a, 'capabilities', 'skills.yaml')
+            skills_b_data = read_yaml_organ(egon_id_b, 'capabilities', 'skills.yaml')
 
-    return max(0.0, min(1.0, normalized))
+            skills_a = set()
+            skills_b = set()
+
+            if skills_a_data:
+                for s in skills_a_data.get('skills', []):
+                    name = s.get('name', '')
+                    if name:
+                        skills_a.add(name.lower())
+            if skills_b_data:
+                for s in skills_b_data.get('skills', []):
+                    name = s.get('name', '')
+                    if name:
+                        skills_b.add(name.lower())
+
+            if skills_a or skills_b:
+                # Unique Skills die nur einer hat
+                nur_a = skills_a - skills_b
+                nur_b = skills_b - skills_a
+                alle = skills_a | skills_b
+
+                # Hohe Komplementaritaet = viele einzigartige Skills
+                # → "Zusammen koennen wir mehr"
+                skill_komp = len(nur_a | nur_b) / max(len(alle), 1)
+        except Exception:
+            pass  # Skill-Files nicht vorhanden → Default 0.5
+
+    # Gewichtete Kombination
+    komplementaritaet = drive_komp * 0.6 + skill_komp * 0.4
+
+    return max(0.0, min(1.0, komplementaritaet))
 
 
 # ================================================================

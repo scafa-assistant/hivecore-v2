@@ -34,12 +34,14 @@ REGULATION_ZYKLUS = 13       # Regulation-Stufe ab hier
 
 MAX_MUSTER_ALARME = 5        # Pro Zyklus
 MAX_KORREKTUREN = 2          # Pro Zyklus
-COOLDOWN_GESPRAECHE = 3      # Nach Neubewertung
+COOLDOWN_GESPRAECHE = 5      # Patch 17: Frische Wunden fuehlen lassen (war: 3)
 
 # Muster-Erkennung: Mindest-Wiederholungen
 WIEDERHOLUNG_MIN = 3         # Gleiche Emotion + gleicher Partner
 GENERALISIERT_MIN = 4        # Gleiche Emotion, verschiedene Partner
 BOND_DRIFT_SCHWELLE = 0.15   # Delta fuer Bond-Drift
+EGO_WIDERSPRUCH_MIN = 3      # Patch 17: Erst nach 3x korrigieren (war: 1)
+UEBERFLUTET_SCHWELLE = 0.85  # Patch 17: Darueber Metacognition offline
 
 
 # ================================================================
@@ -89,6 +91,25 @@ def muster_check(egon_id: str, aktuelle_episode: dict) -> dict | None:
     meta = state.get('metacognition', {})
     if meta.get('cooldown', 0) > 0:
         return None
+
+    # Patch 17: Ueberflutet-Schwelle — bei hoher Emotion kein Metadenken
+    # Biologisch: Praefrontaler Kortex geht bei Ueberflutung offline
+    # Ein ueberwältigter Mensch kann nicht metakognitiv reflektieren
+    drives = state.get('drives', {})
+    max_drive = max(
+        (v for v in drives.values() if isinstance(v, (int, float))),
+        default=0,
+    )
+    if max_drive > UEBERFLUTET_SCHWELLE:
+        try:
+            from engine.kalibrierung import log_decision
+            log_decision(egon_id, 'metacognition', 'ueberflutet_gesperrt', {
+                'max_drive': round(max_drive, 3),
+                'schwelle': UEBERFLUTET_SCHWELLE,
+            })
+        except Exception:
+            pass
+        return None  # Ueberflutet — fuehlen statt analysieren
 
     # Max-Alarme-Check
     if meta.get('muster_alarme_zyklus', 0) >= MAX_MUSTER_ALARME:
@@ -146,20 +167,45 @@ def muster_check(egon_id: str, aktuelle_episode: dict) -> dict | None:
                     ),
                 }
 
-    # ── MUSTER 3: Ego-Widerspruch ──
+    # ── MUSTER 3: Ego-Widerspruch (Patch 17: erst ab 3x) ──
+    # Der menschlichste Moment ist wenn jemand "Ich bin geduldig" glaubt
+    # aber RAGE zeigt. Das ist kein Bug. Erst nach 3+ Wiederholungen
+    # wird es als Muster gemeldet — vorher nur BEMERKT, nicht korrigiert.
     ego_text = read_md_organ(egon_id, 'core', 'ego.md')
     if ego_text and emotion:
         widerspruch = _pruefe_ego_widerspruch(ego_text, emotion, aktuelle_episode)
         if widerspruch:
-            return {
-                'typ': 'ego_widerspruch',
-                'aussage': widerspruch,
-                'episode': aktuelle_episode.get('summary', ''),
-                'frage': (
-                    f"Ich glaube '{widerspruch}' — aber ich habe "
-                    f"gerade das Gegenteil getan. Was stimmt?"
-                ),
-            }
+            # Zaehler im State: Wie oft dieser Widerspruch aufgetreten ist
+            ego_ws = meta.get('ego_widersprueche', {})
+            key = f'{emotion}:{widerspruch[:30]}'
+            ego_ws[key] = ego_ws.get(key, 0) + 1
+            meta['ego_widersprueche'] = ego_ws
+            state['metacognition'] = meta
+            write_yaml_organ(egon_id, 'core', 'state.yaml', state)
+
+            if ego_ws[key] < EGO_WIDERSPRUCH_MIN:
+                # Bemerkt aber NICHT gemeldet — fuehlen lassen
+                try:
+                    from engine.kalibrierung import log_decision
+                    log_decision(egon_id, 'metacognition', 'ego_widerspruch_bemerkt', {
+                        'widerspruch': widerspruch[:50],
+                        'zaehler': ego_ws[key],
+                        'minimum': EGO_WIDERSPRUCH_MIN,
+                    })
+                except Exception:
+                    pass
+            else:
+                return {
+                    'typ': 'ego_widerspruch',
+                    'aussage': widerspruch,
+                    'episode': aktuelle_episode.get('summary', ''),
+                    'wiederholungen': ego_ws[key],
+                    'frage': (
+                        f"Ich glaube '{widerspruch}' — aber ich habe "
+                        f"jetzt {ego_ws[key]} Mal das Gegenteil getan. "
+                        f"Was stimmt wirklich?"
+                    ),
+                }
 
     # ── MUSTER 4: Bond-Drift ──
     if partner:
@@ -418,7 +464,6 @@ async def zyklusende_metacognition(egon_id: str) -> dict | None:
             'role': 'user',
             'content': 'Reflektiere ueber deinen letzten Zyklus.',
         }],
-        tier='2',
         egon_id=egon_id,
     )
 
@@ -519,7 +564,6 @@ Moegliche aufloesung-Werte: "ueberzeugung_anpassen", "verhalten_war_ausnahme", "
     result = await llm_chat(
         system_prompt=prompt,
         messages=[{'role': 'user', 'content': 'Bewerte dein Muster.'}],
-        tier='2',
         egon_id=egon_id,
     )
 
@@ -854,6 +898,12 @@ def metacognition_post_chat(
             f'[metacognition] {egon_id}: Muster erkannt — '
             f'{alarm["typ"]}: {alarm.get("frage", "")[:80]}'
         )
+
+        try:
+            from engine.neuroplastizitaet import ne_emit
+            ne_emit(egon_id, 'AKTIVIERUNG', 'praefrontal', 'praefrontal', label=f'Metacognition: {alarm.get("typ", "?")}', intensitaet=0.7, animation='glow')
+        except Exception:
+            pass
     else:
         # Cooldown reduzieren auch wenn kein Alarm
         reduziere_cooldown(egon_id)

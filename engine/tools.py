@@ -1,18 +1,17 @@
-"""Tool Registry — Adams echte Werkzeuge.
+"""Tool Registry — EGON Werkzeuge.
 
 Jedes Tool hat:
   - name: Eindeutiger Name
   - description: Was das Tool macht (fuer den LLM)
   - parameters: JSON-Schema der Parameter
-  - tier_min: Minimaler Tier der dieses Tool nutzen darf (1/2/3)
 
-Die Tool-Liste wird in OpenAI/Anthropic Function-Calling Format
-umgewandelt, je nach welches LLM genutzt wird.
+Alle Tools stehen allen EGONs zur Verfuegung.
+Alles laeuft ueber Moonshot (Kimi K2.5).
 """
 
 
 # ================================================================
-# WORKSPACE TOOLS (Tier 1+)
+# WORKSPACE TOOLS
 # ================================================================
 
 TOOL_WORKSPACE_WRITE = {
@@ -36,7 +35,6 @@ TOOL_WORKSPACE_WRITE = {
         },
         'required': ['path', 'content'],
     },
-    'tier_min': 1,
 }
 
 TOOL_WORKSPACE_READ = {
@@ -52,7 +50,6 @@ TOOL_WORKSPACE_READ = {
         },
         'required': ['path'],
     },
-    'tier_min': 1,
 }
 
 TOOL_WORKSPACE_LIST = {
@@ -68,7 +65,6 @@ TOOL_WORKSPACE_LIST = {
             },
         },
     },
-    'tier_min': 1,
 }
 
 TOOL_WORKSPACE_DELETE = {
@@ -84,12 +80,11 @@ TOOL_WORKSPACE_DELETE = {
         },
         'required': ['path'],
     },
-    'tier_min': 1,
 }
 
 
 # ================================================================
-# WEB TOOLS (Tier 2+) — Phase B
+# WEB TOOLS
 # ================================================================
 
 TOOL_WEB_FETCH = {
@@ -113,7 +108,6 @@ TOOL_WEB_FETCH = {
         },
         'required': ['url'],
     },
-    'tier_min': 2,
 }
 
 TOOL_WEB_SEARCH = {
@@ -132,12 +126,11 @@ TOOL_WEB_SEARCH = {
         },
         'required': ['query'],
     },
-    'tier_min': 2,
 }
 
 
 # ================================================================
-# SKILL TOOLS (Tier 2+) — Phase C
+# SKILL TOOLS
 # ================================================================
 
 TOOL_SKILL_SEARCH = {
@@ -153,7 +146,6 @@ TOOL_SKILL_SEARCH = {
         },
         'required': ['query'],
     },
-    'tier_min': 2,
 }
 
 TOOL_SKILL_INSTALL = {
@@ -172,7 +164,6 @@ TOOL_SKILL_INSTALL = {
         },
         'required': ['skill_url'],
     },
-    'tier_min': 2,
 }
 
 
@@ -192,18 +183,8 @@ ALL_TOOLS = [
 ]
 
 
-def get_tools_for_tier(tier: int) -> list[dict]:
-    """Gibt die Tools zurueck die fuer einen Tier verfuegbar sind.
-
-    Tier 1 (Moonshot 8K): Nur Workspace-Tools (spart Tokens)
-    Tier 2+ (Kimi/Sonnet): Alle Tools
-    """
-    return [t for t in ALL_TOOLS if t['tier_min'] <= tier]
-
-
-def get_openai_tools(tier: int) -> list[dict]:
-    """Tools im OpenAI Function-Calling Format (fuer Moonshot + Kimi)."""
-    tools = get_tools_for_tier(tier)
+def get_openai_tools() -> list[dict]:
+    """Alle Tools im OpenAI Function-Calling Format (fuer Moonshot / Kimi K2.5)."""
     return [
         {
             'type': 'function',
@@ -213,18 +194,5 @@ def get_openai_tools(tier: int) -> list[dict]:
                 'parameters': t['parameters'],
             },
         }
-        for t in tools
-    ]
-
-
-def get_anthropic_tools(tier: int) -> list[dict]:
-    """Tools im Anthropic Tool-Use Format (fuer Sonnet)."""
-    tools = get_tools_for_tier(tier)
-    return [
-        {
-            'name': t['name'],
-            'description': t['description'],
-            'input_schema': t['parameters'],
-        }
-        for t in tools
+        for t in ALL_TOOLS
     ]

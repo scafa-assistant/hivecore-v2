@@ -73,7 +73,7 @@ DNA_REGULATION_MOD = {
 # Schwellen
 # ================================================================
 
-KRITISCH_HOCH = 0.92       # Ueber 0.92: Verstaerkte Korrektur (x2.0)
+KRITISCH_HOCH = 0.95       # Patch 17: Peaks nicht kappen (war: 0.92, x2.0)
 KRITISCH_NIEDRIG = 0.08    # Unter 0.08: Verstaerkte Anhebung (x2.0)
 CLAMPING_MIN = 0.05        # Minimaler Drive-Wert
 CLAMPING_MAX = 0.95        # Maximaler Drive-Wert
@@ -147,7 +147,15 @@ def echtzeit_homoestase(egon_id: str) -> dict:
         # Kritische Schwellen: Verstaerkte Korrektur (Notfall-Bremse)
         verstaerkung = 1.0
         if aktuell > KRITISCH_HOCH or aktuell < KRITISCH_NIEDRIG:
-            verstaerkung = 2.0
+            verstaerkung = 1.5  # Patch 17: Sanftere Bremse (war: 2.0)
+            try:
+                from engine.kalibrierung import log_decision
+                log_decision(egon_id, 'homoestase', 'notfall_bremse', {
+                    'drive': system, 'wert': round(aktuell, 3),
+                    'schwelle': KRITISCH_HOCH, 'verstaerkung': 1.5,
+                })
+            except Exception:
+                pass
 
         # Korrektur berechnen (bidirektional — zieht IMMER zur Baseline)
         korrektur = abweichung * rate * dna_mod * belastungs_mod * verstaerkung
@@ -172,6 +180,12 @@ def echtzeit_homoestase(egon_id: str) -> dict:
             f'[homoestase] {egon_id}: {len(korrekturen)} Systeme reguliert, '
             f'druck={druck:.2f}'
         )
+
+        try:
+            from engine.neuroplastizitaet import ne_emit
+            ne_emit(egon_id, 'SIGNAL', 'hypothalamus', 'ALL', label='Homöostase-Update', intensitaet=0.4, animation='glow')
+        except Exception:
+            pass
 
     return {
         'reguliert': bool(korrekturen),

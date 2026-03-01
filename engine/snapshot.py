@@ -28,11 +28,27 @@ V1_FILES = [
 ]
 
 V2_ORGANS = {
-    'core': ['dna.md', 'ego.md', 'state.yaml'],
-    'social': ['bonds.yaml', 'network.yaml', 'owner.md', 'egon_self.md'],
+    'core': ['soul.md', 'dna.md', 'ego.md', 'state.yaml', 'body.md'],
+    'social': ['bonds.yaml', 'network.yaml', 'bezugsmensch.md', 'owner.md', 'egon_self.md'],
     'memory': ['episodes.yaml', 'inner_voice.yaml', 'inner_voice.md',
                'experience.yaml', 'emotional_state.yaml'],
     'capabilities': ['skills.yaml', 'wallet.yaml'],
+}
+
+# v3: Philosophische Pfade (nach Migration)
+V3_ORGANS = {
+    'kern': ['seele.md', 'ich.md', 'weisheiten.md', 'lebensweg.md', 'ahnen.yaml'],
+    'innenwelt': ['innenwelt.yaml', 'koerpergefuehl.yaml'],
+    'bindungen': ['naehe.yaml', 'gefuege.yaml', 'begleiter.md', 'selbstbild.md',
+                  'gefuege_mapping.yaml'],
+    'erinnerungen': ['erlebtes.yaml', 'erfahrungen.yaml', 'kurzzeitgedaechtnis.md',
+                     'traeume.yaml', 'zyklusgedaechtnis.md', 'archiv.md',
+                     'lebensfaeden.yaml', 'cue_index.yaml'],
+    'innere_stimme': ['gedanken.yaml'],
+    'leib': ['leib.md', 'bewegungen.yaml'],
+    'faehigkeiten': ['koennen.yaml', 'wallet.yaml', 'eigenheiten.yaml'],
+    'lebenskraft': ['themen.yaml'],
+    'tagebuch': ['selbst.yaml', 'begleiter.yaml'],
 }
 
 
@@ -97,8 +113,10 @@ def create_snapshot(egon_id: str, brain_version: str,
                     file_hashes[key] = _sha256(f)
 
     else:
-        # V2: Kopiere alle Organs aus allen Layern
-        for layer, filenames in V2_ORGANS.items():
+        # V2/V3: Kopiere alle Organs aus allen Layern
+        # v3 erkennen: kern/ existiert → v3-Organs nutzen
+        organs_map = V3_ORGANS if (egon_base / 'kern').is_dir() else V2_ORGANS
+        for layer, filenames in organs_map.items():
             layer_dir = egon_base / layer
             if not layer_dir.is_dir():
                 continue
@@ -128,8 +146,10 @@ def create_snapshot(egon_id: str, brain_version: str,
                 files_copied[f.name] = _file_size(f)
                 file_hashes[f.name] = _sha256(f)
 
-        # Contacts
-        contacts_dir = egon_base / 'contacts' / 'active'
+        # Contacts / Begegnungen
+        contacts_dir = egon_base / 'begegnungen' / 'active'
+        if not contacts_dir.is_dir():
+            contacts_dir = egon_base / 'contacts' / 'active'
         if contacts_dir.is_dir():
             snap_contacts = snap_dir / 'contacts' / 'active'
             snap_contacts.mkdir(parents=True, exist_ok=True)

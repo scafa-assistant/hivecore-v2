@@ -29,8 +29,7 @@ AUDIO_DIR.mkdir(parents=True, exist_ok=True)
 
 class VoiceResponse(BaseModel):
     response: str
-    tier_used: int
-    model: str
+    model: str = 'moonshot'
     egon_id: str
     transcript: str
     action: Optional[dict[str, Any]] = None
@@ -75,7 +74,6 @@ async def chat_voice(
             logger.warning(f'Audio zu klein ({len(content)} bytes) — ueberspringe Transkription')
             return VoiceResponse(
                 response='Die Aufnahme war zu kurz. Versuch es nochmal — halte den Button etwas laenger.',
-                tier_used=0,
                 model='size-check',
                 egon_id=egon_id,
                 transcript='',
@@ -98,7 +96,6 @@ async def chat_voice(
             logger.warning(f'Transkription leer fuer {filename} — sende Default-Antwort')
             return VoiceResponse(
                 response='Ich konnte deine Sprachnachricht leider nicht verstehen. Versuch es nochmal — sprich deutlich und nah ans Mikrofon.',
-                tier_used=0,
                 model='whisper-fallback',
                 egon_id=egon_id,
                 transcript='',
@@ -114,7 +111,6 @@ async def chat_voice(
         chat_req = ChatRequest(
             egon_id=egon_id,
             message=transcript,
-            tier='auto',
             device_id=device_id,
             user_name=user_name,
         )
@@ -126,7 +122,6 @@ async def chat_voice(
             logger.error(f'Chat-Call fehlgeschlagen: {type(e).__name__}: {e}')
             return VoiceResponse(
                 response=f'Ich habe verstanden: "{transcript}" — aber konnte gerade nicht antworten. Versuch es nochmal.',
-                tier_used=0,
                 model='chat-fallback',
                 egon_id=egon_id,
                 transcript=transcript,
@@ -137,7 +132,6 @@ async def chat_voice(
         # 6. Erfolg — Response zusammenbauen (inkl. Emotion/Body aus Phase 3)
         return VoiceResponse(
             response=chat_result.response,
-            tier_used=chat_result.tier_used,
             model=chat_result.model,
             egon_id=chat_result.egon_id,
             transcript=transcript,
@@ -155,7 +149,6 @@ async def chat_voice(
         logger.error(f'Voice-Endpoint Crash: {type(e).__name__}: {e}')
         return VoiceResponse(
             response='Etwas ist schiefgelaufen. Versuch es nochmal.',
-            tier_used=0,
             model='error-fallback',
             egon_id=egon_id,
             transcript='',

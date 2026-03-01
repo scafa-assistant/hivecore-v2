@@ -153,6 +153,55 @@ def event_buffer_push(egon_id: str, events: list) -> None:
         _event_buffer[egon_id] = buf[-_MAX_BUFFER:]
 
 
+def ne_emit(egon_id: str, typ: str, von: str, nach: str = '',
+            label: str = '', intensitaet: float = 0.5,
+            animation: str = 'pulse', dauer: float = 2.0,
+            extra: dict | None = None) -> None:
+    """Universelle NeuroMap-Event-Emission fuer alle Module.
+
+    Einfach aus jedem Modul aufrufbar:
+        from engine.neuroplastizitaet import ne_emit
+        ne_emit(egon_id, 'AKTIVIERUNG', 'hippocampus', 'praefrontal',
+                label='Episoden-Abruf', intensitaet=0.7)
+
+    Args:
+        egon_id: Welcher EGON.
+        typ: Event-Typ (AKTIVIERUNG, SIGNAL, IMPULS, STRUKTUR_NEU, etc.)
+        von: Quell-Region (z.B. 'hippocampus', 'amygdala', 'thalamus').
+        nach: Ziel-Region (optional, leer fuer lokale Aktivierung).
+        label: Menschenlesbarer Text fuers Frontend.
+        intensitaet: 0.0-1.0 — steuert Helligkeit/Groesse im Frontend.
+        animation: Frontend-Animation ('pulse', 'flow', 'glow', 'flash', 'color_drift').
+        dauer: Dauer der Animation in Sekunden.
+        extra: Optionale zusaetzliche Daten.
+    """
+    from datetime import datetime
+    ts = datetime.now().strftime('%H:%M:%S')
+    ts_unix = time.time()
+    event = {
+        'typ': typ,
+        'von': von,
+        'nach': nach or von,
+        'label': label,
+        'intensitaet': round(min(1.0, max(0.0, intensitaet)), 2),
+        'animation': animation,
+        'dauer_sekunden': dauer,
+        'timestamp': ts,
+        'timestamp_unix': ts_unix,
+    }
+    if extra:
+        event.update(extra)
+    event_buffer_push(egon_id, [event])
+    # Region-Nutzung tracken
+    regs = set()
+    if von and von != 'ALL':
+        regs.add(von)
+    if nach and nach != von and nach != 'ALL':
+        regs.add(nach)
+    if regs:
+        regionen_nutzung_erhoehen(egon_id, list(regs))
+
+
 def event_buffer_pop(egon_id: str) -> list:
     """Alle Events abholen und Buffer leeren."""
     return _event_buffer.pop(egon_id, [])
@@ -898,7 +947,75 @@ def synaptisches_pruning(egon_id: str) -> list:
     except Exception:
         pass
 
-    # 4. Pruning-Statistik speichern
+    # 4. MAX_DYNAMISCHE_FAEDEN Enforcement (Patch 16)
+    # Zaehle dynamische Faeden und pruene schwache wenn Limit ueberschritten
+    snapshot = baue_struktur_snapshot(egon_id)
+    statistik = snapshot.get('statistik', {})
+    dynamische_total = (
+        statistik.get('bonds_aktiv', 0)
+        + statistik.get('lebensfaeden_aktiv', 0)
+        + statistik.get('praegungen_sichtbar', 0)
+        + statistik.get('metacognition_loops', 0)
+    )
+
+    if dynamische_total > MAX_DYNAMISCHE_FAEDEN:
+        ueberschuss = dynamische_total - MAX_DYNAMISCHE_FAEDEN
+        print(f'[neuroplastizitaet] {egon_id}: {dynamische_total} dynamische Faeden '
+              f'> {MAX_DYNAMISCHE_FAEDEN} — Pruning {ueberschuss} schwache')
+
+        # Pruning-Prioritaet (schwachste zuerst):
+        # 1. Bond-Faeden mit staerke < 0.15
+        # 2. Praegungen mit opacity < 0.05
+        # 3. Abgeschlossene Lebensfaeden
+        pruning_count = 0
+
+        # 1. Schwache Bonds entfernen
+        try:
+            bonds_data = read_yaml_organ(egon_id, 'social', 'bonds.yaml') or {}
+            bonds = bonds_data.get('bonds', [])
+            schwache_bonds = sorted(
+                [b for b in bonds if isinstance(b, dict) and b.get('score', 0) < 15],
+                key=lambda b: b.get('score', 0),
+            )
+            for bond in schwache_bonds:
+                if pruning_count >= ueberschuss:
+                    break
+                bid = bond.get('id', '')
+                if bid and bid != 'OWNER_CURRENT':
+                    events.append({
+                        'typ': 'STRUKTUR_ENTFERNT',
+                        'timestamp': ts, 'timestamp_unix': ts_unix,
+                        'faden_id': f'bond_{bid}',
+                        'grund': 'max_faeden_pruning',
+                        'animation': 'dissolve',
+                    })
+                    pruning_count += 1
+                    entfernte += 1
+        except Exception:
+            pass
+
+        # 2. Schwache Praegungen entfernen
+        if pruning_count < ueberschuss:
+            try:
+                praeg_data = read_yaml_organ(egon_id, 'core', 'epigenetik.yaml') or {}
+                praegungen = praeg_data.get('praegungen', [])
+                schwache = [p for p in praegungen if p.get('staerke', 0) < 0.05]
+                for p in schwache:
+                    if pruning_count >= ueberschuss:
+                        break
+                    events.append({
+                        'typ': 'STRUKTUR_ENTFERNT',
+                        'timestamp': ts, 'timestamp_unix': ts_unix,
+                        'faden_id': f'praeg_{p.get("typ", "?")}',
+                        'grund': 'max_faeden_pruning',
+                        'animation': 'dissolve',
+                    })
+                    pruning_count += 1
+                    entfernte += 1
+            except Exception:
+                pass
+
+    # 5. Pruning-Statistik speichern
     from datetime import date
     neuro['pruning'] = {
         'letztes_pruning': str(date.today()),
@@ -906,9 +1023,8 @@ def synaptisches_pruning(egon_id: str) -> list:
         'gestaerkte_faeden_gesamt': gestaerkte,
     }
 
-    # 5. Faden-Statistik aktualisieren
-    snapshot = baue_struktur_snapshot(egon_id)
-    neuro['faden_statistik'] = snapshot.get('statistik', {})
+    # 6. Faden-Statistik aktualisieren
+    neuro['faden_statistik'] = statistik
 
     state['neuroplastizitaet'] = neuro
     write_yaml_organ(egon_id, 'core', 'state.yaml', state)

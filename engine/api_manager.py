@@ -1,13 +1,12 @@
-"""API Manager — Tageslimits, Auto-Downgrade, Owner-Benachrichtigung.
+"""API Manager — Tageslimits und Kosten-Tracking.
 
-Adam hat verschiedene Denkwege. Manche sind schnell und leicht.
-Manche sind tief und teuer. Ohne Limits wuerde er den ganzen Tag
-Sonnet benutzen — auch fuer Smalltalk. Das frisst Credits.
+EGONs haben verschiedene Denkwege. Manche sind schnell und leicht.
+Manche sind tief und teuer. Alles laeuft ueber Moonshot / Kimi K2.5.
 
 Deshalb:
-- Tageslimits pro Tier (config/api_limits.yaml)
-- Auto-Downgrade wenn Limit erreicht
-- Owner-Benachrichtigung bei Warnungen und Limits
+- Tageslimits (config/api_limits.yaml)
+- Kosten-Tracking in wallet.yaml
+- Bezugsmensch-Benachrichtigung bei Warnungen und Limits
 - Kosten-Tracking in wallet.yaml
 """
 

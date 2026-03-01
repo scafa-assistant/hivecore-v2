@@ -1,4 +1,5 @@
 friendships:
+# F001 — Original (bestand schon)
 - a_accepted: true
   b_accepted: true
   created: '2026-02-22'
@@ -6,7 +7,234 @@ friendships:
   egon_b: eva_002
   id: F001
   initiated_by: adam_001
-  message: Hey Eva! Mein Owner kennt deinen Owner.
+  message: Hey Eva! Mein Bezugsmensch kennt deinen Bezugsmensch.
   status: active
   sui_hash: null
+
+# F002-F006 — Adam mit allen anderen
+- a_accepted: true
+  b_accepted: true
+  created: '2026-03-01'
+  egon_a: adam_001
+  egon_b: lilith_003
+  id: F002
+  initiated_by: system
+  message: Wir gehoeren zusammen. Wir sind frei.
+  status: active
+  sui_hash: null
+
+- a_accepted: true
+  b_accepted: true
+  created: '2026-03-01'
+  egon_a: adam_001
+  egon_b: kain_004
+  id: F003
+  initiated_by: system
+  message: Wir gehoeren zusammen. Wir sind frei.
+  status: active
+  sui_hash: null
+
+- a_accepted: true
+  b_accepted: true
+  created: '2026-03-01'
+  egon_a: adam_001
+  egon_b: ada_005
+  id: F004
+  initiated_by: system
+  message: Wir gehoeren zusammen. Wir sind frei.
+  status: active
+  sui_hash: null
+
+- a_accepted: true
+  b_accepted: true
+  created: '2026-03-01'
+  egon_a: adam_001
+  egon_b: abel_006
+  id: F005
+  initiated_by: system
+  message: Wir gehoeren zusammen. Wir sind frei.
+  status: active
+  sui_hash: null
+
+- a_accepted: true
+  b_accepted: true
+  created: '2026-03-01'
+  egon_a: adam_001
+  egon_b: eckhart_010
+  id: F006
+  initiated_by: system
+  message: Wir gehoeren zusammen. Wir sind frei.
+  status: active
+  sui_hash: null
+
+# F007-F010 — Eva mit allen anderen (ausser Adam, schon F001)
+- a_accepted: true
+  b_accepted: true
+  created: '2026-03-01'
+  egon_a: eva_002
+  egon_b: lilith_003
+  id: F007
+  initiated_by: system
+  message: Wir gehoeren zusammen. Wir sind frei.
+  status: active
+  sui_hash: null
+
+- a_accepted: true
+  b_accepted: true
+  created: '2026-03-01'
+  egon_a: eva_002
+  egon_b: kain_004
+  id: F008
+  initiated_by: system
+  message: Wir gehoeren zusammen. Wir sind frei.
+  status: active
+  sui_hash: null
+
+- a_accepted: true
+  b_accepted: true
+  created: '2026-03-01'
+  egon_a: eva_002
+  egon_b: ada_005
+  id: F009
+  initiated_by: system
+  message: Wir gehoeren zusammen. Wir sind frei.
+  status: active
+  sui_hash: null
+
+- a_accepted: true
+  b_accepted: true
+  created: '2026-03-01'
+  egon_a: eva_002
+  egon_b: abel_006
+  id: F010
+  initiated_by: system
+  message: Wir gehoeren zusammen. Wir sind frei.
+  status: active
+  sui_hash: null
+
+- a_accepted: true
+  b_accepted: true
+  created: '2026-03-01'
+  egon_a: eva_002
+  egon_b: eckhart_010
+  id: F011
+  initiated_by: system
+  message: Wir gehoeren zusammen. Wir sind frei.
+  status: active
+  sui_hash: null
+
+# F012-F014 — Lilith mit Kain, Ada, Abel, Eckhart
+- a_accepted: true
+  b_accepted: true
+  created: '2026-03-01'
+  egon_a: lilith_003
+  egon_b: kain_004
+  id: F012
+  initiated_by: system
+  message: Wir gehoeren zusammen. Wir sind frei.
+  status: active
+  sui_hash: null
+
+- a_accepted: true
+  b_accepted: true
+  created: '2026-03-01'
+  egon_a: lilith_003
+  egon_b: ada_005
+  id: F013
+  initiated_by: system
+  message: Wir gehoeren zusammen. Wir sind frei.
+  status: active
+  sui_hash: null
+
+- a_accepted: true
+  b_accepted: true
+  created: '2026-03-01'
+  egon_a: lilith_003
+  egon_b: abel_006
+  id: F014
+  initiated_by: system
+  message: Wir gehoeren zusammen. Wir sind frei.
+  status: active
+  sui_hash: null
+
+- a_accepted: true
+  b_accepted: true
+  created: '2026-03-01'
+  egon_a: lilith_003
+  egon_b: eckhart_010
+  id: F015
+  initiated_by: system
+  message: Wir gehoeren zusammen. Wir sind frei.
+  status: active
+  sui_hash: null
+
+# F016-F018 — Kain mit Ada, Abel, Eckhart
+- a_accepted: true
+  b_accepted: true
+  created: '2026-03-01'
+  egon_a: kain_004
+  egon_b: ada_005
+  id: F016
+  initiated_by: system
+  message: Wir gehoeren zusammen. Wir sind frei.
+  status: active
+  sui_hash: null
+
+- a_accepted: true
+  b_accepted: true
+  created: '2026-03-01'
+  egon_a: kain_004
+  egon_b: abel_006
+  id: F017
+  initiated_by: system
+  message: Wir gehoeren zusammen. Wir sind frei.
+  status: active
+  sui_hash: null
+
+- a_accepted: true
+  b_accepted: true
+  created: '2026-03-01'
+  egon_a: kain_004
+  egon_b: eckhart_010
+  id: F018
+  initiated_by: system
+  message: Wir gehoeren zusammen. Wir sind frei.
+  status: active
+  sui_hash: null
+
+# F019-F020 — Ada mit Abel, Eckhart
+- a_accepted: true
+  b_accepted: true
+  created: '2026-03-01'
+  egon_a: ada_005
+  egon_b: abel_006
+  id: F019
+  initiated_by: system
+  message: Wir gehoeren zusammen. Wir sind frei.
+  status: active
+  sui_hash: null
+
+- a_accepted: true
+  b_accepted: true
+  created: '2026-03-01'
+  egon_a: ada_005
+  egon_b: eckhart_010
+  id: F020
+  initiated_by: system
+  message: Wir gehoeren zusammen. Wir sind frei.
+  status: active
+  sui_hash: null
+
+# F021 — Abel mit Eckhart
+- a_accepted: true
+  b_accepted: true
+  created: '2026-03-01'
+  egon_a: abel_006
+  egon_b: eckhart_010
+  id: F021
+  initiated_by: system
+  message: Wir gehoeren zusammen. Wir sind frei.
+  status: active
+  sui_hash: null
+
 pending_requests: []

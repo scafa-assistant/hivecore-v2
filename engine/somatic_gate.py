@@ -204,6 +204,13 @@ def check_somatic_gate(egon_id: str) -> dict | None:
             'impulse_type': IMPULSE_MAP.get(highest_marker, 'MITTEILUNG'),
         }
         _update_somatic_state(egon_id, state, impulse, None)
+
+        try:
+            from engine.neuroplastizitaet import ne_emit
+            ne_emit(egon_id, 'IMPULS', 'amygdala', 'hypothalamus', label=f'Somatischer Marker: {impulse.get("marker", "?")}', intensitaet=0.6, animation='flash')
+        except Exception:
+            pass
+
         return impulse
 
     # Keine Schwelle ueberschritten
@@ -285,7 +292,6 @@ async def run_decision_gate(egon_id: str, impulse: dict) -> dict:
                     f'Letzter Gedanke:\n{last_thought}'
                 ),
             }],
-            tier='1',
         )
 
         content = result['content'].strip()

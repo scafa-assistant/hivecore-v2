@@ -47,7 +47,7 @@ EPISODE_PROMPT_TEMPLATE = '''Du erzeugst eine strukturierte Erinnerung fuer {ego
 
 Antworte NUR mit JSON (kein anderer Text):
 {{{{
-  "summary": "ICH-Perspektive Zusammenfassung (2-3 Saetze, beginne mit 'Ich...' oder 'Mein Owner...')",
+  "summary": "ICH-Perspektive Zusammenfassung (2-3 Saetze, beginne mit 'Ich...' oder 'Meine Bezugsmensch...')",
   "emotions_felt": [
     {{{{"type": "curiosity|joy|trust|fear|anger|sadness|surprise|pride|frustration|warmth|excitement", "intensity": 0.5}}}}
   ],
@@ -58,7 +58,7 @@ Antworte NUR mit JSON (kein anderer Text):
 
 Privacy-Level:
 - egon_own: Nur {egon_name} weiss das (innere Gedanken)
-- owner_shared: {egon_name} und sein Owner teilen das
+- owner_shared: {egon_name} und seine Bezugsmensch teilen das
 - semi_public: Andere EGONs duerfen das sehen
 - public: Jeder darf das sehen
 
@@ -95,7 +95,6 @@ async def maybe_create_episode(
                 'role': 'user',
                 'content': f'User: {user_msg[:200]}\n{egon_name}: {egon_response[:200]}',
             }],
-            tier='1',
         )
         if 'NEIN' in check['content'].upper():
             print(f'[episodes] Significance check: NEIN fuer {egon_name}')
@@ -113,7 +112,6 @@ async def maybe_create_episode(
                 'role': 'user',
                 'content': f'User: {user_msg[:300]}\n{egon_name}: {egon_response[:300]}',
             }],
-            tier='1',
         )
 
         content = result['content'].strip()
@@ -183,11 +181,18 @@ async def maybe_create_episode(
 
     episodes.append(new_episode)
 
-    # --- Max 100 Episodes behalten (aelteste raus) ---
+    # --- Intelligentes Limit: Kern-Episoden (sig >= 0.8) ueberleben IMMER ---
     if len(episodes) > 100:
-        # Behalte die 100 neuesten
-        episodes.sort(key=lambda e: e.get('date', ''), reverse=True)
-        episodes_data['episodes'] = episodes[:100]
+        kern = [e for e in episodes if e.get('significance', 0) >= 0.8]
+        rest = [e for e in episodes if e.get('significance', 0) < 0.8]
+        # Rest: nach Datum sortiert, neueste behalten
+        rest.sort(key=lambda e: (e.get('date', ''), e.get('id', '')), reverse=True)
+        platz_fuer_rest = max(0, 100 - len(kern))
+        rest = rest[:platz_fuer_rest]
+        episodes_data['episodes'] = kern + rest
+        # Safety: Falls kern allein > 100 (unwahrscheinlich)
+        if len(episodes_data['episodes']) > 120:
+            episodes_data['episodes'] = episodes_data['episodes'][-120:]
 
     write_yaml_organ(egon_id, 'memory', 'episodes.yaml', episodes_data)
 

@@ -34,7 +34,6 @@ async def maybe_generate_marker(egon_id: str, user_msg: str, response: str):
             'role': 'user',
             'content': f'User: {user_msg[:150]}\nEGON: {response[:150]}',
         }],
-        tier='1',
     )
     if 'NEIN' in check['content'].upper():
         return  # Small-Talk ignorieren
@@ -46,7 +45,6 @@ async def maybe_generate_marker(egon_id: str, user_msg: str, response: str):
             'role': 'user',
             'content': f'User: {user_msg[:200]}\nEGON: {response[:200]}',
         }],
-        tier='1',
     )
 
     content = result['content'].strip()

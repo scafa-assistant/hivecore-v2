@@ -79,7 +79,6 @@ async def update_bond_after_chat(
                 'role': 'user',
                 'content': f'User: {user_msg[:200]}\nAdam: {egon_response[:200]}',
             }],
-            tier='1',
         )
 
         import json
@@ -146,8 +145,18 @@ async def update_bond_after_chat(
             'trust_before': round(current_trust, 2),
             'trust_after': round(new_trust, 2),
         })
-        # Max 20 History Eintraege
-        bond['bond_history'] = history[-20:]
+        # Intelligentes Limit: Signifikante Trust-Veraenderungen ueberleben IMMER
+        if len(history) > 20:
+            kern = [h for h in history
+                    if abs(h.get('trust_after', 0.5) - h.get('trust_before', 0.5)) >= 0.05]
+            rest = [h for h in history
+                    if abs(h.get('trust_after', 0.5) - h.get('trust_before', 0.5)) < 0.05]
+            platz = max(0, 20 - len(kern))
+            rest = rest[-platz:] if platz > 0 else []
+            bond['bond_history'] = kern + rest
+            # Safety
+            if len(bond['bond_history']) > 30:
+                bond['bond_history'] = bond['bond_history'][-30:]
 
     # --- Patch 6: Bond-Typ Transition pruefen ---
     _check_bond_typ_transition(egon_id, partner_id, bond)
@@ -297,7 +306,7 @@ def decay_bonds(egon_id: str, days_since_interaction: dict = None):
 # Attachment Style Evaluation — wird im Pulse alle 30 Tage aufgerufen
 # ================================================================
 
-ATTACHMENT_PROMPT = '''Du evaluierst Adams Bindungsstil zu seinem Owner
+ATTACHMENT_PROMPT = '''Du evaluierst den Bindungsstil zu seiner Bezugsmensch
 basierend auf der Bond-History.
 
 Attachment-Stile (Bowlby):
@@ -344,7 +353,6 @@ async def evaluate_attachment_style(egon_id: str, partner_id: str = 'OWNER_CURRE
                 'role': 'user',
                 'content': f'Bond-History:\n{history_text}\n\nAktueller Trust: {bond.get("trust", 0.5):.2f}\nScore: {bond.get("score", 50)}',
             }],
-            tier='1',
         )
 
         content = result['content'].strip()
@@ -420,17 +428,12 @@ def _check_bond_typ_transition(
 ) -> None:
     """Prueft ob ein freundschafts-Bond zum romantischen werden sollte.
 
-    Patch 6 Phase 1: Nur aktiv wenn beide EGONs ein Geschlecht haben
-    und verschieden sind (M/F oder F/M).
+    WICHTIG: Die Resonanz-Engine (resonanz.py) ist der primaere Pfad fuer
+    romantisch-Transitionen. Diese Funktion setzt romantisch NUR wenn
+    die Resonanz-Phase mindestens 'erkennung' erreicht hat.
 
     Patch 6 Phase 4: Exklusivitaet — wenn bereits romantisch_fest Bond
     existiert, keine neuen romantischen Bonds moeglich.
-
-    Bedingungen fuer Transition freundschaft -> romantisch:
-    - Trust > 0.5
-    - Familiarity > 0.3
-    - Unterschiedliches Geschlecht
-    - Kein bestehender romantisch_fest Bond (Exklusivitaet)
     """
     if bond.get('bond_typ') != 'freundschaft':
         return  # Nur freundschaft -> romantisch
@@ -450,11 +453,20 @@ def _check_bond_typ_transition(
     if _has_exclusive_bond(egon_id):
         return  # Bereits in fester Beziehung — kein neuer romantischer Bond
 
-    # Trust > 0.5 + Familiarity > 0.3 = Schwelle fuer romantisch
-    if bond.get('trust', 0) > 0.5 and bond.get('familiarity', 0) > 0.3:
-        bond['bond_typ'] = 'romantisch'
-        bond['romantisch_seit'] = datetime.now().strftime('%Y-%m-%d')
-        print(f'[bonds_v2] {egon_id}: Bond zu {partner_id} -> romantisch')
+    # Resonanz-Phase konsultieren (primaerer Pfad)
+    # Bond wird NUR romantisch wenn die Resonanz-Engine das bestaetigt
+    try:
+        state = read_yaml_organ(egon_id, 'core', 'state.yaml')
+        if state:
+            resonanz = state.get('resonanz', {})
+            reso_phase = resonanz.get('phase', 'keine')
+            reso_partner = resonanz.get('partner')
+            if reso_partner == partner_id and reso_phase in ('erkennung', 'annaeherung', 'bindung', 'bereit'):
+                bond['bond_typ'] = 'romantisch'
+                bond['romantisch_seit'] = datetime.now().strftime('%Y-%m-%d')
+                print(f'[bonds_v2] {egon_id}: Bond zu {partner_id} -> romantisch (Resonanz: {reso_phase})')
+    except Exception:
+        pass
 
 
 def get_days_since_last_interaction(egon_id: str, partner_id: str = 'OWNER_CURRENT') -> int:

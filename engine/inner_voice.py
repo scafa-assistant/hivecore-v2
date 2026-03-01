@@ -47,7 +47,6 @@ async def generate_inner_voice(egon_id: str, user_message: str) -> str:
     result = await llm_chat(
         system_prompt=INNER_VOICE_PROMPT,
         messages=[{'role': 'user', 'content': context}],
-        tier='1',  # IMMER Tier 1 (kosteneffizient)
     )
 
     thought = result['content']

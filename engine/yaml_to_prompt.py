@@ -15,7 +15,11 @@ Jedes Organ hat seine eigene Konvertierung:
 
 
 def state_to_prompt(state: dict) -> str:
-    """Wandelt state.yaml in natuerliche Sprache um.
+    """Wandelt state.yaml / innenwelt.yaml in natuerliche Sprache um.
+
+    Unterstuetzt BEIDE Formate:
+      v2: survive/thrive/express/drives (value/verbal)
+      v3: ueberleben/entfaltung/empfindungen/lebenskraft (wert/verbal)
 
     Nutzt die verbal-Felder direkt aus dem YAML.
     Bei kritischen Werten (< 0.2) kommt eine DRINGEND-Warnung.
@@ -25,35 +29,53 @@ def state_to_prompt(state: dict) -> str:
 
     lines = []
 
-    # === SURVIVE Layer ===
-    survive = state.get('survive', {})
-    for key in ['energy', 'safety', 'coherence']:
-        entry = survive.get(key, {})
-        value = entry.get('value', 0.5)
+    # === SURVIVE / UEBERLEBEN Layer ===
+    survive = state.get('survive') or state.get('ueberleben', {})
+    # v2-Keys → v3-Keys Mapping fuer Iteration
+    survive_keys = [
+        ('energy', 'lebenskraft'),
+        ('safety', 'geborgenheit'),
+        ('coherence', 'innerer_zusammenhalt'),
+    ]
+    for v2_key, v3_key in survive_keys:
+        entry = survive.get(v2_key) or survive.get(v3_key, {})
+        if not isinstance(entry, dict):
+            continue
+        value = entry.get('value') or entry.get('wert', 0.5)
         verbal = entry.get('verbal', '')
 
         if value < 0.2:
-            lines.append(f'DRINGEND — {key}: {verbal}')
+            label = v2_key if v2_key in survive else v3_key
+            lines.append(f'DRINGEND — {label}: {verbal}')
         elif verbal:
             lines.append(verbal)
 
-    # === THRIVE Layer ===
-    thrive = state.get('thrive', {})
-    for key in ['belonging', 'trust_owner', 'mood', 'purpose']:
-        entry = thrive.get(key, {})
+    # === THRIVE / ENTFALTUNG Layer ===
+    thrive = state.get('thrive') or state.get('entfaltung', {})
+    thrive_keys = [
+        ('belonging', 'zugehoerigkeit'),
+        ('trust_owner', 'vertrauen'),
+        ('mood', 'grundstimmung'),
+        ('purpose', 'sinn'),
+    ]
+    for v2_key, v3_key in thrive_keys:
+        entry = thrive.get(v2_key) or thrive.get(v3_key, {})
+        if not isinstance(entry, dict):
+            continue
         verbal = entry.get('verbal', '')
         if verbal:
             lines.append(verbal)
 
-    # === EXPRESS Layer (aktive Emotionen) ===
-    express = state.get('express', {})
-    emotions = express.get('active_emotions', [])
+    # === EXPRESS / EMPFINDUNGEN Layer (aktive Emotionen) ===
+    express = state.get('express') or state.get('empfindungen', {})
+    emotions = express.get('active_emotions') or express.get('aktive_gefuehle', [])
     if emotions:
         emotion_parts = []
         for em in emotions[:5]:  # Max 5 Emotionen
-            anchor = em.get('verbal_anchor', '')
-            etype = em.get('type', '?')
-            intensity = em.get('intensity', 0)
+            # v2: verbal_anchor/type/intensity, v3: anker/art/staerke
+            anchor = em.get('verbal_anchor') or em.get('anker', '')
+            etype = em.get('type') or em.get('art', '?')
+            intensity = em.get('intensity') or em.get('staerke', 0)
             if anchor:
                 emotion_parts.append(f'{anchor} ({etype}, {intensity:.1f})')
             else:
@@ -62,19 +84,18 @@ def state_to_prompt(state: dict) -> str:
     else:
         lines.append('Gerade keine starken Gefuehle an der Oberflaeche.')
 
-    # === Self Assessment ===
-    self_assess = state.get('self_assessment', {})
-    verbal = self_assess.get('verbal', '')
+    # === Self Assessment / Selbstbild ===
+    self_assess = state.get('self_assessment') or state.get('selbstbild', {})
+    verbal = self_assess.get('verbal', '') if isinstance(self_assess, dict) else ''
     if verbal:
-        # Trim to first 2 sentences for budget
         sentences = verbal.strip().split('.')
         short = '. '.join(sentences[:3]).strip()
         if short and not short.endswith('.'):
             short += '.'
         lines.append(f'Selbsteinschaetzung: {short}')
 
-    # === Drives (nur die aktiven, > 0.3) ===
-    drives = state.get('drives', {})
+    # === Drives / Lebenskraft (nur die aktiven, > 0.3) ===
+    drives = state.get('drives') or state.get('lebenskraft', {})
     active_drives = []
     for drive, value in drives.items():
         if isinstance(value, (int, float)) and value > 0.3:
@@ -82,9 +103,13 @@ def state_to_prompt(state: dict) -> str:
     if active_drives:
         lines.append('Aktive Antriebe: ' + ', '.join(active_drives))
 
-    # === Emotional Gravity ===
+    # === Emotional Gravity / Schwerkraft ===
     gravity = state.get('emotional_gravity', {})
-    bias = gravity.get('interpretation_bias', 'neutral')
+    if not gravity:
+        # v3: empfindungen.schwerkraft
+        empf = state.get('empfindungen', {})
+        gravity = empf.get('schwerkraft', {})
+    bias = gravity.get('interpretation_bias') or gravity.get('deutungstendenz', 'neutral')
     if bias != 'neutral':
         lines.append(f'Tendenz: Ich interpretiere Dinge gerade eher {bias}.')
 
@@ -133,7 +158,7 @@ def bonds_to_prompt(bonds: dict, partner_id: str = None) -> str:
         # Patch 6: Bond-Typ anzeigen (wenn nicht leer und nicht gleich type)
         if bond_typ and bond_typ != btype:
             bond_typ_label = {
-                'owner': 'Owner',
+                'owner': 'Bezugsmensch',
                 'freundschaft': 'Freundschaft',
                 'romantisch': 'Romantisch',
                 'romantisch_fest': 'Feste Beziehung',
@@ -158,11 +183,11 @@ def bonds_to_prompt(bonds: dict, partner_id: str = None) -> str:
     # Former owners
     former = bonds.get('former_owner_bonds', [])
     if former:
-        lines.append(f'Fruehere Owner: {len(former)}')
+        lines.append(f'Fruehere Bezugsmenschen: {len(former)}')
         for fo in former[:2]:
             period = fo.get('owner_period', '')
             score = fo.get('score', 0)
-            lines.append(f'  Ex-Owner (Score {score}, Zeitraum: {period})')
+            lines.append(f'  Fruehere Bezugsmensch (Score {score}, Zeitraum: {period})')
 
     # Other bonds summary
     others = bonds.get('other_bonds', [])
@@ -174,7 +199,7 @@ def bonds_to_prompt(bonds: dict, partner_id: str = None) -> str:
             btype = ob.get('type', '?')
             lines.append(f'  {bid} ({btype}, Score {score})')
 
-    return '\n'.join(lines) if lines else 'Nur mein Owner. Sonst niemand.'
+    return '\n'.join(lines) if lines else 'Nur meine Bezugsmensch. Sonst niemand.'
 
 
 def episodes_to_prompt(episodes_data: dict, max_count: int = 10) -> str:
@@ -394,12 +419,12 @@ def network_to_prompt(network_data: dict) -> str:
     if owner:
         name = owner.get('name', '?')
         since = owner.get('since', '?')
-        lines.append(f'Mein Owner: {name} (seit {since})')
+        lines.append(f'Meine Bezugsmensch: {name} (seit {since})')
 
     # Former owners
     former = network_data.get('former_owners', [])
     if former:
-        lines.append(f'Fruehere Owner: {len(former)}')
+        lines.append(f'Fruehere Bezugsmenschen: {len(former)}')
 
     # Counts for each tier
     inner = network_data.get('inner_circle', [])

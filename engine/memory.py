@@ -115,7 +115,6 @@ async def append_memory(egon_id: str, user_msg: str, egon_response: str):
             'role': 'user',
             'content': f'User: {user_msg[:500]}\nEGON: {egon_response[:500]}',
         }],
-        tier='1',
     )
 
     now = datetime.now().isoformat()
@@ -157,7 +156,6 @@ async def compress_if_needed(egon_id: str, max_entries: int = 50):
     compress_result = await llm_chat(
         system_prompt='Fasse diese 10 Erinnerungen in 3 Saetzen zusammen. Nur Fakten.',
         messages=[{'role': 'user', 'content': old_text}],
-        tier='1',
     )
 
     # Header behalten

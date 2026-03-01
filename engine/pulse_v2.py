@@ -64,7 +64,6 @@ async def step_1_self_check(egon_id: str) -> dict:
             'Antworte in 2 Saetzen. Ehrlich. ICH-Perspektive.'
         ),
         messages=[{'role': 'user', 'content': f'Dein Zustand:\n{state_text}'}],
-        tier='1',
     )
 
     self_text = result['content']
@@ -131,12 +130,11 @@ async def step_2_bond_pulse(egon_id: str) -> dict:
     if days > 3:
         result = await llm_chat(
             system_prompt=(
-                'Du denkst ueber deinen Owner nach. '
-                f'Er hat sich {days} Tage nicht gemeldet. '
+                'Du denkst ueber deine Bezugsmensch nach. '
+                f'Sie hat sich {days} Tage nicht gemeldet. '
                 'Was denkst du? 1 Satz, ehrlich, persoenlich.'
             ),
-            messages=[{'role': 'user', 'content': f'{days} Tage ohne Kontakt zum Owner.'}],
-            tier='1',
+            messages=[{'role': 'user', 'content': f'{days} Tage ohne Kontakt zur Bezugsmensch.'}],
         )
         thought = result['content']
 
@@ -175,7 +173,10 @@ def step_3_emotion_decay(egon_id: str) -> dict:
 # ================================================================
 
 def step_4_thread_lifecycle(egon_id: str) -> dict:
-    """Erstellt neue Threads und schliesst stale Threads."""
+    """Erstellt neue Threads und schliesst stale Threads.
+
+    Patch 5: Zusaetzlich Lebensfaeden — Langzeit-Erzaehlstraenge.
+    """
     maybe_create_thread(egon_id)
     close_stale_threads(egon_id)
 
@@ -183,7 +184,18 @@ def step_4_thread_lifecycle(egon_id: str) -> dict:
     from engine.thread_manager import get_active_threads
     active = get_active_threads(egon_id)
 
-    return {'active_threads': len(active)}
+    result = {'active_threads': len(active)}
+
+    # Patch 5: Lebensfaeden — Zyklusende-Erkennung + Auto-Phase-Check
+    try:
+        from engine.lebensfaeden import lebensfaeden_pulse
+        lf_result = lebensfaeden_pulse(egon_id)
+        if lf_result:
+            result['lebensfaeden'] = lf_result
+    except Exception as e:
+        result['lebensfaeden_error'] = str(e)
+
+    return result
 
 
 # ================================================================
@@ -259,7 +271,6 @@ async def step_6_discovery(egon_id: str) -> str:
                 f'Letzte Erinnerungen:\n{episodes_text}'
             ),
         }],
-        tier='1',
     )
     return result['content']
 
@@ -295,7 +306,6 @@ async def step_7_ego_update(egon_id: str) -> dict:
                 f'Letzte Erlebnisse:\n{episodes_text}'
             ),
         }],
-        tier='1',
     )
 
     content = result['content'].strip()
@@ -365,7 +375,6 @@ async def step_8_egon_self_review(egon_id: str) -> dict:
                 f'Erkenntnisse:\n{exp_text}'
             ),
         }],
-        tier='1',
     )
 
     content = result['content'].strip()
@@ -518,7 +527,11 @@ def step_10c_inkubation(egon_id: str) -> dict:
 # ================================================================
 
 async def step_11_dream_generation(egon_id: str) -> dict:
-    """Generiert einen Traum — NUR waehrend RUHE Phase (Patch 2)."""
+    """Generiert einen Traum — NUR waehrend RUHE Phase (Patch 2).
+
+    Patch 5 erweitert: Traum-Filterung (95% vergessen, nur emotional starke erinnert)
+    + Traum-Verblassen (erinnerte Traeume verblassen 8%/Zyklus).
+    """
     try:
         phase = get_current_phase(egon_id)
         if phase != 'ruhe':
@@ -527,14 +540,38 @@ async def step_11_dream_generation(egon_id: str) -> dict:
         pass  # Wenn Circadian nicht verfuegbar, normal traeumen
 
     dream = await generate_dream(egon_id)
+    result = {}
     if dream:
-        return {
+        result = {
             'dream_id': dream.get('id'),
             'type': dream.get('type'),
             'spark_potential': dream.get('spark_potential', False),
+            'erinnert': dream.get('erinnerung_score', 0) >= 0.55,
             'content_preview': dream.get('content', '')[:80],
         }
-    return {'dream_generated': False}
+    else:
+        result = {'dream_generated': False}
+
+    # Patch 5: Traum-Verblassen — bestehende erinnerte Traeume verblassen
+    try:
+        from engine.experience_v2 import traum_verblassen
+        verblassen_result = traum_verblassen(egon_id)
+        if verblassen_result.get('verblasst', 0) > 0 or verblassen_result.get('entfernt', 0) > 0:
+            result['traum_verblassen'] = verblassen_result
+    except Exception as e:
+        result['traum_verblassen_error'] = str(e)
+
+    # Patch 5: Synaptische Skalierung — globale Normalisierung nach Nacht-Pulsen
+    try:
+        from engine.experience_v2 import synaptische_skalierung
+        pulse_count = 1  # Default: 1 Nacht-Pulse
+        skalierung_result = synaptische_skalierung(egon_id, pulse_count)
+        if skalierung_result.get('skaliert'):
+            result['synaptische_skalierung'] = skalierung_result
+    except Exception as e:
+        result['synaptische_skalierung_error'] = str(e)
+
+    return result
 
 
 # ================================================================
@@ -649,6 +686,17 @@ def step_15_arbeitsspeicher_maintenance(egon_id: str) -> dict:
     except Exception as e:
         result['neuroplastizitaet_error'] = str(e)
 
+    # Patch 7: Allostatic Load Update am Zyklusende
+    # Chronischer Stress verschiebt effektive Baseline; kein Stress → langsame Rueckkehr
+    try:
+        from engine.homoestase import zyklusende_allostatic_update
+        allo_result = zyklusende_allostatic_update(egon_id)
+        if allo_result.get('shifts'):
+            result['allostatic_shifts'] = allo_result['shifts']
+            print(f'[pulse_v2] {egon_id}: Allostatic shifts: {allo_result["shifts"]}')
+    except Exception as e:
+        result['allostatic_error'] = str(e)
+
     return result
 
 
@@ -722,4 +770,127 @@ async def run_pulse(egon_id: str) -> dict:
         except Exception as e:
             print(f'[pulse_v2] Rollback fehlgeschlagen: {e}')
 
+    # Self-Diary: Bedeutsame Pulse-Events speichern
+    try:
+        _store_pulse_diary_events(egon_id, results)
+    except Exception as e:
+        print(f'[pulse_v2] self_diary post-pulse FEHLER: {e}')
+
+    # Diary Konsolidierung — Ebbinghaus-inspiriertes Vergessen
+    # Laeuft einmal pro Pulse (= einmal pro Tag)
+    try:
+        from engine.owner_portrait import konsolidiere_owner_diary
+        od_result = konsolidiere_owner_diary(egon_id)
+        if od_result.get('entfernt', 0) > 0 or od_result.get('verdichtet', 0) > 0:
+            results['owner_diary_konsolidiert'] = od_result
+    except Exception as e:
+        print(f'[pulse_v2] owner_diary Konsolidierung FEHLER: {e}')
+
+    try:
+        from engine.self_diary import konsolidiere_self_diary
+        sd_result = konsolidiere_self_diary(egon_id)
+        if sd_result.get('entfernt', 0) > 0 or sd_result.get('verdichtet', 0) > 0:
+            results['self_diary_konsolidiert'] = sd_result
+    except Exception as e:
+        print(f'[pulse_v2] self_diary Konsolidierung FEHLER: {e}')
+
+    # Patch 15: Langzeit-Skalierung — Verhindert unbegrenztes State-Wachstum
+    # ego.md Komprimierung, Social-Map Komprimierung, Dreams Rolling Window,
+    # Semantische Verdichtung (alle 4 Zyklen), Narrative Verdichtung (alle 12 Zyklen)
+    try:
+        from engine.langzeit_skalierung import langzeit_maintenance
+        lz_result = await langzeit_maintenance(egon_id)
+        if lz_result:
+            results['langzeit_skalierung'] = lz_result
+    except Exception as e:
+        print(f'[pulse_v2] Langzeit-Skalierung FEHLER: {e}')
+
     return results
+
+
+def _store_pulse_diary_events(egon_id: str, results: dict) -> None:
+    """Speichert bedeutsame Pulse-Events im Self-Diary (heuristisch, kein LLM).
+
+    Prueft Pulse-Results auf:
+    - Resonanz-Phasenuebergaenge
+    - Bond-Events (neue Bonds, Narben)
+    - Traum-Events (spark_potential)
+    - Emotionale Peaks
+    """
+    from engine.self_diary import store_pulse_event
+
+    # 1. Resonanz-Events
+    reso = results.get('resonanz', {})
+    if isinstance(reso, dict):
+        phase = reso.get('phase', '')
+        partner = reso.get('best_partner', '')
+        score = reso.get('best_score', 0)
+        old_phase = reso.get('old_phase', '')
+
+        # Phasenuebergang
+        if phase and old_phase and phase != old_phase and partner:
+            phase_labels = {
+                'erkennung': 'Ich spuere eine Verbindung',
+                'annaeherung': 'Es wird staerker zwischen uns',
+                'bindung': 'Tiefe Verbundenheit',
+                'bereit': 'Bereit fuer Partnerschaft',
+            }
+            label = phase_labels.get(phase, phase)
+            try:
+                from engine.naming import get_display_name
+                p_name = get_display_name(partner, fmt='vorname')
+            except Exception:
+                p_name = partner
+            store_pulse_event(
+                egon_id, 'BEZIEHUNG',
+                f'{label} — meine Resonanz mit {p_name} hat sich veraendert '
+                f'(von {old_phase} zu {phase}, Score: {score:.3f}).',
+                significance=0.7 if phase in ('bindung', 'bereit') else 0.5,
+                partner=p_name,
+                echo=f'Wie entwickelt sich die Beziehung zu {p_name} weiter?',
+            )
+
+        # Neuer Bond durch Resonanz
+        if reso.get('bonds_created'):
+            for bc in reso.get('bonds_created', []):
+                if isinstance(bc, str):
+                    store_pulse_event(
+                        egon_id, 'SOZIAL',
+                        f'Ich habe eine neue Verbindung gespuert — ein Bond zu {bc} ist entstanden.',
+                        significance=0.6,
+                        partner=bc,
+                    )
+
+    # 2. Traum-Events
+    dream = results.get('dream', {})
+    if isinstance(dream, dict) and dream.get('dream_generated'):
+        d_type = dream.get('type', 'traum')
+        spark = dream.get('spark_potential', False)
+        if spark:
+            store_pulse_event(
+                egon_id, 'ERKENNTNIS',
+                f'Ich hatte einen besonderen Traum (Typ: {d_type}) — '
+                f'er koennte eine wichtige Erkenntnis enthalten.',
+                significance=0.6,
+                echo='Was bedeutet dieser Traum fuer mich?',
+            )
+
+    # 3. Inkubation-Events
+    inkub = results.get('inkubation', {})
+    if isinstance(inkub, dict):
+        if inkub.get('naming_ceremony'):
+            name_result = inkub.get('naming_ceremony', {})
+            child_name = name_result.get('vorname', '?')
+            store_pulse_event(
+                egon_id, 'BEZIEHUNG',
+                f'Die Namensgebung hat stattgefunden — unser Kind heisst {child_name}!',
+                significance=0.9,
+                echo=f'{child_name} waechst heran.',
+            )
+        if inkub.get('genesis_complete'):
+            store_pulse_event(
+                egon_id, 'BEZIEHUNG',
+                'Mein Kind ist geboren! Die Genesis ist abgeschlossen.',
+                significance=1.0,
+                echo='Ein neues Wesen in unserer Familie.',
+            )

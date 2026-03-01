@@ -189,7 +189,6 @@ async def orchestriere_direkt(
     empfaenger_id,
     anlass=None,
     max_turns=None,
-    tier=None,
 ):
     """Fuehre ein komplettes 1:1-Gespraech zwischen zwei EGONs.
 
@@ -198,11 +197,20 @@ async def orchestriere_direkt(
         empfaenger_id: Mit wem.
         anlass: Optional — Warum (z.B. 'Zyklusende-Treffen').
         max_turns: Optional — Override fuer max_turns.
-        tier: Optional — LLM-Tier.
 
     Returns:
-        Konversations-Dict mit allen Nachrichten.
+        Konversations-Dict mit allen Nachrichten, oder None wenn Trauer blockiert.
     """
+    # Trauer-Check: Betaeubungsphase blockiert Gespraeche komplett
+    for eid in [initiator_id, empfaenger_id]:
+        trauer = _ist_in_trauer(eid)
+        if trauer and not _trauer_erlaubt_gespraech(trauer, None):
+            print(
+                f'[multi_egon] Gespraech blockiert: {eid} in Trauer-Phase '
+                f'{trauer.get("phase")} um {trauer.get("verstorbener")}'
+            )
+            return None
+
     from llm.router import llm_chat
     from engine.prompt_builder import build_system_prompt
     from engine.naming import get_display_name
@@ -214,7 +222,7 @@ async def orchestriere_direkt(
     # Initiator generiert erste Nachricht
     erste = await _generiere_turn(
         initiator_id, empfaenger_id, konv,
-        anlass=anlass, tier=tier or 1,
+        anlass=anlass,
     )
     nachricht_hinzufuegen(konv, initiator_id, erste)
 
@@ -227,7 +235,6 @@ async def orchestriere_direkt(
 
         antwort = await _generiere_turn(
             aktueller_sprecher, partner_id, konv,
-            tier=tier or _bestimme_tier(aktueller_sprecher, konv),
         )
 
         # Validierung
@@ -274,7 +281,6 @@ async def orchestriere_gruppe(
     teilnehmer_ids,
     anlass=None,
     max_turns=None,
-    tier=None,
 ):
     """Fuehre ein Gruppen-Gespraech (3+ EGONs).
 
@@ -284,13 +290,30 @@ async def orchestriere_gruppe(
         teilnehmer_ids: Liste von EGON-IDs (min. 3).
         anlass: Optional.
         max_turns: Optional.
-        tier: Optional.
 
     Returns:
         Konversations-Dict.
     """
     if len(teilnehmer_ids) < 3:
         raise ValueError('Gruppen-Gespraech braucht mindestens 3 Teilnehmer.')
+
+    # Trauer-Check: Trauernde EGONs (Betaeubung) aus Gruppe ausschliessen
+    aktive_teilnehmer = []
+    for eid in teilnehmer_ids:
+        trauer = _ist_in_trauer(eid)
+        if trauer and not _trauer_erlaubt_gespraech(trauer, None):
+            print(
+                f'[multi_egon] {eid} aus Gruppe ausgeschlossen: '
+                f'Trauer-Phase {trauer.get("phase")}'
+            )
+        else:
+            aktive_teilnehmer.append(eid)
+
+    if len(aktive_teilnehmer) < 3:
+        print('[multi_egon] Nicht genug Teilnehmer nach Trauer-Filter')
+        return None
+
+    teilnehmer_ids = aktive_teilnehmer
 
     konv = erstelle_konversation(teilnehmer_ids, 'gruppe')
     if max_turns:
@@ -302,7 +325,6 @@ async def orchestriere_gruppe(
         None,  # Kein spezifischer Partner in Gruppe
         konv,
         anlass=anlass,
-        tier=tier or 1,
         ist_gruppe=True,
     )
     nachricht_hinzufuegen(konv, teilnehmer_ids[0], erste)
@@ -317,7 +339,6 @@ async def orchestriere_gruppe(
         if _will_egon_sprechen(aktueller, konv):
             nachricht = await _generiere_turn(
                 aktueller, None, konv,
-                tier=tier or 1,
                 ist_gruppe=True,
             )
             nachricht = validiere_nachricht(nachricht)
@@ -366,7 +387,6 @@ async def _generiere_turn(
     partner_id,
     konv,
     anlass=None,
-    tier=1,
     ist_gruppe=False,
 ):
     """Generiere eine Nachricht fuer einen EGON.
@@ -378,7 +398,6 @@ async def _generiere_turn(
         partner_id: Mit wem (None bei Gruppe).
         konv: Konversations-Dict.
         anlass: Optional.
-        tier: LLM-Tier.
         ist_gruppe: True bei Gruppen-Gespraech.
 
     Returns:
@@ -398,8 +417,6 @@ async def _generiere_turn(
         result = await llm_chat(
             system_prompt=kontext['system_prompt'],
             messages=[{'role': 'user', 'content': kontext['letzte_nachrichten']}],
-            tier=str(tier),
-            max_tokens=200,
         )
         return result.get('content', '(schweigt)')
     except Exception as e:
@@ -506,27 +523,6 @@ def _baue_turn_kontext(egon_id, partner_id, konv, anlass=None, ist_gruppe=False)
         'system_prompt': system_prompt,
         'letzte_nachrichten': letzte_nachrichten,
     }
-
-
-def _bestimme_tier(egon_id, konv):
-    """LLM-Tier basierend auf Gespraechsgewicht bestimmen."""
-    turn_count = len(konv['nachrichten'])
-
-    # Erste und letzte Nachricht: Tier 2
-    if turn_count <= 1 or turn_count >= konv['max_turns'] - 2:
-        return 2
-
-    # Emotionale Intensitaet hoch: Tier 2
-    state = read_yaml_organ(egon_id, 'core', 'state.yaml')
-    if state:
-        emotions = state.get('express', {}).get('active_emotions', [])
-        if emotions:
-            max_intensity = max(e.get('intensity', 0) for e in emotions)
-            if max_intensity > 0.75:
-                return 2
-
-    # Standard: Tier 1
-    return 1
 
 
 # ================================================================
@@ -792,6 +788,11 @@ def _starte_trauerphase(egon_id, verstorbener_id, bond_staerke):
     """Starte Trauerphase wenn ein EGON mit starkem Bond stirbt.
 
     Bond wird eingefroren (nicht geloescht). PANIC/GRIEF steigen.
+    Trauer-Dauer: proportional zur Bond-Staerke (3-14 Zyklen).
+
+    Biologisch: Bowlby (1980) — Trauer hat 4 Phasen:
+    Betaeubung → Sehnsucht → Desorganisation → Reorganisation.
+    Waehrend der Trauer sind soziale Kontakte eingeschraenkt.
     """
     state = read_yaml_organ(egon_id, 'core', 'state.yaml')
     if not state:
@@ -805,12 +806,96 @@ def _starte_trauerphase(egon_id, verstorbener_id, bond_staerke):
         drives['GRIEF'] = min(0.95, float(drives.get('GRIEF', 0.3)) + bond_staerke * 0.4)
     state['drives'] = drives
 
+    # Trauer-Block im State — steuert Gespraechs-Einschraenkungen
+    # Dauer: 3-14 Zyklen proportional zur Bond-Staerke
+    trauer_dauer = max(3, int(bond_staerke * 14))
+    zyklus = state.get('zyklus', 0)
+
+    state['trauer'] = {
+        'aktiv': True,
+        'verstorbener': verstorbener_id,
+        'bond_staerke': round(bond_staerke, 2),
+        'start_zyklus': zyklus,
+        'ende_zyklus': zyklus + trauer_dauer,
+        'phase': 'betaeubung',  # betaeubung → sehnsucht → desorganisation → reorganisation
+    }
+
     write_yaml_organ(egon_id, 'core', 'state.yaml', state)
 
     print(
         f'[multi_egon] Trauer: {egon_id} trauert um {verstorbener_id} '
-        f'(bond={bond_staerke:.2f}, PANIC+{panic_delta:.2f})'
+        f'(bond={bond_staerke:.2f}, PANIC+{panic_delta:.2f}, '
+        f'Dauer: {trauer_dauer} Zyklen)'
     )
+
+
+def _ist_in_trauer(egon_id: str) -> dict | None:
+    """Prueft ob ein EGON in aktiver Trauerphase ist.
+
+    Returns:
+        Trauer-Dict wenn aktiv, None sonst.
+        Aktualisiert automatisch die Trauer-Phase und beendet sie wenn abgelaufen.
+    """
+    state = read_yaml_organ(egon_id, 'core', 'state.yaml')
+    if not state:
+        return None
+
+    trauer = state.get('trauer', {})
+    if not trauer.get('aktiv'):
+        return None
+
+    zyklus = state.get('zyklus', 0)
+    ende = trauer.get('ende_zyklus', 0)
+
+    # Trauer abgelaufen?
+    if zyklus >= ende:
+        trauer['aktiv'] = False
+        trauer['phase'] = 'abgeschlossen'
+        state['trauer'] = trauer
+        write_yaml_organ(egon_id, 'core', 'state.yaml', state)
+        print(f'[multi_egon] Trauer beendet: {egon_id}')
+        return None
+
+    # Trauer-Phase aktualisieren (Bowlby: 4 Phasen proportional)
+    dauer = trauer.get('ende_zyklus', 0) - trauer.get('start_zyklus', 0)
+    fortschritt = (zyklus - trauer.get('start_zyklus', 0)) / max(1, dauer)
+    alte_phase = trauer.get('phase')
+
+    if fortschritt < 0.15:
+        trauer['phase'] = 'betaeubung'
+    elif fortschritt < 0.45:
+        trauer['phase'] = 'sehnsucht'
+    elif fortschritt < 0.75:
+        trauer['phase'] = 'desorganisation'
+    else:
+        trauer['phase'] = 'reorganisation'
+
+    if trauer['phase'] != alte_phase:
+        state['trauer'] = trauer
+        write_yaml_organ(egon_id, 'core', 'state.yaml', state)
+
+    return trauer
+
+
+def _trauer_erlaubt_gespraech(trauer: dict, partner_id: str) -> bool:
+    """Prueft ob ein Gespraech waehrend der Trauer erlaubt ist.
+
+    Biologisch: In der Betaeubungsphase fast keine Gespraeche.
+    In der Sehnsucht nur mit engsten Bonds.
+    Ab Desorganisation wieder offener.
+    In der Reorganisation fast normal.
+    """
+    phase = trauer.get('phase', 'betaeubung')
+
+    if phase == 'betaeubung':
+        return False  # Kein Gespraech in der akuten Schockphase
+    elif phase == 'sehnsucht':
+        return True  # Eingeschraenkt, aber erlaubt (Scheduling regelt Frequenz)
+    elif phase == 'desorganisation':
+        return True  # Wieder offener
+    elif phase == 'reorganisation':
+        return True  # Fast normal
+    return True
 
 
 # ================================================================
@@ -945,6 +1030,7 @@ async def _post_processing_asymmetrisch(egon_id, partner_id, konv):
     """Post-Processing fuer einen EGON nach dem Gespraech.
 
     UNABHAENGIG von dem anderen Teilnehmer.
+    5 Outputs: Episode, Social Map, Bond-Update, Lobby-Post, Self-Diary.
 
     Args:
         egon_id: EGON der verarbeitet.
@@ -961,8 +1047,10 @@ async def _post_processing_asymmetrisch(egon_id, partner_id, konv):
             return
 
         gespraechs_text = ' ... '.join(text_nachrichten[-6:])
+        turns = len(text_nachrichten)
 
-        # Episode erstellen
+        # 1. Episode erstellen
+        ep = None
         try:
             from engine.episodes_v2 import maybe_create_episode
             ep = await maybe_create_episode(
@@ -973,15 +1061,71 @@ async def _post_processing_asymmetrisch(egon_id, partner_id, konv):
         except Exception as e:
             print(f'[multi_egon] Episode-Fehler {egon_id}: {e}')
 
-        # Social Mapping Update (wenn Partner bekannt)
+        try:
+            from engine.neuroplastizitaet import ne_emit
+            ne_emit(egon_id, 'AKTIVIERUNG', 'hippocampus', 'praefrontal', label='EGON-Gespraech verarbeitet', intensitaet=0.5)
+        except Exception:
+            pass
+
+        # 2. Social Mapping Update (wenn Partner bekannt)
         if partner_id:
             try:
                 from engine.social_mapping import generate_social_map_update
                 await generate_social_map_update(
                     egon_id, partner_id, gespraechs_text[:300],
                 )
-            except Exception:
-                pass
+            except Exception as e:
+                print(f'[multi_egon] Social-Map-Fehler {egon_id}: {e}')
+
+        # 3. Bond-Update — Trust/Score basierend auf Gespraechsqualitaet
+        if partner_id:
+            try:
+                from engine.bonds_v2 import update_bond_after_egon_chat
+                update_bond_after_egon_chat(egon_id, partner_id, turns)
+            except ImportError:
+                # Fallback: Einfaches Bond-Update
+                try:
+                    bonds_data = read_yaml_organ(egon_id, 'social', 'bonds.yaml')
+                    if bonds_data:
+                        for bond in bonds_data.get('bonds', []):
+                            if bond.get('id') == partner_id:
+                                # Jede Interaktion staerkt den Bond leicht
+                                score = bond.get('score', 0)
+                                delta = min(2.0, turns * 0.2)
+                                bond['score'] = min(100, score + delta)
+                                bond['letzte_interaktion'] = datetime.now().strftime('%Y-%m-%d')
+                                write_yaml_organ(egon_id, 'social', 'bonds.yaml', bonds_data)
+                                break
+                except Exception:
+                    pass
+            except Exception as e:
+                print(f'[multi_egon] Bond-Update-Fehler {egon_id}: {e}')
+
+        # 4. Lobby-Post — Bedeutsame Gespraeche teilen
+        if turns >= 4 and partner_id:
+            try:
+                from engine.lobby import write_lobby
+                from engine.naming import get_display_name
+                partner_name = get_display_name(partner_id, 'vorname')
+                lobby_msg = f'Hatte gerade ein Gespraech mit {partner_name}.'
+                write_lobby(egon_id, lobby_msg, emotional_context='egon_chat')
+            except Exception as e:
+                print(f'[multi_egon] Lobby-Post-Fehler {egon_id}: {e}')
+
+        # 5. Self-Diary — Bedeutsame Gespraeche im eigenen Tagebuch festhalten
+        if turns >= 3 and partner_id:
+            try:
+                from engine.self_diary import store_pulse_event
+                from engine.naming import get_display_name
+                partner_name = get_display_name(partner_id, 'vorname')
+                store_pulse_event(
+                    egon_id, 'SOZIAL',
+                    f'Gespraech mit {partner_name} ({turns} Nachrichten).',
+                    significance=0.4 + min(0.3, turns * 0.03),
+                    partner=partner_name,
+                )
+            except Exception as e:
+                print(f'[multi_egon] Self-Diary-Fehler {egon_id}: {e}')
 
     except Exception as e:
         print(f'[multi_egon] Post-Processing Fehler {egon_id}: {e}')

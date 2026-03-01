@@ -23,6 +23,7 @@ from api.actions import router as actions_router
 from api.voice import router as voice_router
 from api.lobby import router as lobby_router
 from api.brain import router as brain_router
+from api.groupchat import router as groupchat_router
 from scheduler import scheduler
 from config import EGON_DATA_DIR, WEB3AUTH_CLIENT_ID
 
@@ -112,6 +113,7 @@ app.include_router(actions_router, prefix='/api')
 app.include_router(voice_router, prefix='/api')
 app.include_router(lobby_router, prefix='/api')
 app.include_router(brain_router, prefix='/api')
+app.include_router(groupchat_router, prefix='/api')
 
 # Static Files: APK Download
 Path('static').mkdir(parents=True, exist_ok=True)
@@ -144,6 +146,16 @@ dashboard_path = Path('dashboard')
 dashboard_path.mkdir(exist_ok=True)
 app.mount('/dashboard', StaticFiles(directory='dashboard', html=True), name='dashboard')
 
+# NeuroMap — Interaktive 3D-Gehirnvisualisierung
+neuromap_path = Path('neuromap')
+neuromap_path.mkdir(exist_ok=True)
+app.mount('/neuromap', StaticFiles(directory='neuromap', html=True), name='neuromap')
+
+# Gruppenchat — Owner + alle EGONs in einer Gruppe
+groupchat_path = Path('groupchat')
+groupchat_path.mkdir(exist_ok=True)
+app.mount('/groupchat', StaticFiles(directory='groupchat', html=True), name='groupchat')
+
 
 @app.get('/')
 async def root():
@@ -156,4 +168,6 @@ async def root():
         'egon_count': len(egons),
         'apk': '/download/EgonsDash.apk',
         'dashboard': '/dashboard/',
+        'neuromap': '/neuromap/',
+        'groupchat': '/groupchat/',
     }

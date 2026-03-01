@@ -50,7 +50,6 @@ async def step_1_self_check(egon_id: str) -> str:
             'role': 'user',
             'content': 'Wie fuehlst du dich heute? Lies deine Marker. Antworte in 2 Saetzen als du selbst.',
         }],
-        tier='1',
     )
     return result['content']
 
@@ -220,7 +219,6 @@ async def step_5_discovery(egon_id: str) -> str:
                 f'Letzte Gespraeche:\n{recent_text[:500]}'
             ),
         }],
-        tier='1',
     )
     return result['content']
 
@@ -265,7 +263,6 @@ async def step_6_community(egon_id: str) -> dict:
                 'role': 'user',
                 'content': f'Diese Beziehungen werden schwaecher: {names}',
             }],
-            tier='1',
         )
         thought = result['content']
 
@@ -291,7 +288,6 @@ async def step_7_idle_thought(egon_id: str) -> str:
                 '1-2 Saetze. Persoenlich. Nachdenklich.'
             ),
         }],
-        tier='1',
     )
     return result['content']
 
@@ -453,7 +449,6 @@ async def step_9_dream_generation(egon_id: str) -> dict:
                     f'Aktuelle Gefuehle/Marker: {markers_text}'
                 ),
             }],
-            tier='1',
         )
         content = result['content'].strip()
         json_str = _extract_json_from_text(content)

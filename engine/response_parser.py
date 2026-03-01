@@ -31,8 +31,10 @@ def parse_body(text: str) -> tuple[str, Optional[dict]]:
             body_json = parts[1].split('###END_BODY###')[0].strip()
             body = json.loads(body_json)
 
-            # Validierung: words muss eine Liste sein
-            if not isinstance(body.get('words'), list):
+            # Validierung: words (Liste) ODER bones (Dict) muss vorhanden sein
+            has_words = isinstance(body.get('words'), list)
+            has_bones = isinstance(body.get('bones'), dict)
+            if not has_words and not has_bones:
                 body = None
             else:
                 # Defaults setzen

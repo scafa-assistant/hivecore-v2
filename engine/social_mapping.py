@@ -69,7 +69,7 @@ def _default_social_map(about_id: str) -> dict:
     """Erstellt eine leere Social Map fuer einen noch unbekannten EGON."""
     from engine.naming import get_display_name
     if about_id == 'owner':
-        about_name = 'Mein Owner'
+        about_name = 'Meine Bezugsmensch'
     else:
         about_name = get_display_name(about_id, 'voll')
     return {
@@ -141,7 +141,7 @@ async def generate_social_map_update(
     from engine.naming import get_display_name
     egon_name = get_display_name(egon_id)
     if about_id == 'owner':
-        about_name = 'Mein Owner'
+        about_name = 'Meine Bezugsmensch'
     else:
         about_name = get_display_name(about_id, 'voll')
 
@@ -198,7 +198,6 @@ Deltas zwischen -0.1 und +0.1. Positive = mehr, negative = weniger.'''
                 'role': 'user',
                 'content': f'Beobachtung:\n{interaction_text[:400]}',
             }],
-            tier='1',
         )
 
         content = result['content'].strip()
@@ -232,9 +231,11 @@ Deltas zwischen -0.1 und +0.1. Positive = mehr, negative = weniger.'''
         if beobachtung:
             gelernt = current_map.setdefault('was_ich_gelernt_habe', [])
             gelernt.append(beobachtung)
-            # Max 20 Beobachtungen behalten
+            # Intelligentes Limit: Erste Beobachtung (Ersteindruck) + neueste 19
             if len(gelernt) > 20:
-                current_map['was_ich_gelernt_habe'] = gelernt[-20:]
+                first_obs = gelernt[0]  # Ersteindruck — IMMER behalten
+                rest = gelernt[1:][-19:]  # Neueste 19
+                current_map['was_ich_gelernt_habe'] = [first_obs] + rest
 
         # Interaktionszaehler erhoehen
         ident = current_map.setdefault('identitaet', {})

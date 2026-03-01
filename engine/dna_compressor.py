@@ -72,12 +72,11 @@ EXTENDED_SECTIONS = [
 ]
 
 
-def compress_dna(dna_text: str, tier: int = 1) -> str:
-    """Komprimiert die DNA auf die essentiellen Sektionen.
+def compress_dna(dna_text: str) -> str:
+    """Komprimiert die DNA auf die essentiellen + erweiterten Sektionen.
 
     Args:
         dna_text: Voller DNA-Text
-        tier: LLM-Tier (1=kompakt, 2+=ausfuehrlicher)
 
     Returns:
         Komprimierter DNA-Text
@@ -85,10 +84,8 @@ def compress_dna(dna_text: str, tier: int = 1) -> str:
     if not dna_text:
         return ''
 
-    # Bestimme welche Sektionen geladen werden
-    sections_to_load = list(ESSENTIAL_SECTIONS)
-    if tier >= 2:
-        sections_to_load.extend(EXTENDED_SECTIONS)
+    # Alle Sektionen laden — keine Kuerzung
+    sections_to_load = list(ESSENTIAL_SECTIONS) + list(EXTENDED_SECTIONS)
 
     # Parse die DNA in Sektionen (## Ueberschrift)
     parsed_sections = _parse_sections(dna_text)
@@ -103,9 +100,6 @@ def compress_dna(dna_text: str, tier: int = 1) -> str:
     for section_name in sections_to_load:
         content = parsed_sections.get(section_name, '')
         if content:
-            # Fuer Tier 1: Kuerze lange Sektionen
-            if tier == 1:
-                content = _trim_section(section_name, content)
             result_parts.append(content.strip())
 
     return '\n\n'.join(result_parts)

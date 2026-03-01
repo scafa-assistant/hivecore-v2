@@ -36,61 +36,90 @@ MAX_CHECKPOINTS_PRO_TYP = 5  # Aelteste werden rotiert
 # Nicht-existierende Dateien werden beim Backup uebersprungen.
 CHECKPOINT_SCOPES = {
     'pre_pulse': [
-        # State (v2)
+        # State (v2 + v3)
         'core/state.yaml',
-        # Recent Memory (v2 Pfad: skills/memory/, legacy: memory/)
+        'innenwelt/innenwelt.yaml',
+        # Recent Memory (v2 Pfad: skills/memory/, legacy: memory/, v3: erinnerungen/)
         'skills/memory/recent_memory.md',
         'memory/recent_memory.md',
-        # Inner Voice (v2: memory/, legacy: flat)
+        'erinnerungen/kurzzeitgedaechtnis.md',
+        # Inner Voice (v2: memory/, v3: innere_stimme/, legacy: flat)
         'memory/inner_voice.md',
+        'innere_stimme/gedanken.yaml',
         'inner_voice.md',
-        # Dreams (wenn vorhanden)
+        # Dreams (v2 + v3)
         'memory/dreams.md',
+        'erinnerungen/traeume.yaml',
     ],
     'pre_cycle': [
-        # Core
+        # Core (v2 + v3)
         'core/state.yaml',
+        'innenwelt/innenwelt.yaml',
         'core/ego.md',
-        # Memory (v2 + legacy Pfade)
+        'kern/ich.md',
+        # Memory (v2 + v3 + legacy Pfade)
         'memory/inner_voice.md',
+        'innere_stimme/gedanken.yaml',
         'inner_voice.md',
         'skills/memory/recent_memory.md',
         'memory/recent_memory.md',
+        'erinnerungen/kurzzeitgedaechtnis.md',
         'memory/cycle_memory.md',
+        'erinnerungen/zyklusgedaechtnis.md',
         'memory/archive.md',
+        'erinnerungen/archiv.md',
         'memory/dreams.md',
+        'erinnerungen/traeume.yaml',
         'memory/episodes.yaml',
+        'erinnerungen/erlebtes.yaml',
         'memory/experience.yaml',
-        # Social
+        'erinnerungen/erfahrungen.yaml',
+        # Social (v2 + v3)
         'social/bonds.yaml',
+        'bindungen/naehe.yaml',
         'bonds.md',
-        # Social Mappings (v2 Ordner)
         'social/social_mapping.yaml',
-        # Zukunft (Patch 14+)
+        'bindungen/gefuege_mapping.yaml',
+        # Lebensfaeden + Cue-Index (v2 + v3)
         'memory/lebensfaeden.yaml',
+        'erinnerungen/lebensfaeden.yaml',
         'memory/cue_index.yaml',
+        'erinnerungen/cue_index.yaml',
         # Legacy flat files (v1 Adam)
         'memory.md',
     ],
     'pre_genesis': [
         'core/state.yaml',
+        'innenwelt/innenwelt.yaml',
         'core/ego.md',
+        'kern/ich.md',
         'memory/inner_voice.md',
+        'innere_stimme/gedanken.yaml',
         'inner_voice.md',
         'skills/memory/recent_memory.md',
         'memory/recent_memory.md',
+        'erinnerungen/kurzzeitgedaechtnis.md',
         'memory/cycle_memory.md',
+        'erinnerungen/zyklusgedaechtnis.md',
         'memory/archive.md',
+        'erinnerungen/archiv.md',
         'memory/dreams.md',
+        'erinnerungen/traeume.yaml',
         'social/bonds.yaml',
+        'bindungen/naehe.yaml',
         'bonds.md',
         'social/social_mapping.yaml',
+        'bindungen/gefuege_mapping.yaml',
         'memory/lebensfaeden.yaml',
+        'erinnerungen/lebensfaeden.yaml',
         'memory/cue_index.yaml',
+        'erinnerungen/cue_index.yaml',
     ],
     'auto_6h': [
         'core/state.yaml',
+        'innenwelt/innenwelt.yaml',
         'core/ego.md',
+        'kern/ich.md',
     ],
 }
 
@@ -360,10 +389,16 @@ def _notfall_reset(egon_id):
         print(f'[checkpoint] FATAL: Agent-Dir {agent_dir} existiert nicht')
         return False
 
-    # Versuche DNA-Profil aus core/dna.md zu extrahieren
-    dna_md = agent_dir / 'core' / 'dna.md'
+    # Versuche DNA-Profil aus kern/seele.md (v3) oder core/dna.md (v2) zu extrahieren
+    dna_md = agent_dir / 'kern' / 'seele.md'
+    if not dna_md.is_file():
+        dna_md = agent_dir / 'core' / 'dna.md'
     profil = 'DEFAULT'
-    name = egon_id.split('_')[0].title()
+    try:
+        from engine.naming import get_display_name
+        name = get_display_name(egon_id, 'vorname')
+    except Exception:
+        name = egon_id.split('_')[0].title()
 
     if dna_md.is_file():
         text = dna_md.read_text(encoding='utf-8')
@@ -421,7 +456,10 @@ def _notfall_reset(egon_id):
     # Versuche Geschlecht und Identitaet aus existierendem State zu retten
     try:
         import yaml as _yaml
-        old_state_path = agent_dir / 'core' / 'state.yaml'
+        # v3 zuerst, dann v2
+        old_state_path = agent_dir / 'innenwelt' / 'innenwelt.yaml'
+        if not old_state_path.is_file():
+            old_state_path = agent_dir / 'core' / 'state.yaml'
         if old_state_path.is_file():
             old = _yaml.safe_load(old_state_path.read_text(encoding='utf-8'))
             if isinstance(old, dict):
@@ -444,16 +482,24 @@ def _notfall_reset(egon_id):
     except Exception:
         pass
 
-    # State schreiben
+    # State schreiben — v3-Pfad wenn migriert, sonst v2
     import yaml as _yaml
-    state_path = agent_dir / 'core' / 'state.yaml'
+    is_v3 = (agent_dir / 'kern').is_dir()
+    if is_v3:
+        state_path = agent_dir / 'innenwelt' / 'innenwelt.yaml'
+    else:
+        state_path = agent_dir / 'core' / 'state.yaml'
     state_path.parent.mkdir(parents=True, exist_ok=True)
     with open(state_path, 'w', encoding='utf-8') as f:
         _yaml.dump(reset_state, f, allow_unicode=True, default_flow_style=False,
                     sort_keys=False, width=120)
 
-    # Ego.md zuruecksetzen
-    ego_path = agent_dir / 'core' / 'ego.md'
+    # Ego.md / ich.md zuruecksetzen
+    if is_v3:
+        ego_path = agent_dir / 'kern' / 'ich.md'
+    else:
+        ego_path = agent_dir / 'core' / 'ego.md'
+    ego_path.parent.mkdir(parents=True, exist_ok=True)
     ego_path.write_text(
         f'# Wer bin ich?\n\n'
         f'Ich bin {name}. Ich habe alles vergessen. '
@@ -462,7 +508,10 @@ def _notfall_reset(egon_id):
     )
 
     # Inner Voice zuruecksetzen
-    iv_path = agent_dir / 'memory' / 'inner_voice.md'
+    if is_v3:
+        iv_path = agent_dir / 'innere_stimme' / 'gedanken.yaml'
+    else:
+        iv_path = agent_dir / 'memory' / 'inner_voice.md'
     iv_path.parent.mkdir(parents=True, exist_ok=True)
     iv_path.write_text(
         '## Neustart\n'
@@ -472,12 +521,18 @@ def _notfall_reset(egon_id):
     )
 
     # Recent Memory leeren
-    rm_path = agent_dir / 'memory' / 'recent_memory.md'
+    if is_v3:
+        rm_path = agent_dir / 'erinnerungen' / 'kurzzeitgedaechtnis.md'
+    else:
+        rm_path = agent_dir / 'memory' / 'recent_memory.md'
     rm_path.parent.mkdir(parents=True, exist_ok=True)
     rm_path.write_text('', encoding='utf-8')
 
     # Dreams leeren
-    dr_path = agent_dir / 'memory' / 'dreams.md'
+    if is_v3:
+        dr_path = agent_dir / 'erinnerungen' / 'traeume.yaml'
+    else:
+        dr_path = agent_dir / 'memory' / 'dreams.md'
     dr_path.parent.mkdir(parents=True, exist_ok=True)
     dr_path.write_text('', encoding='utf-8')
 

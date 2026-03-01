@@ -32,6 +32,8 @@ from engine.organ_reader import read_yaml_organ, write_yaml_organ
 RETENTION_SCHWELLE = 0.10     # Unter 10%: Nicht mehr laden
 LOESCH_SCHWELLE = 0.03        # Unter 3%: Aus Arbeitsspeicher loeschen
 MAX_EINTRAEGE = 30            # Maximale Eintraege im Arbeitsspeicher
+FLASHBULB_SCHWELLE = 0.85     # Patch 17: Marker darueber = Flashbulb Memory
+FLASHBULB_RETENTION_FLOOR = 0.10  # Patch 17: Kann nicht tiefer fallen bis Nacht-Pulse
 LAYER = 'memory'
 FILENAME = 'arbeitsspeicher.yaml'
 
@@ -119,6 +121,24 @@ def berechne_retention(
 
     # Ebbinghaus
     retention = math.exp(-t_stunden / S)
+
+    # Patch 13: Retrieval 0.7 Floor (Bjork 1994)
+    # Kuerzlich abgerufene Erinnerungen: Retention springt auf mind. 0.7
+    # Der Floor wird beim naechsten Abruf gesetzt und zerfaellt dann wieder
+    # (aber langsamer, weil abruf_count hoeher → S hoeher)
+    retention_floor = eintrag.get('_retention_floor', 0.0)
+    if retention_floor > 0 and retention < retention_floor:
+        retention = retention_floor
+        # Floor abbauen: Bei naechster Berechnung etwas senken
+        # Damit es kein permanenter Halt ist
+        eintrag['_retention_floor'] = round(max(0.0, retention_floor - 0.05), 2)
+
+    # Patch 17: Flashbulb Memory Protection
+    # Erinnerungen mit marker > 0.85: Retention-Floor bei 0.10
+    # Koennen nicht tiefer fallen bis Nacht-Pulse konsolidiert
+    # Brown & Kulik 1977: Traumatische Erinnerungen vergisst man nicht
+    if marker > FLASHBULB_SCHWELLE and not eintrag.get('nacht_rettung'):
+        retention = max(retention, FLASHBULB_RETENTION_FLOOR)
 
     return round(retention, 4)
 
@@ -276,8 +296,19 @@ def stabilisiere_abruf(egon_id: str, eintrag_index: int) -> None:
     eintrag['abruf_count'] = eintrag.get('abruf_count', 0) + 1
     eintrag['letzter_abruf'] = int(time.time())
 
+    # Patch 13: Retrieval 0.7 Floor (Bjork 1994)
+    # Reaktivierung springt Retention auf mindestens 0.7.
+    # Danach beginnt Decay wieder, aber langsamer (weil S hoeher durch abruf_count).
+    eintrag['_retention_floor'] = 0.7
+
     data['eintraege'] = eintraege
     write_yaml_organ(egon_id, LAYER, FILENAME, data)
+
+    try:
+        from engine.neuroplastizitaet import ne_emit
+        ne_emit(egon_id, 'AKTIVIERUNG', 'hippocampus', 'praefrontal', label='Erinnerung stabilisiert', intensitaet=0.5, animation='pulse')
+    except Exception:
+        pass
 
 
 def stabilisiere_nach_cue(egon_id: str, cue_woerter: list[str]) -> int:
@@ -306,6 +337,8 @@ def stabilisiere_nach_cue(egon_id: str, cue_woerter: list[str]) -> int:
         if any(t.lower() in cues_lower for t in tags):
             eintrag['abruf_count'] = eintrag.get('abruf_count', 0) + 1
             eintrag['letzter_abruf'] = jetzt
+            # Patch 13: Retrieval 0.7 Floor
+            eintrag['_retention_floor'] = 0.7
             stabilisiert += 1
 
     if stabilisiert:
@@ -406,6 +439,16 @@ def nacht_rettung(egon_id: str) -> int:
             eintrag['letzter_abruf'] = int(jetzt)
             eintrag['nacht_rettung'] = True
             gerettet += 1
+            # Patch 17: Flashbulb-Rettung loggen
+            if marker > FLASHBULB_SCHWELLE:
+                try:
+                    from engine.kalibrierung import log_decision
+                    log_decision(egon_id, 'decay', 'flashbulb_nacht_rettung', {
+                        'marker': round(marker, 3), 'retention': round(r, 4),
+                        'summary': str(eintrag.get('zusammenfassung', ''))[:60],
+                    })
+                except Exception:
+                    pass
 
     if gerettet:
         data['eintraege'] = eintraege

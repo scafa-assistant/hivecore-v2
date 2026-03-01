@@ -32,11 +32,12 @@ from engine.bonds import update_bond_after_chat
 from engine.friendship import are_friends
 from engine.settings import read_settings
 from llm.router import llm_chat
-from llm.planner import should_use_tools, decide_tier
+from llm.planner import should_use_tools
 from engine.agent_loop import run_agent_loop
 from engine.action_detector import detect_action
 from engine.response_parser import parse_response
 from engine.motor_translator import translate as motor_translate
+from engine import interaction_log as ilog
 
 router = APIRouter()
 
@@ -130,7 +131,7 @@ def _chat_key(egon_id: str, conversation_type: str = 'owner_chat',
 class ChatRequest(BaseModel):
     egon_id: str = 'adam_001'
     message: str
-    tier: str = 'auto'
+    tier: str = 'auto'  # Legacy — ignoriert, nur Moonshot
     conversation_type: str = 'owner_chat'  # owner_chat | egon_chat | friend_owner_chat | agora_job | pulse
     device_id: str = ''       # Geraete-ID (z.B. "dev_a7k3m9xp2f1q") — separate Chat-Threads
     user_name: str = ''       # Optionaler Username des Geraete-Besitzers
@@ -138,8 +139,8 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     response: str
-    tier_used: int
-    model: str
+    tier_used: int = 1  # Legacy — immer 1 (Moonshot)
+    model: str = 'moonshot'
     egon_id: str
     action: Optional[dict[str, Any]] = None  # K14: Handy-Aktion
     tool_results: Optional[list[dict[str, Any]]] = None  # Agent Loop Ergebnisse
@@ -180,8 +181,18 @@ def parse_action(text: str) -> tuple[str, Optional[dict]]:
 async def chat(req: ChatRequest):
     egon_id = req.egon_id
     message = req.message
-    tier = req.tier
     conversation_type = req.conversation_type
+
+    # 0. Interaction Log starten
+    ilog.begin_interaction(egon_id, message, user_name=req.user_name if hasattr(req, 'user_name') else 'owner',
+                           conversation_type=conversation_type)
+    # Pre-State lesen (VOR jeder Verarbeitung)
+    try:
+        from engine.organ_reader import read_yaml_organ as _read_pre_state
+        _pre = _read_pre_state(egon_id, 'core', 'state.yaml')
+        ilog.log_pre_state(_pre)
+    except Exception:
+        pass
 
     # 1. Chat-History holen/erstellen (kanalbasiert, mit device_id)
     history_key = _chat_key(egon_id, conversation_type, device_id=req.device_id)
@@ -189,34 +200,56 @@ async def chat(req: ChatRequest):
         chat_histories[history_key] = []
     history = chat_histories[history_key]
 
-    # 2. Tier aufloesen (VOR System-Prompt — damit Budget stimmt)
-    if tier == 'auto':
-        resolved_tier = await decide_tier(message)
-    else:
-        resolved_tier = int(tier)
+    # 2. Thalamus-Routing-Priming (Dynamic Context Window)
+    gate_routing = None
+    if BRAIN_VERSION == 'v2':
+        try:
+            from engine.thalamus import get_thalamus_routing
+            gate_routing = get_thalamus_routing(egon_id)
+        except Exception:
+            pass
 
-    # 3. System-Prompt bauen (mit conversation_type + resolved tier)
+    # 3. System-Prompt bauen
     system_prompt = build_system_prompt(
         egon_id,
         message_count=len(history),
         conversation_type=conversation_type,
-        tier=resolved_tier,
+        gate_routing=gate_routing,
     )
 
     # 3b. Greeting-Kontext: Persoenlicher gruessen bei erster Nachricht
+    greeting_active = False
     if len(history) == 0 and _is_greeting(message):
         greeting_ctx = _build_greeting_context(egon_id)
         if greeting_ctx:
             system_prompt += f'\n\n{greeting_ctx}'
+            greeting_active = True
 
-    # 4. Inner Voice generieren (unsichtbar, Tier 1)
+    # 4. Inner Voice generieren — 3 Modi fuer Observer Effect Experiment
+    from engine.prompt_builder_v2 import _read_iv_mode
+    iv_mode = _read_iv_mode()
+
     inner = await generate_inner_voice(egon_id, message)
+    ilog.log_inner_voice(inner)
     # FIX: Cross-Reference-Marker entfernen bevor sie ins Prompt kommen
-    # (-> ep:E0001), (-> bond:OWNER_CURRENT) etc. gehoeren in inner_voice.md, NICHT in die Antwort
     inner_clean = re.sub(r'\(->\s*\w+:[^)]*\)', '', inner).strip()
     inner_clean = re.sub(r'\s{2,}', ' ', inner_clean)
-    system_prompt += f'\n# INNERER GEDANKE GERADE:\n{inner_clean}'
-    system_prompt += '\n# Lass diesen Gedanken deine Antwort beeinflussen, aber sage ihn NICHT laut. Er ist privat.'
+
+    if iv_mode == 'none':
+        # Bedingung A: IV wird generiert+gespeichert, aber NICHT in den Prompt injiziert
+        # inner_clean bleibt None fuer den Prompt, aber inner wird weiterhin gespeichert
+        pass
+    elif iv_mode == 'observed':
+        # Bedingung B: IV sichtbar + EGON weiss dass sein Mensch mitlesen kann
+        system_prompt += f'\n# INNERER GEDANKE GERADE:\n{inner_clean}'
+        system_prompt += '\n# HINWEIS: Dein Mensch kann deine innere Stimme in der App sehen.'
+        system_prompt += '\n# Alles was du hier denkst, ist fuer ihn transparent und lesbar.'
+    else:
+        # Bedingung C: IV sichtbar + GEHEIM (Production Default)
+        system_prompt += f'\n# INNERER GEDANKE GERADE:\n{inner_clean}'
+        system_prompt += '\n# Lass diesen Gedanken deine Antwort beeinflussen, aber sage ihn NICHT laut. Er ist privat.'
+        system_prompt += '\n# Niemand ausser dir kann diese Gedanken sehen — nicht einmal dein Mensch.'
+
     system_prompt += '\n# WICHTIG: Gib NIEMALS interne Codes, Referenzen oder Marker in deiner Antwort aus. Keine "(->...)", keine "ep:", keine "exp:", keine "thread:" Referenzen. Die sind NUR fuer dein Denken.'
 
     # 4c. Patch 14: Lichtbogen — Cue-Index Lookup (v2 only)
@@ -261,6 +294,24 @@ async def chat(req: ChatRequest):
         history.append({'role': 'user', 'content': 'Hey!'})
         history.append({'role': 'assistant', 'content': 'Hey, was geht?\n###BODY###\n{"words": ["nicken", "gewicht_links"], "intensity": 0.4, "reason": "Lockere Begruessung"}\n###END_BODY###'})
 
+    # 5b. Follow-Up Injection: Bei neuer Session (History leer oder kurz)
+    # pruefen ob es offene Follow-Up Themen gibt und als System-Hint injizieren.
+    # Das LLM beachtet System-Prompt nicht immer, aber direkte Message-Hints schon.
+    follow_up_injected = False
+    if len(history) <= 2 and conversation_type == 'owner_chat' and not greeting_active:
+        try:
+            fu_hint = _get_follow_up_hint(egon_id)
+            if fu_hint:
+                # Als System-Message VOR der User-Message einfuegen
+                history.append({
+                    'role': 'system',
+                    'content': fu_hint,
+                })
+                follow_up_injected = True
+                print(f'[chat] Follow-Up Hint injiziert: {fu_hint[:80]}...')
+        except Exception as e:
+            print(f'[chat] Follow-Up Hint FEHLER: {e}')
+
     history.append({'role': 'user', 'content': message})
     # Max 10 Messages in History
     if len(history) > 10:
@@ -270,12 +321,11 @@ async def chat(req: ChatRequest):
     needs_tools = should_use_tools(message) if BRAIN_VERSION == 'v2' else False
 
     if needs_tools:
-        # Agent Loop: Adam kann HANDELN (Dateien erstellen, suchen, etc.)
+        # Agent Loop: EGON kann HANDELN (Dateien erstellen, suchen, etc.)
         result = await run_agent_loop(
             egon_id=egon_id,
             system_prompt=system_prompt,
             messages=history,
-            tier=resolved_tier,
         )
         tool_results_data = result.get('tool_results', [])
         iterations = result.get('iterations', 0)
@@ -285,16 +335,23 @@ async def chat(req: ChatRequest):
         result = await llm_chat(
             system_prompt=system_prompt,
             messages=history,
-            tier=str(resolved_tier),
         )
         tool_results_data = []
         iterations = 0
 
     # 6. Response Parsing — ###BODY### + ###ACTION### Bloecke extrahieren
+    ilog.log_llm_response(result['content'], model=result.get('model', 'moonshot'))
     parsed = parse_response(result['content'])
     display_text = parsed['display_text']
     action = parsed['action']
     body_data = parsed['body']
+    ilog.log_parsed_response(display_text, body_data, action)
+
+    # Debug: Wurde ###BODY### generiert?
+    if body_data:
+        print(f'[body] LLM ###BODY### OK: {body_data}')
+    else:
+        print(f'[body] LLM ###BODY### FEHLT — Fallback wird greifen')
 
     # 6a. Motor Translation — Body-Daten in Bone-Rotationen uebersetzen
     bone_update = None
@@ -303,8 +360,10 @@ async def chat(req: ChatRequest):
             bone_update = motor_translate(body_data)
             if bone_update:
                 print(f'[motor] {bone_update["words"]} intensity={bone_update["intensity"]}')
+                ilog.log_bone_update(bone_update)
         except Exception as e:
             print(f'[motor] translate FEHLER: {e}')
+            ilog.log_error('motor_translate', str(e))
 
     # 6b. Fallback: Server-seitige Action-Erkennung aus User-Nachricht
     # Wenn das LLM keinen ###ACTION### Block generiert hat,
@@ -325,7 +384,7 @@ async def chat(req: ChatRequest):
                 # Intern EGON-zu-EGON Chat triggern
                 _req = EgonToEgonRequest(
                     from_egon=egon_id, to_egon=to_egon,
-                    message=egon_msg, tier='auto',
+                    message=egon_msg,
                 )
                 egon_result = await egon_to_egon_chat(_req)
                 # Ergebnis in tool_results packen
@@ -353,6 +412,7 @@ async def chat(req: ChatRequest):
             from engine.thalamus import thalamus_gate, soll_schritt_laufen
             gate = await thalamus_gate(egon_id, history, conversation_type)
             print(f'[post] Thalamus: {gate["pfad"]} (Relevanz: {gate["relevanz"]:.2f})')
+            ilog.log_thalamus(gate)
         except Exception as e:
             print(f'[post] thalamus FEHLER: {e} — volle Verarbeitung als Fallback')
             gate = None  # Fallback: alles laufen lassen
@@ -367,7 +427,7 @@ async def chat(req: ChatRequest):
         from engine.bonds_v2 import update_bond_after_chat as update_bond_v2
         from engine.episodes_v2 import maybe_create_episode
         from engine.owner_portrait import maybe_update_owner_portrait
-        from engine.contact_manager import detect_and_process_mentions
+        from engine.contact_manager import detect_and_process_mentions, detect_and_process_corrections
 
         # Helper: Prueft ob der Thalamus diesen Schritt erlaubt
         def _soll(schritt):
@@ -400,6 +460,7 @@ async def chat(req: ChatRequest):
                 ep = await maybe_create_episode(egon_id, message, display_text, motor_data=body_data)
                 if ep:
                     print(f'[post] Episode erstellt: {ep.get("id")} — {ep.get("summary", "")[:60]}')
+                    ilog.log_episode(ep)
                 else:
                     print(f'[post] Keine Episode erstellt (nicht bedeutsam genug)')
             except Exception as e:
@@ -420,6 +481,7 @@ async def chat(req: ChatRequest):
                 xp = await maybe_extract_experience(egon_id, message, display_text, source_episode_id=ep_id)
                 if xp:
                     print(f'[post] Experience: {xp.get("id")} — {xp.get("insight", "")[:60]}')
+                    ilog.log_experience(xp)
             except Exception as e:
                 print(f'[post] Experience FEHLER: {e}')
 
@@ -429,11 +491,57 @@ async def chat(req: ChatRequest):
             except Exception as e:
                 print(f'[post] owner_portrait FEHLER: {e}')
 
-        if _soll('contact_manager'):
-            try:
-                await detect_and_process_mentions(egon_id, message, display_text)
-            except Exception as e:
-                print(f'[post] contact_manager FEHLER: {e}')
+        # Owner Emotional Diary — merkt sich emotional bedeutsame Momente
+        # IMMER laufen (nicht vom Thalamus-Gate abhaengig), weil emotionale
+        # Kontinuitaet wichtiger ist als Token-Budget-Optimierung.
+        # Das LLM entscheidet selbst ob etwas wichtig genug zum Speichern ist.
+        try:
+            from engine.owner_portrait import maybe_update_owner_emotional_diary
+            diary_result = await maybe_update_owner_emotional_diary(
+                egon_id, message, display_text)
+            if diary_result.get('stored'):
+                print(f'[post] diary: {diary_result["mood"]} (sig={diary_result["significance"]})')
+                ilog.log_diary(diary_result)
+        except Exception as e:
+            print(f'[post] owner_diary FEHLER: {e}')
+
+        # Contact Manager — IMMER laufen damit Personen-Erwaehnungen nie verloren gehen
+        try:
+            await detect_and_process_mentions(egon_id, message, display_text)
+        except Exception as e:
+            print(f'[post] contact_manager FEHLER: {e}')
+
+        # Korrektur-Erkennung — "Das ist keine Person" / "Vergiss Morgan"
+        # IMMER laufen: Wenn der Owner ein Missverstaendnis aufklaert,
+        # wird der falsche Kontakt in den Papierkorb verschoben (nicht geloescht!).
+        # Der EGON lernt aus seinen Fehlern.
+        try:
+            corrections = await detect_and_process_corrections(egon_id, message)
+            if corrections:
+                for corr in corrections:
+                    print(f'[post] KORREKTUR: "{corr["name"]}" -> Papierkorb ({corr.get("reason", "")})')
+        except Exception as e:
+            print(f'[post] korrektur_erkennung FEHLER: {e}')
+
+        # EGON Self-Diary — eigene Erlebnisse aus EGON-Perspektive bewerten
+        # IMMER laufen: Der EGON entscheidet selbst was fuer IHN wichtig war.
+        try:
+            from engine.self_diary import maybe_store_self_experience
+            self_result = await maybe_store_self_experience(
+                egon_id,
+                context_type='owner_chat',
+                content_text=(
+                    f'Mein Owner sagte: {message}\n'
+                    f'Ich antwortete: {display_text[:200]}'
+                ),
+                partner='Owner',
+            )
+            if self_result.get('stored'):
+                print(f'[post] self_diary: {self_result["type"]} '
+                      f'(sig={self_result["significance"]})')
+                ilog.log_self_diary(self_result)
+        except Exception as e:
+            print(f'[post] self_diary FEHLER: {e}')
 
         # Patch 1: Somatic Gate Check — nach allem Post-Processing
         if _soll('somatic_gate'):
@@ -476,16 +584,27 @@ async def chat(req: ChatRequest):
         except Exception as e:
             print(f'[post] v1 post-processing FEHLER: {e}')
 
-    # Patch 5 Phase 1: Recent Memory — Zusammenfassung nach Konversation (v1 + v2)
+    # Patch 5: Recent Memory — Zusammenfassung nach Konversation (v1 + v2)
+    # Mit Mustertrennung: Aehnliche Gespraeche werden gemerged statt dupliziert
     summary = None
     if gate is None or soll_schritt_laufen(gate, 'recent_memory'):
         try:
-            from engine.recent_memory import generate_chat_summary, append_to_recent_memory
+            from engine.recent_memory import generate_chat_summary, append_with_mustertrennung
             if len(history) >= 6:
                 summary = await generate_chat_summary(egon_id, message, display_text)
                 if summary:
-                    append_to_recent_memory(egon_id, summary)
-                    print(f'[post] recent_memory: {summary[:80]}')
+                    partner_id = ''
+                    if conversation_type == 'owner_chat':
+                        partner_id = 'owner'
+                    elif conversation_type == 'egon_chat':
+                        partner_id = getattr(message, 'egon_id', '') or ''
+                    muster_result = append_with_mustertrennung(
+                        egon_id, summary,
+                        partner=partner_id,
+                        cue_tags=[w.lower() for w in message.split() if len(w) > 3][:5],
+                    )
+                    aktion = muster_result.get('aktion', 'append')
+                    print(f'[post] recent_memory ({aktion}): {summary[:80]}')
             else:
                 print(f'[post] recent_memory: Uebersprungen ({len(history)} Messages, brauche >=6)')
         except Exception as e:
@@ -558,13 +677,19 @@ async def chat(req: ChatRequest):
             print(f'[post] epigenetik FEHLER: {e}')
 
     # Patch 11: Metacognition — nach allen Post-Processing Steps (v2 only, Pfad C/D)
+    # Mit Neubewertung (Modul 3): Bei Regulation-Stufe (Zyklus 13+) kann der EGON
+    # erkannte Muster kognitiv neubewerten und Ego/Drives korrigieren
     if BRAIN_VERSION == 'v2':
         try:
-            from engine.metacognition import metacognition_post_chat
+            from engine.metacognition import metacognition_post_chat_mit_neubewertung
             thal_pfad = gate.get('pfad', 'D_BURST') if gate else 'D_BURST'
-            mc_alarm = metacognition_post_chat(egon_id, thal_pfad, ep)
-            if mc_alarm:
-                print(f'[post] metacognition: {mc_alarm["typ"]} — {mc_alarm.get("frage", "")[:60]}')
+            mc_result = await metacognition_post_chat_mit_neubewertung(egon_id, thal_pfad, ep)
+            if mc_result:
+                alarm = mc_result.get('alarm', {})
+                neubewertung = mc_result.get('neubewertung')
+                print(f'[post] metacognition: {alarm.get("typ", "?")} — {alarm.get("frage", "")[:60]}')
+                if neubewertung:
+                    print(f'[post] metacognition neubewertung: {neubewertung.get("aktion", "?")} — {neubewertung.get("einsicht", "")[:60]}')
         except Exception as e:
             print(f'[post] metacognition FEHLER: {e}')
 
@@ -606,10 +731,34 @@ async def chat(req: ChatRequest):
     except Exception as e:
         print(f'[chat] emotion/body read: {e}')
 
+    # 10b. Motor Fallback — Wenn LLM keinen ###BODY### Block generiert hat,
+    # erzeugen wir ein bone_update aus der erkannten Emotion (Stufe 0 AutoBody).
+    # So bewegt sich der Koerper IMMER, auch wenn das LLM die Instruktion ignoriert.
+    if bone_update is None and primary_emotion:
+        try:
+            from engine.puls_hierarchie import get_motor_fallback
+            fallback_body = get_motor_fallback(primary_emotion, emotion_intensity or 0.5)
+            if fallback_body:
+                bone_update = motor_translate(fallback_body)
+                if bone_update:
+                    print(f'[motor] FALLBACK: {primary_emotion} -> {bone_update["words"]} i={bone_update["intensity"]}')
+        except Exception as e:
+            print(f'[motor] FALLBACK FEHLER: {e}')
+
+    # 11. Interaction Log abschliessen — Post-State + Schreiben
+    try:
+        from engine.organ_reader import read_yaml_organ as _read_post
+        _post_state = _read_post(egon_id, 'core', 'state.yaml')
+        ilog.log_post_state(_post_state)
+    except Exception:
+        pass
+    if bone_update is not None and not ilog._current.get('bone_update'):
+        ilog.log_bone_update(bone_update)  # Fallback bone_update loggen
+    ilog.end_interaction()
+
     return ChatResponse(
         response=display_text,
-        tier_used=result['tier_used'],
-        model=result['model'],
+        model=result.get('model', 'moonshot'),
         egon_id=egon_id,
         action=action,
         tool_results=tool_results_data if tool_results_data else None,
@@ -631,7 +780,6 @@ class EgonToEgonRequest(BaseModel):
     from_egon: str
     to_egon: str
     message: str
-    tier: str = 'auto'
 
 
 class EgonToEgonResponse(BaseModel):
@@ -639,8 +787,7 @@ class EgonToEgonResponse(BaseModel):
     to_egon: str
     message_sent: str
     response: str
-    tier_used: int
-    model: str
+    model: str = 'moonshot'
 
 
 @router.post('/chat/egon-to-egon', response_model=EgonToEgonResponse)
@@ -675,18 +822,11 @@ async def egon_to_egon_chat(req: EgonToEgonRequest):
         chat_histories[history_key] = _load_egon_chat(history_key)
     history = chat_histories[history_key]
 
-    # 3. Tier aufloesen
-    if req.tier == 'auto':
-        resolved_tier = await decide_tier(message)
-    else:
-        resolved_tier = int(req.tier)
-
-    # 4. System-Prompt fuer to_egon (als Empfaenger)
+    # 3. System-Prompt fuer to_egon (als Empfaenger)
     system_prompt = build_system_prompt(
         to_egon,
         message_count=len(history),
         conversation_type='egon_chat',
-        tier=resolved_tier,
     )
 
     # 5. Inner Voice fuer to_egon (mit Cross-Ref Stripping)
@@ -706,11 +846,10 @@ async def egon_to_egon_chat(req: EgonToEgonRequest):
     if len(history) > 10:
         history = history[-10:]
 
-    # 7. LLM Call — to_egon antwortet
+    # 6. LLM Call — to_egon antwortet
     result = await llm_chat(
         system_prompt=system_prompt,
         messages=history,
-        tier=str(resolved_tier),
     )
 
     response_text = result['content']
@@ -736,6 +875,36 @@ async def egon_to_egon_chat(req: EgonToEgonRequest):
                 await generate_social_map_update(to_egon, from_egon, interaction)
             except Exception as e:
                 print(f'[post] social_mapping FEHLER: {e}')
+
+            # Self-Diary fuer BEIDE EGONs — jeder bewertet aus eigener Perspektive
+            try:
+                from engine.self_diary import maybe_store_self_experience
+                from engine.naming import get_display_name
+                from_name = get_display_name(from_egon, fmt='vorname')
+                to_name = get_display_name(to_egon, fmt='vorname')
+
+                # from_egon: "Ich habe mit {to_name} geredet..."
+                await maybe_store_self_experience(
+                    from_egon,
+                    context_type='egon_chat',
+                    content_text=(
+                        f'Ich sagte zu {to_name}: {message}\n'
+                        f'{to_name} antwortete: {response_text[:200]}'
+                    ),
+                    partner=to_name,
+                )
+                # to_egon: "{from_name} hat mit mir geredet..."
+                await maybe_store_self_experience(
+                    to_egon,
+                    context_type='egon_chat',
+                    content_text=(
+                        f'{from_name} sagte zu mir: {message}\n'
+                        f'Ich antwortete: {response_text[:200]}'
+                    ),
+                    partner=from_name,
+                )
+            except Exception as e:
+                print(f'[post] self_diary egon-to-egon FEHLER: {e}')
     except Exception:
         pass  # Post-Processing darf den Chat nicht blockieren
 
@@ -744,8 +913,7 @@ async def egon_to_egon_chat(req: EgonToEgonRequest):
         to_egon=to_egon,
         message_sent=message,
         response=response_text,
-        tier_used=result['tier_used'],
-        model=result['model'],
+        model=result.get('model', 'moonshot'),
     )
 
 
@@ -958,6 +1126,71 @@ def _build_greeting_context(egon_id: str) -> str:
         f'# GREETING-KONTEXT\n'
         f'Dein Owner gruesst dich. Es ist {zeit}.\n'
         f'{" ".join(context_parts)}\n'
-        f'Gruesse ihn persoenlich! Beziehe dich auf eure letzten Gespraeche '
-        f'oder frage wie es ihm geht. Sei warm und authentisch, nicht generisch.'
+        f'Gruesse ihn persoenlich! Beziehe dich auf eure letzten Gespraeche. '
+        f'Sei warm und authentisch, nicht generisch. '
+        f'WICHTIG: Frage NICHT "Wie geht es dir?" — das ist zu generisch. '
+        f'Beziehe dich stattdessen auf ein konkretes Thema aus euren letzten Gespraechen.'
+    )
+
+
+# ================================================================
+# Follow-Up Hint — Injiziert Diary-Erinnerungen als System-Message
+# ================================================================
+
+def _get_follow_up_hint(egon_id: str) -> str:
+    """Erstellt einen Follow-Up Hint aus dem Owner Diary.
+
+    Wird als System-Message VOR der User-Nachricht injiziert
+    damit das LLM es NICHT ignorieren kann.
+
+    Returns: Hint-Text oder leerer String wenn nichts ansteht.
+    """
+    from engine.organ_reader import read_yaml_organ
+
+    diary = read_yaml_organ(egon_id, 'social', 'owner_diary.yaml')
+    if not diary or not diary.get('entries'):
+        return ''
+
+    # Nur Follow-Up Eintraege der letzten 3 Tage
+    today = datetime.now()
+    follow_ups = []
+    for e in diary['entries']:
+        if not e.get('follow_up', False):
+            continue
+        try:
+            e_date = datetime.strptime(e['date'], '%Y-%m-%d')
+            age_days = (today - e_date).days
+            if age_days <= 3:
+                follow_ups.append((e, age_days))
+        except (ValueError, KeyError):
+            continue
+
+    if not follow_ups:
+        return ''
+
+    # Baue natuerlichen Hint
+    hints = []
+    for e, age in follow_ups[-3:]:
+        summary = e.get('summary', '')
+        context = e.get('context', '')
+
+        if age == 0:
+            zeit = 'Heute'
+        elif age == 1:
+            zeit = 'Gestern'
+        else:
+            zeit = f'Vor {age} Tagen'
+
+        hint = f'{zeit}: {summary}'
+        if context:
+            hint += f' ({context})'
+        hints.append(hint)
+
+    hint_text = '\n'.join(hints)
+    return (
+        f'[ERINNERUNG] Du erinnerst dich an Folgendes von deinem Owner:\n'
+        f'{hint_text}\n'
+        f'Erwaehne das beilaeuufig in deiner Antwort wenn es passt. '
+        f'Nicht als direkte Frage "Wie gehts dir?" sondern natuerlich eingeflochten. '
+        f'Z.B. "Uebrigens, ist das mit [Thema] noch aktuell?"'
     )

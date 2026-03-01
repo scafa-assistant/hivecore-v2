@@ -259,6 +259,12 @@ async def check_phase_transition(egon_id: str) -> dict | None:
 
     print(f'[circadian] {egon_id}: {current_phase} → {next_phase} ({reason}) [Profil: {profile["label"]}]')
 
+    try:
+        from engine.neuroplastizitaet import ne_emit
+        ne_emit(egon_id, 'SIGNAL', 'hypothalamus', 'ALL', label=f'Phase: {next_phase}', intensitaet=0.5, animation='glow', dauer=5.0)
+    except Exception:
+        pass
+
     # Phasenuebergang als Episode loggen (Datenpunkt fuer Studie)
     _log_phase_transition_episode(
         egon_id, current_phase, next_phase, reason, energy, profile['label'], aufwach_gedanke,
@@ -399,7 +405,6 @@ async def _generate_wakeup_thought(egon_id: str) -> str:
                 f'Neuer Tag beginnt.'
             ),
         }],
-        tier='1',
     )
     return result['content'].strip()
 

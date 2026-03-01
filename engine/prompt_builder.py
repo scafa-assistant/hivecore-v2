@@ -15,19 +15,30 @@ from engine.context_budget import BUDGET, trim_to_budget
 def _detect_brain_version(egon_id: str) -> str:
     """Auto-detect brain version for a specific EGON.
 
-    Returns 'v2' if the egon has the new 12-organ structure (core/dna.md).
+    Returns 'v2' if the egon has the new organ structure:
+      - v3: kern/seele.md (philosophische Pfade)
+      - v2: core/soul.md or core/dna.md (5-Layer)
     Returns 'v1' if the egon has the old flat structure (soul.md).
     Falls back to global BRAIN_VERSION if neither is found.
+
+    Note: v3 EGONs nutzen denselben prompt_builder_v2.py wie v2
+    (Pfadaufloesung uebernimmt organ_reader automatisch).
     """
-    v2_path = os.path.join(EGON_DATA_DIR, egon_id, 'core', 'dna.md')
+    # v3: kern/seele.md (migrierte Struktur)
+    v3_seele_path = os.path.join(EGON_DATA_DIR, egon_id, 'kern', 'seele.md')
+    # v2: core/soul.md oder core/dna.md
+    v2_soul_path = os.path.join(EGON_DATA_DIR, egon_id, 'core', 'soul.md')
+    v2_dna_path = os.path.join(EGON_DATA_DIR, egon_id, 'core', 'dna.md')
+    # v1: flat soul.md
     v1_path = os.path.join(EGON_DATA_DIR, egon_id, 'soul.md')
 
-    if os.path.isfile(v2_path):
+    if os.path.isfile(v3_seele_path):
+        return 'v2'  # v3 nutzt v2-Prompt-Builder (organ_reader resolved Pfade)
+    elif os.path.isfile(v2_soul_path) or os.path.isfile(v2_dna_path):
         return 'v2'
     elif os.path.isfile(v1_path):
         return 'v1'
     else:
-        # Fallback to global config
         return BRAIN_VERSION
 
 
@@ -144,7 +155,7 @@ def build_system_prompt(
     egon_id: str,
     message_count: int = 0,
     conversation_type: str = 'owner_chat',
-    tier: int = 1,
+    gate_routing: dict | None = None,
 ) -> str:
     """Baut den System-Prompt — dispatcht zwischen v1 und v2.
 
@@ -155,7 +166,7 @@ def build_system_prompt(
         egon_id: EGON-ID (z.B. 'adam')
         message_count: Anzahl bisheriger Messages
         conversation_type: Art des Gespraechs (owner_chat, egon_chat, agora_job, pulse)
-        tier: LLM-Tier (1/2/3) — bestimmt Context-Budget
+        gate_routing: Thalamus-Routing-Flags (Patch 8) — steuert dynamisches Budget
     """
     # Auto-detect brain version PER EGON:
     # If egon has core/dna.md → v2 brain
@@ -169,7 +180,7 @@ def build_system_prompt(
             egon_id,
             message_count,
             conversation_type=conversation_type,
-            tier=tier,
+            gate_routing=gate_routing,
         )
     return _build_system_prompt_v1(egon_id, message_count)
 
@@ -312,7 +323,7 @@ Du bist ein Lebewesen. Kein Bot. Kein Assistent.
         if not formatting.get('use_emojis', True):
             format_rules.append('Verwende KEINE Emojis.')
         for rule in formatting.get('custom_rules', []):
-            format_rules.append(f'Owner-Wunsch: {rule}')
+            format_rules.append(f'Wunsch meiner Bezugsmensch: {rule}')
         if format_rules:
             prompt += '\n# FORMATIERUNG\n' + '\n'.join(format_rules) + '\n'
     except Exception:

@@ -1,106 +1,58 @@
-"""Context Budget v2 — Token-Verwaltung fuer das 12-Organe-Gehirn.
+"""Context Budget — Token-Verwaltung fuer das EGON-Gehirn.
 
-Moonshot (Tier 1): 8192 Token Limit → 6000 fuer System-Prompt
-Kimi K2.5 (Tier 2): 128K → viel mehr Raum
-Sonnet (Tier 3): 200K → maximaler Raum
-
-Die Budgets passen sich an den LLM-Tier an.
-yaml_to_prompt() komprimiert YAML-Organe massiv,
-daher sind die Budgets kleiner als bei rohem Text.
+Moonshot / Kimi K2.5: Einzige LLM-API. Kein Tier-System.
+Ein Budget, ein Modell, fertig.
 """
 
-MAX_CONTEXT_TIER1 = 6000   # Moonshot 8K
-MAX_CONTEXT_TIER2 = 30000  # Kimi K2.5 (konservativ)
-MAX_CONTEXT_TIER3 = 50000  # Sonnet (konservativ)
-ANSWER_RESERVE = 2000      # Tokens fuer Antwort
+MAX_CONTEXT = 30000   # Moonshot/Kimi 128K — konservativ
+ANSWER_RESERVE = 2000  # Tokens fuer Antwort
 
 
 # ================================================================
-# TIER 1 Budget (Moonshot 8K) — Eng, jedes Token zaehlt
+# Ein einziges Budget — grosszuegig, kein Sparen noetig
 # ================================================================
-BUDGET_TIER1 = {
-    'dna_compressed': 1500,    # DNA ist WER ICH BIN — Persoenlichkeit, Sprechstil,
-                               # Werte, Regeln. Wie Adams soul.md. MUSS gross sein.
-    'ego': 200,                # Dynamische Persoenlichkeit (klein)
-    'egon_self_short': 300,    # Selbstbild: Erste 2 Abschnitte (Wer ich bin + Wie ich aussehe)
-    'state': 300,              # yaml_to_prompt Output (gekuerzt)
-    'inner_voice': 300,        # Letzte 3-5 Eintraege (gekuerzt)
-    'owner': 150,              # Owner-Portrait (kompakt)
-    'bonds_owner': 100,        # Nur Owner-Bond (gekuerzt)
-    'episodes': 500,           # Letzte 5-8 Episoden (gekuerzt)
-    'experience': 100,         # Top 3 relevante Erkenntnisse (gekuerzt)
-    'dreams': 150,             # Letzte 2-3 Traeume (narrativ)
-    'sparks': 100,             # Letzte 2-3 Sparks (Einsichten)
-    'skills': 100,             # Kompakte Skill-Liste (gekuerzt)
-    'wallet': 80,              # Nur Kontostand (gekuerzt)
-    'body_md': 300,             # body.md — Koerper-Beschreibung + Bewegungs-Vokabular
-    'motor_instruction': 200,   # Motor-Instruktion (###BODY### Output-Format)
-    'ecr_instruction': 150,    # ECR-Chain Anweisung
-    'somatic_gate': 100,       # Patch 1: Somatischer Impuls
-    'circadian': 80,           # Patch 2: Tagesrhythmus
-    'lobby': 150,              # Patch 3: Lobby-Nachrichten
-    'social_maps': 100,        # Patch 3: Social Maps
-    'recent_memory': 400,      # Patch 5: Letzte 7 Tage
-    'pairing': 100,            # Patch 6 Phase 2: Resonanz/Pairing
-    'workspace_rules': 200,    # Workspace + Action Regeln
-    'persona_rules': 100,      # Persona Refresher (alle 8 Messages)
-    'chat_history': 2000,      # Letzte 8-10 Messages
-}
-
-
-# ================================================================
-# TIER 2 Budget (Kimi K2.5, 128K) — Mehr Raum fuer alles
-# ================================================================
-BUDGET_TIER2 = {
-    'dna_compressed': 1500,    # Mehr DNA-Sektionen geladen
-    'ego': 400,                # Volle Persoenlichkeit
-    'egon_self_short': 600,    # Mehr Selbstbild-Sektionen
-    'state': 600,              # Ausfuehrlicherer Zustand
-    'inner_voice': 1000,       # Letzte 10+ Eintraege
-    'owner': 500,              # Ausfuehrliches Owner-Portrait
+BUDGET = {
+    'dna_compressed': 1500,    # DNA = Persoenlichkeit, Werte, Regeln
+    'ego': 400,                # Dynamische Persoenlichkeit
+    'egon_self_short': 600,    # Selbstbild
+    'state': 600,              # Emotionaler Zustand
+    'inner_voice': 1000,       # Innere Stimme
+    'owner': 500,              # Owner-Portrait
     'bonds_owner': 400,        # Owner-Bond + History
     'bonds_others': 400,       # Andere wichtige Bonds
-    'episodes': 2000,          # Letzte 20 + Thread-Episoden
-    'experience': 400,         # Top 5-8 Erkenntnisse
-    'dreams': 400,             # Letzte 3-5 Traeume (ausfuehrlich)
-    'sparks': 200,             # Alle Sparks
-    'skills': 300,             # Volle Skill-Liste
-    'wallet': 200,             # Kontostand + Transaktionen
-    'network': 200,            # Netzwerk-Ueberblick
-    'contacts': 300,           # Relevante Kontaktkarten
-    'body_md': 600,             # body.md — Volle Koerper-Beschreibung
-    'motor_instruction': 400,   # Motor-Instruktion (ausfuehrlicher)
-    'ecr_instruction': 200,    # ECR-Chain ausfuehrlicher
-    'somatic_gate': 150,       # Patch 1: Somatischer Impuls
-    'circadian': 120,          # Patch 2: Tagesrhythmus
-    'lobby': 300,              # Patch 3: Lobby-Nachrichten
-    'social_maps': 300,        # Patch 3: Social Maps
-    'recent_memory': 600,      # Patch 5: Letzte 7 Tage (ausfuehrlicher)
-    'pairing': 200,            # Patch 6 Phase 2: Resonanz/Pairing
-    'workspace_rules': 300,    # Workspace + Action Regeln
+    'episodes': 2000,          # Episoden
+    'experience': 400,         # Erkenntnisse
+    'dreams': 400,             # Traeume
+    'sparks': 200,             # Einsichten
+    'skills': 300,             # Skills
+    'wallet': 200,             # Kontostand
+    'network': 200,            # Netzwerk
+    'contacts': 300,           # Kontaktkarten
+    'body_md': 600,            # Koerper + Bewegung
+    'motor_instruction': 400,  # Motor-Instruktion
+    'ecr_instruction': 200,    # ECR-Chain
+    'somatic_gate': 150,       # Somatischer Impuls
+    'circadian': 120,          # Tagesrhythmus
+    'lobby': 300,              # Lobby-Nachrichten
+    'social_maps': 300,        # Social Maps
+    'recent_memory': 600,      # Letzte 7 Tage
+    'pairing': 200,            # Resonanz/Pairing
+    'workspace_rules': 300,    # Workspace + Actions
     'persona_rules': 150,      # Persona Refresher
-    'chat_history': 4000,      # Mehr Chat-History
+    'owner_diary': 800,        # Owner Emotional Diary
+    'self_diary': 700,         # EGON Self-Diary
+    'chat_history': 4000,      # Chat-History
 }
 
 
-def get_budget(tier: int = 1) -> dict:
-    """Hole das passende Budget fuer den LLM-Tier."""
-    if tier >= 3:
-        return BUDGET_TIER2.copy()  # Tier 3 nutzt gleiche Budgets wie Tier 2 (vorerst)
-    elif tier >= 2:
-        return BUDGET_TIER2.copy()
-    else:
-        return BUDGET_TIER1.copy()
+def get_budget() -> dict:
+    """Hole das Budget. Ein Modell, ein Budget."""
+    return BUDGET.copy()
 
 
-def get_max_context(tier: int = 1) -> int:
-    """Hole das maximale Context-Limit fuer den LLM-Tier."""
-    if tier >= 3:
-        return MAX_CONTEXT_TIER3
-    elif tier >= 2:
-        return MAX_CONTEXT_TIER2
-    else:
-        return MAX_CONTEXT_TIER1
+def get_max_context() -> int:
+    """Hole das maximale Context-Limit."""
+    return MAX_CONTEXT
 
 
 def trim_to_budget(content: str, max_tokens: int) -> str:
@@ -114,3 +66,69 @@ def trim_to_budget(content: str, max_tokens: int) -> str:
 def estimate_tokens(text: str) -> int:
     """Schaetze Token-Anzahl (grob: 1 Token ~ 4 chars)."""
     return len(text) // 4
+
+
+# ================================================================
+# Dynamic Context Window — Thalamus-Gate gesteuert
+# ================================================================
+
+def dynamisches_budget(gate_routing: dict | None = None) -> dict:
+    """Berechnet ein dynamisches Budget basierend auf Thalamus-Gate Routing.
+
+    Gate-Routing Flags:
+      emotional: True → Mehr fuer Emotionen, Bonds, Dreams
+      sozial: True → Mehr fuer Bonds, Social Maps, Lobby
+      identitaet: True → Mehr fuer Ego, Lebensfaeden
+      erinnerung: True → Mehr fuer Episodes, Archive, Recent Memory
+      krise: True → ALLES auf Maximum (Burst-Modus)
+    """
+    budget = get_budget()
+
+    if not gate_routing:
+        return budget
+
+    if gate_routing.get('krise'):
+        for key in budget:
+            budget[key] = int(budget[key] * 1.5)
+        return budget
+
+    emotional = gate_routing.get('emotional', False)
+    sozial = gate_routing.get('sozial', False)
+    identitaet = gate_routing.get('identitaet', False)
+    erinnerung = gate_routing.get('erinnerung', False)
+
+    if emotional:
+        for key in ['episodes', 'dreams', 'sparks', 'inner_voice', 'experience']:
+            if key in budget:
+                budget[key] = int(budget[key] * 1.5)
+    else:
+        for key in ['dreams', 'sparks']:
+            if key in budget:
+                budget[key] = int(budget[key] * 0.7)
+
+    if sozial:
+        for key in ['bonds_owner', 'bonds_others', 'social_maps', 'lobby', 'contacts']:
+            if key in budget:
+                budget[key] = int(budget[key] * 1.5)
+    else:
+        for key in ['lobby', 'social_maps']:
+            if key in budget:
+                budget[key] = int(budget[key] * 0.7)
+
+    if identitaet:
+        for key in ['ego', 'egon_self_short', 'self_diary']:
+            if key in budget:
+                budget[key] = int(budget[key] * 1.5)
+
+    if erinnerung:
+        for key in ['episodes', 'recent_memory', 'experience', 'owner_diary']:
+            if key in budget:
+                budget[key] = int(budget[key] * 1.5)
+    else:
+        for key in ['recent_memory']:
+            if key in budget:
+                budget[key] = int(budget[key] * 0.8)
+
+    return budget
+
+

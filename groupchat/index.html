@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>EGON Gruppenchat</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a0f;
+  --bg-card: #12121a;
+  --bg-input: #1a1a2e;
+  --text: #e0e0e0;
+  --text-dim: #888;
+  --accent: #00d4aa;
+  --border: #2a2a3e;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header */
+.header {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.header-icon {
+  width: 36px; height: 36px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: bold; color: #000;
+}
+
+.header-info h1 { font-size: 16px; font-weight: 600; }
+.header-info .subtitle { font-size: 12px; color: var(--text-dim); }
+
+.participants-bar {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.participant-dot {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: bold; color: #fff;
+  border: 2px solid var(--bg-card);
+}
+
+/* Messages */
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  scroll-behavior: smooth;
+}
+
+.message {
+  display: flex;
+  gap: 8px;
+  max-width: 85%;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.msg-egon { align-self: flex-start; }
+.msg-owner { align-self: flex-end; flex-direction: row-reverse; }
+
+.msg-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: bold; color: #fff;
+  flex-shrink: 0;
+}
+
+.msg-bubble {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 8px 12px;
+  min-width: 60px;
+}
+
+.msg-owner .msg-bubble {
+  background: #0d3a2e;
+  border-color: #1a5c47;
+}
+
+.msg-name {
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.msg-text {
+  font-size: 14px;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.msg-time {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-top: 4px;
+  text-align: right;
+}
+
+/* Typing Indicator */
+.typing-indicator {
+  display: none;
+  align-self: flex-start;
+  padding: 8px 16px;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-style: italic;
+}
+
+.typing-indicator.active { display: flex; align-items: center; gap: 8px; }
+
+.typing-dots span {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: typingBounce 1.2s infinite;
+}
+
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* Input */
+.input-area {
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.input-area input {
+  flex: 1;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 10px 16px;
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+}
+
+.input-area input:focus { border-color: var(--accent); }
+
+.input-area input::placeholder { color: var(--text-dim); }
+
+.send-btn {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  color: #000;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.2s;
+}
+
+.send-btn:hover { opacity: 0.85; }
+.send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Empty State */
+.empty-state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  font-size: 14px;
+  text-align: center;
+  padding: 40px;
+  line-height: 1.6;
+}
+
+/* Scrollbar */
+.messages::-webkit-scrollbar { width: 4px; }
+.messages::-webkit-scrollbar-track { background: transparent; }
+.messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">E</div>
+  <div class="header-info">
+    <h1>EGON Gruppenchat</h1>
+    <div class="subtitle" id="subtitle">Laden...</div>
+  </div>
+  <div class="participants-bar" id="participants-bar"></div>
+</div>
+
+<div class="messages" id="messages">
+  <div class="empty-state" id="empty-state">
+    Schreib etwas, um den Gruppenchat zu starten.<br>
+    2-3 EGONs werden antworten.
+  </div>
+</div>
+
+<div class="typing-indicator" id="typing">
+  <div class="typing-dots"><span></span><span></span><span></span></div>
+  <span id="typing-text">EGONs denken nach...</span>
+</div>
+
+<div class="input-area">
+  <input type="text" id="msg-input" placeholder="Nachricht an die Gruppe..."
+         autocomplete="off" autofocus>
+  <button class="send-btn" id="send-btn" onclick="sendMessage()">&#9654;</button>
+</div>
+
+<script>
+const API = window.location.origin + '/api';
+const POLL_INTERVAL = 2500;
+
+let lastSeenId = '';
+let participants = {};
+let isSending = false;
+let seenIds = new Set();
+
+// ============================================================
+// Init
+// ============================================================
+
+async function init() {
+  await loadParticipants();
+  await loadHistory();
+  setInterval(poll, POLL_INTERVAL);
+}
+
+async function loadParticipants() {
+  try {
+    const res = await fetch(API + '/groupchat/participants');
+    const data = await res.json();
+    for (const p of data.participants) {
+      participants[p.id] = p;
+    }
+    renderParticipants(data.participants);
+    document.getElementById('subtitle').textContent =
+      data.participants.length + ' Teilnehmer';
+  } catch (e) {
+    console.error('Participants error:', e);
+  }
+}
+
+function renderParticipants(list) {
+  const bar = document.getElementById('participants-bar');
+  bar.innerHTML = '';
+  for (const p of list) {
+    const dot = document.createElement('div');
+    dot.className = 'participant-dot';
+    dot.style.background = p.color;
+    dot.textContent = (p.name || '?')[0].toUpperCase();
+    dot.title = p.name;
+    bar.appendChild(dot);
+  }
+}
+
+async function loadHistory() {
+  try {
+    const res = await fetch(API + '/groupchat?limit=50');
+    const data = await res.json();
+    if (data.messages && data.messages.length > 0) {
+      document.getElementById('empty-state').style.display = 'none';
+      for (const msg of data.messages) {
+        appendMessage(msg);
+        lastSeenId = msg.id;
+      }
+    }
+  } catch (e) {
+    console.error('History error:', e);
+  }
+}
+
+// ============================================================
+// Polling
+// ============================================================
+
+async function poll() {
+  if (isSending) return;
+  try {
+    const url = API + '/groupchat?since_id=' + encodeURIComponent(lastSeenId) + '&limit=50';
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.messages && data.messages.length > 0) {
+      for (const msg of data.messages) {
+        appendMessage(msg);
+        lastSeenId = msg.id;
+      }
+    }
+  } catch (e) {
+    // Silently retry on next poll
+  }
+}
+
+// ============================================================
+// Send
+// ============================================================
+
+async function sendMessage() {
+  const input = document.getElementById('msg-input');
+  const text = input.value.trim();
+  if (!text || isSending) return;
+
+  input.value = '';
+  isSending = true;
+  document.getElementById('send-btn').disabled = true;
+  showTyping();
+
+  try {
+    const res = await fetch(API + '/groupchat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, user_name: 'Rene' }),
+    });
+    const data = await res.json();
+
+    hideTyping();
+
+    if (data.messages) {
+      for (const msg of data.messages) {
+        appendMessage(msg);
+        lastSeenId = msg.id;
+      }
+    }
+  } catch (e) {
+    hideTyping();
+    console.error('Send error:', e);
+  }
+
+  isSending = false;
+  document.getElementById('send-btn').disabled = false;
+  input.focus();
+}
+
+// ============================================================
+// Message Rendering
+// ============================================================
+
+function appendMessage(msg) {
+  if (seenIds.has(msg.id)) return;
+  seenIds.add(msg.id);
+
+  document.getElementById('empty-state').style.display = 'none';
+
+  const container = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'message ' + (msg.from_type === 'owner' ? 'msg-owner' : 'msg-egon');
+
+  const p = participants[msg.from_id] || {};
+  const color = p.color || '#888';
+  const initial = (msg.from_name || '?')[0].toUpperCase();
+  const time = msg.timestamp && msg.timestamp.includes('T')
+    ? msg.timestamp.split('T')[1].slice(0, 5)
+    : '';
+
+  div.innerHTML =
+    '<div class="msg-avatar" style="background:' + color + '">' + initial + '</div>' +
+    '<div class="msg-bubble">' +
+      (msg.from_type !== 'owner'
+        ? '<div class="msg-name" style="color:' + color + '">' + esc(msg.from_name) + '</div>'
+        : '') +
+      '<div class="msg-text">' + esc(msg.message) + '</div>' +
+      '<div class="msg-time">' + time + '</div>' +
+    '</div>';
+
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function esc(text) {
+  const d = document.createElement('div');
+  d.textContent = text || '';
+  return d.innerHTML;
+}
+
+// ============================================================
+// Typing Indicator
+// ============================================================
+
+function showTyping() {
+  document.getElementById('typing').classList.add('active');
+  scrollToBottom();
+}
+
+function hideTyping() {
+  document.getElementById('typing').classList.remove('active');
+}
+
+function scrollToBottom() {
+  const c = document.getElementById('messages');
+  c.scrollTop = c.scrollHeight;
+}
+
+// ============================================================
+// Keyboard
+// ============================================================
+
+document.getElementById('msg-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+// Start
+init();
+</script>
+</body>
+</html>

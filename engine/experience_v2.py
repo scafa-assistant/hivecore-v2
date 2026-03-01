@@ -98,7 +98,6 @@ async def maybe_extract_experience(
                 'role': 'user',
                 'content': f'User: {user_msg[:200]}\n{egon_name}: {egon_response[:200]}',
             }],
-            tier='1',
         )
         if 'NEIN' in check['content'].upper():
             print(f'[experience] Significance: NEIN fuer {egon_name}')
@@ -116,7 +115,6 @@ async def maybe_extract_experience(
                 'role': 'user',
                 'content': f'User: {user_msg[:300]}\n{egon_name}: {egon_response[:300]}',
             }],
-            tier='1',
         )
         content = result['content'].strip()
         json_str = _extract_json_object(content)
@@ -161,12 +159,19 @@ async def maybe_extract_experience(
 
     experiences.append(new_exp)
 
-    # Trim to max (remove lowest confidence)
+    # Intelligentes Limit: Kern-Erkenntnisse (confidence >= 0.8 ODER times_confirmed >= 3)
+    # ueberleben IMMER. Rest: niedrigste Confidence raus.
     config = exp_data.get('experience_config', DEFAULT_CONFIG)
     max_exp = config.get('max_experiences', 50)
     if len(experiences) > max_exp:
-        experiences.sort(key=lambda e: e.get('confidence', 0))
-        exp_data['experiences'] = experiences[-max_exp:]
+        kern = [e for e in experiences
+                if e.get('confidence', 0) >= 0.8 or e.get('times_confirmed', 0) >= 3]
+        rest = [e for e in experiences
+                if e.get('confidence', 0) < 0.8 and e.get('times_confirmed', 0) < 3]
+        rest.sort(key=lambda e: e.get('confidence', 0))
+        platz = max(0, max_exp - len(kern))
+        rest = rest[-platz:] if platz > 0 else []
+        exp_data['experiences'] = kern + rest
 
     write_yaml_organ(egon_id, 'memory', 'experience.yaml', exp_data)
     print(f'[experience] Neu: {new_exp["id"]} — {new_insight[:60]}')
@@ -292,7 +297,6 @@ async def generate_dream(egon_id: str) -> dict | None:
                     f'Aktuelle Gefuehle:\n{emotions_text}'
                 ),
             }],
-            tier='1',
         )
         content = result['content'].strip()
         json_str = _extract_json_object(content)
@@ -308,6 +312,30 @@ async def generate_dream(egon_id: str) -> dict | None:
     source_eps = [ep.get('id') for ep in recent_episodes[:3] if ep.get('id')]
     source_emos = [em.get('type') for em in active_emotions[:3]]
 
+    # Patch 5: Traum-Erinnerung (biologisch: 95% der Traeume werden vergessen)
+    # Berechne Erinnerungs-Score
+    emotional_intensity = 0.5
+    if active_emotions:
+        intensities = [em.get('intensity', 0) for em in active_emotions[:3]]
+        emotional_intensity = max(intensities) if intensities else 0.5
+
+    typ_bonus = {
+        'angsttraum': 0.30,        # Albtraeume bleiben haengen
+        'verarbeitungstraum': 0.10,
+        'kreativtraum': 0.15,
+    }
+
+    erinnerung_score = (
+        emotional_intensity * 0.4
+        + typ_bonus.get(dream_type, 0.10)
+    )
+
+    # DNA-Modifikator
+    state_data = read_yaml_organ(egon_id, 'core', 'state.yaml')
+    dna_profile = (state_data or {}).get('dna_profile', 'DEFAULT')
+    dna_mod = {'SEEKING/PLAY': 0.9, 'CARE/PANIC': 1.15}.get(dna_profile, 1.0)
+    erinnerung_score *= dna_mod
+
     new_dream = {
         'id': _generate_id(exp_data.get('dreams', []), 'D'),
         'date': datetime.now().strftime('%Y-%m-%d'),
@@ -318,18 +346,44 @@ async def generate_dream(egon_id: str) -> dict | None:
         'source_episodes': source_eps,
         'source_emotions': source_emos,
         'spark_potential': bool(parsed.get('spark_potential', False)),
+        'emotional_marker': round(emotional_intensity, 2),
+        'erinnerung_score': round(erinnerung_score, 2),
     }
 
+    # Patch 5: Traum-Filterung — nur erinnerte Traeume speichern
     dreams = exp_data.setdefault('dreams', [])
-    dreams.append(new_dream)
+    erinnert = erinnerung_score >= 0.55
 
-    # Trim to max
-    max_dreams = config.get('max_dreams', 30)
-    if len(dreams) > max_dreams:
-        exp_data['dreams'] = dreams[-max_dreams:]
+    if erinnert:
+        # Intelligentes Limit: Max erinnerte Traeume basierend auf Score
+        # Statt hartem Limit: Schwachster Traum weicht nur wenn neuer staerker
+        erinnerte = [d for d in dreams if d.get('erinnerung_score', 0.5) >= 0.55]
+        if len(erinnerte) >= 10:
+            schwaechster = min(erinnerte, key=lambda d: d.get('emotional_marker', 0))
+            if new_dream['emotional_marker'] > schwaechster.get('emotional_marker', 0):
+                dreams.remove(schwaechster)
+                print(f'[dream] Verdraengt: {schwaechster.get("id")} (marker {schwaechster.get("emotional_marker", 0):.2f})')
+            else:
+                erinnert = False
+                print(f'[dream] {egon_name}: Traum vergessen (10 staerkere erinnert)')
+
+    if erinnert:
+        dreams.append(new_dream)
+        # Intelligentes Limit: Spark-Traeume + hohe Marker ueberleben
+        max_dreams = config.get('max_dreams', 30)
+        if len(dreams) > max_dreams:
+            # Sortiere nach Wertigkeit: spark_potential (3x) + emotional_marker
+            dreams.sort(key=lambda d: (
+                (3.0 if d.get('spark_potential') else 1.0)
+                * d.get('emotional_marker', 0.3)
+            ))
+            exp_data['dreams'] = dreams[-max_dreams:]
+    else:
+        # Traum vergessen, aber Effekte bleiben (emotional_marker wirkt in Pulse)
+        print(f'[dream] {egon_name}: Traum vergessen (Score {erinnerung_score:.2f} < 0.55)')
 
     write_yaml_organ(egon_id, 'memory', 'experience.yaml', exp_data)
-    print(f'[dream] {egon_name} traeumt: {new_dream["id"]} ({dream_type}) — {new_dream["content"][:60]}')
+    print(f'[dream] {egon_name} traeumt: {new_dream["id"]} ({dream_type}) — erinnert: {erinnert}')
     return new_dream
 
 
@@ -422,7 +476,6 @@ async def maybe_generate_spark(egon_id: str) -> dict | None:
                     f'{dream_text}'
                 ),
             }],
-            tier='1',
         )
         content = result['content'].strip()
 
@@ -454,8 +507,11 @@ async def maybe_generate_spark(egon_id: str) -> dict | None:
     sparks = exp_data.setdefault('sparks', [])
     sparks.append(new_spark)
 
+    # Intelligentes Limit: Sparks nach Confidence x Impact gewichtet
     max_sparks = config.get('max_sparks', 20)
     if len(sparks) > max_sparks:
+        _impact_w = {'high': 3.0, 'medium': 2.0, 'low': 1.0}
+        sparks.sort(key=lambda s: s.get('confidence', 0.5) * _impact_w.get(s.get('impact', 'medium'), 2.0))
         exp_data['sparks'] = sparks[-max_sparks:]
 
     write_yaml_organ(egon_id, 'memory', 'experience.yaml', exp_data)
@@ -567,7 +623,6 @@ async def generate_mental_time_travel(egon_id: str) -> dict | None:
                     f'Erkenntnisse:\n{exp_text}'
                 ),
             }],
-            tier='1',
         )
         content = result['content'].strip()
         json_str = _extract_json_object(content)
@@ -598,8 +653,10 @@ async def generate_mental_time_travel(egon_id: str) -> dict | None:
 
     mtt_entries.append(new_mtt)
 
+    # Intelligentes Limit: MTT nach emotional_weight — emotionalste ueberleben
     max_mtt = config.get('max_mental_time_travel', 20)
     if len(mtt_entries) > max_mtt:
+        mtt_entries.sort(key=lambda m: m.get('emotional_weight', 0.5))
         exp_data['mental_time_travel'] = mtt_entries[-max_mtt:]
 
     write_yaml_organ(egon_id, 'memory', 'experience.yaml', exp_data)
@@ -636,6 +693,243 @@ def _generate_id(entries: list, prefix: str) -> str:
             if num_str.isdigit():
                 max_num = max(max_num, int(num_str))
     return f'{prefix}{max_num + 1:04d}'
+
+
+# ================================================================
+# Traum-Verblassen (Patch 5)
+# ================================================================
+
+def traum_verblassen(egon_id: str) -> dict:
+    """Verblassungs-Mechanik fuer erinnerte Traeume.
+
+    Bio-Aequivalent: Traeume verblassen natuerlich ueber die Zeit.
+
+    Pro Zyklus ohne Bezugnahme: emotional_marker *= 0.92 (8% Verblassen)
+    Pro Bezugnahme: emotional_marker *= 1.05 (5% Verstaerkung)
+    Wenn emotional_marker < 0.3: Traum wird entfernt.
+
+    Wird am Zyklusende aus pulse_v2.py aufgerufen (nach dream_generation).
+    """
+    exp_data = _load_experience_data(egon_id)
+    dreams = exp_data.get('dreams', [])
+    if not dreams:
+        return {'verblasst': 0, 'entfernt': 0}
+
+    verblasst = 0
+    entfernt_ids = []
+
+    for dream in dreams:
+        marker = dream.get('emotional_marker', 0.5)
+
+        # Bezugnahme-Check: Wurde der Traum kuerzlich referenziert?
+        # (via retrieval_count — wird von cue_index/retrieval gesetzt)
+        bezugnahme = dream.get('referenced_this_cycle', False)
+
+        if bezugnahme:
+            dream['emotional_marker'] = round(min(1.0, marker * 1.05), 3)
+            dream['referenced_this_cycle'] = False  # Reset
+        else:
+            dream['emotional_marker'] = round(marker * 0.92, 3)
+            verblasst += 1
+
+        # Unter Schwelle → vergessen
+        if dream['emotional_marker'] < 0.3:
+            entfernt_ids.append(dream.get('id'))
+
+    # Intelligentes Entfernen: Nur wirklich schwache Traeume
+    # Spark-Traeume und sehr alte Traeume mit hohem Impact behalten
+    if entfernt_ids:
+        neue_dreams = []
+        for d in dreams:
+            did = d.get('id')
+            if did in entfernt_ids:
+                # Spark-Traeume bekommen Gnadenfrist
+                if d.get('spark_potential') and d.get('emotional_marker', 0) > 0.15:
+                    neue_dreams.append(d)
+                    entfernt_ids.remove(did)
+                else:
+                    print(f'[dream] Traum verblasst: {did} (marker {d.get("emotional_marker", 0):.2f})')
+            else:
+                neue_dreams.append(d)
+        exp_data['dreams'] = neue_dreams
+
+    if verblasst > 0 or entfernt_ids:
+        write_yaml_organ(egon_id, 'memory', 'experience.yaml', exp_data)
+
+    return {
+        'verblasst': verblasst,
+        'entfernt': len(entfernt_ids),
+        'verbleibend': len(exp_data.get('dreams', [])),
+    }
+
+
+# ================================================================
+# Synaptische Skalierung — Tononi & Cirelli SHY (Patch 5)
+# ================================================================
+
+def synaptische_skalierung(egon_id: str, pulse_count: int = 1) -> dict:
+    """Globale Normalisierung nach Nacht-Pulsen.
+
+    Bio-Aequivalent: Synaptic Homeostasis Hypothesis (SHY).
+    Nach dem Schlaf werden ALLE Synapsen proportional herunterskaliert.
+    Starke Synapsen bleiben ueber der Schwelle, schwache fallen weg.
+
+    Args:
+        egon_id: Agent-ID.
+        pulse_count: Anzahl Nacht-Pulses die gelaufen sind.
+
+    Effekte:
+    1. Emotionen driften zur DNA-Baseline
+    2. Recent Memory Marker skalieren herunter (schwache vergessen)
+    """
+    state = read_yaml_organ(egon_id, 'core', 'state.yaml')
+    if not state:
+        return {'skaliert': False}
+
+    # Basis: 5% Normalisierung pro Nacht
+    basis_faktor = 0.05
+
+    # Pulse-Korrektur: Jeder Pulse reduziert Skalierung um 20%
+    # → 0 Pulse: volle 5% (ruhig → Reset)
+    # → 3 Pulse: nur 2% (intensiv → weniger Reset)
+    # → 5 Pulse: 0% (Krise → kein Reset)
+    pulse_korrektur = max(0.0, 1.0 - (pulse_count * 0.20))
+
+    # DNA-Modifikation
+    dna_profile = state.get('dna_profile', 'DEFAULT')
+    dna_mod = {
+        'SEEKING/PLAY': 1.15,   # Schnellerer Reset → "frischer Morgen"
+        'CARE/PANIC': 0.85,     # Langsamerer Reset → "Emotionen halten laenger"
+    }.get(dna_profile, 1.0)
+
+    skalierung = basis_faktor * pulse_korrektur * dna_mod
+
+    if skalierung < 0.005:
+        return {'skaliert': False, 'reason': 'pulse_korrektur_null'}
+
+    # 1. EMOTIONEN normalisieren (driften zur Baseline)
+    emotions = state.get('express', {}).get('active_emotions', [])
+    emotionen_skaliert = 0
+
+    # DNA-Baselines (Default-Werte)
+    try:
+        dna_data = read_yaml_organ(egon_id, 'core', 'dna.md')
+        if not dna_data or not isinstance(dna_data, dict):
+            dna_data = {}
+    except Exception:
+        dna_data = {}
+
+    for emo in emotions:
+        intensity = emo.get('intensity', 0.5)
+        emo_type = emo.get('type', '')
+
+        # Baseline aus DNA oder Default 0.3
+        baseline = 0.3  # Universeller Default
+
+        # Skalierung: Intensitaet driftet zur Baseline
+        new_intensity = intensity + (baseline - intensity) * skalierung
+        new_intensity = round(max(0.05, min(1.0, new_intensity)), 3)
+
+        if abs(new_intensity - intensity) > 0.001:
+            emo['intensity'] = new_intensity
+            emotionen_skaliert += 1
+
+    # Emotionen unter Mindest-Schwelle entfernen
+    # Intelligentes Entfernen: Nur wenn Intensitaet UND Alter beides niedrig
+    min_schwelle = 0.08
+    state['express']['active_emotions'] = [
+        e for e in emotions
+        if e.get('intensity', 0) >= min_schwelle
+    ]
+
+    write_yaml_organ(egon_id, 'core', 'state.yaml', state)
+
+    # 2. RECENT MEMORY Marker skalieren (schwache Erinnerungen verblassen)
+    from engine.organ_reader import read_organ, write_organ
+    import re
+
+    rm_content = read_organ(egon_id, 'skills', 'memory/recent_memory.md')
+    rm_skaliert = 0
+    rm_vergessen = 0
+
+    if rm_content:
+        blocks = rm_content.split('\n---\n')
+        neue_blocks = []
+        for block in blocks:
+            # Marker suchen/berechnen
+            marker_match = re.search(r'emotional_marker: ([\d.]+)', block)
+            if marker_match:
+                marker = float(marker_match.group(1))
+                new_marker = round(marker * (1.0 - skalierung), 3)
+                if new_marker < 0.3:
+                    # Vergessen — nur wenn status: active
+                    if 'status: active' in block:
+                        block = block.replace('status: active', 'status: vergessen')
+                        rm_vergessen += 1
+                else:
+                    block = block.replace(
+                        f'emotional_marker: {marker_match.group(1)}',
+                        f'emotional_marker: {new_marker}',
+                    )
+                    rm_skaliert += 1
+            neue_blocks.append(block)
+
+        if rm_skaliert > 0 or rm_vergessen > 0:
+            write_organ(egon_id, 'skills', 'memory/recent_memory.md', '\n---\n'.join(neue_blocks))
+
+    result = {
+        'skaliert': True,
+        'faktor': round(skalierung, 4),
+        'emotionen_skaliert': emotionen_skaliert,
+        'rm_skaliert': rm_skaliert,
+        'rm_vergessen': rm_vergessen,
+    }
+
+    print(f'[synaptisch] {egon_id}: Skalierung {skalierung:.3f} — '
+          f'{emotionen_skaliert} Emotionen, {rm_skaliert} RM-Eintraege')
+    return result
+
+
+# ================================================================
+# Prediction Error — Insight Memory Advantage (Patch 5)
+# ================================================================
+
+def berechne_prediction_error(
+    egon_id: str,
+    widerspricht_ego: bool = False,
+    person_unerwartet: bool = False,
+    erstmalig: bool = False,
+    unerwartetes_ergebnis: bool = False,
+) -> float:
+    """Berechnet den Prediction Error fuer eine Konversation.
+
+    Hoher Prediction Error → Episode wird staerker gespeichert,
+    Verarbeitungsdruck steigt, NIEMALS gemerged (Mustertrennung).
+
+    Bio-Aequivalent: Dopaminerge Prediction-Error-Signale im VTA/Striatum.
+    """
+    error = 0.0
+
+    if widerspricht_ego:
+        error += 0.4
+    if person_unerwartet:
+        error += 0.3
+    if erstmalig:
+        error += 0.2
+    if unerwartetes_ergebnis:
+        error += 0.2
+
+    error = min(1.0, error)
+
+    # DNA-Modulation
+    state = read_yaml_organ(egon_id, 'core', 'state.yaml')
+    dna_profile = state.get('dna_profile', 'DEFAULT') if state else 'DEFAULT'
+    if dna_profile == 'SEEKING/PLAY':
+        error *= 1.2  # Neugierige Agents reagieren staerker auf Ueberraschung
+    elif dna_profile == 'CARE/PANIC':
+        error *= 0.9  # Vorsichtigere Agents daempfen Ueberraschung
+
+    return round(min(1.0, error), 2)
 
 
 def _extract_json_object(text: str) -> str | None:

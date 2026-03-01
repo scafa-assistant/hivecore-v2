@@ -95,7 +95,6 @@ async def generate_inner_voice(egon_id: str, user_message: str) -> str:
     result = await llm_chat(
         system_prompt=INNER_VOICE_V2_PROMPT,
         messages=[{'role': 'user', 'content': context}],
-        tier='1',
     )
 
     thought = result['content']
@@ -153,7 +152,6 @@ async def generate_pulse_reflection(egon_id: str) -> str:
     result = await llm_chat(
         system_prompt=PULSE_REFLECTION_PROMPT,
         messages=[{'role': 'user', 'content': context}],
-        tier='1',
     )
 
     reflection = result['content']

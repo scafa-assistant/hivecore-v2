@@ -233,7 +233,6 @@ async def thalamus_scan(
         response = await llm_chat(
             system_prompt=THALAMUS_SYSTEM,
             messages=[{'role': 'user', 'content': prompt}],
-            tier='1',
             egon_id=egon_id,
         )
         text = response['content'].strip()
@@ -368,11 +367,15 @@ def validiere_thalamus_output(
 # State Update — Thalamus-Block in state.yaml
 # ================================================================
 
-def update_thalamus_state(egon_id: str, pfad: str, relevanz: float) -> None:
+def update_thalamus_state(
+    egon_id: str, pfad: str, relevanz: float,
+    routing: dict | None = None,
+) -> None:
     """Schreibt den Thalamus-Block in state.yaml.
 
-    Trackt: letzter_pfad, letzte_relevanz, pfad_historie_heute,
-    forced_burst_count_heute. Tages-Reset bei neuem Datum.
+    Trackt: letzter_pfad, letzte_relevanz, letztes_routing,
+    pfad_historie_heute, forced_burst_count_heute.
+    Tages-Reset bei neuem Datum.
     """
     state = read_yaml_organ(egon_id, 'core', 'state.yaml')
     if not state:
@@ -395,6 +398,11 @@ def update_thalamus_state(egon_id: str, pfad: str, relevanz: float) -> None:
     thalamus['letzter_pfad'] = pfad
     thalamus['letzte_relevanz'] = round(relevanz, 3)
 
+    # Patch 8: Routing-Flags speichern fuer dynamisches Budget-Priming
+    # Biologisch: Aufmerksamkeits-Priming durch letzten Kontext
+    if routing:
+        thalamus['letztes_routing'] = routing
+
     historie = thalamus.get('pfad_historie_heute', {
         'A_MINIMAL': 0, 'B_SOZIAL': 0,
         'C_EMOTIONAL': 0, 'D_BURST': 0,
@@ -409,6 +417,22 @@ def update_thalamus_state(egon_id: str, pfad: str, relevanz: float) -> None:
 
     state['thalamus'] = thalamus
     write_yaml_organ(egon_id, 'core', 'state.yaml', state)
+
+
+def get_thalamus_routing(egon_id: str) -> dict | None:
+    """Liest das letzte Thalamus-Routing aus state.yaml.
+
+    Biologisch: Aufmerksamkeits-Priming — das Gehirn startet die naechste
+    Konversation mit dem Routing-Kontext der letzten. Emotionale Gespraeche
+    primen emotionale Aufmerksamkeit, soziale primen soziale, etc.
+
+    Returns None wenn kein Routing gespeichert oder kein v2-EGON.
+    """
+    state = read_yaml_organ(egon_id, 'core', 'state.yaml')
+    if not state:
+        return None
+    thalamus = state.get('thalamus', {})
+    return thalamus.get('letztes_routing')
 
 
 # ================================================================
@@ -493,13 +517,50 @@ async def thalamus_gate(
     pfad = bestimme_pfad(gate_output, dna_profile)
     relevanz = gate_output.get('relevanz', 0.5)
 
-    # 6. State updaten
-    update_thalamus_state(egon_id, pfad, relevanz)
+    # Patch 17: Aufgewuehlte EGONs verarbeiten ALLES intensiv
+    # Wenn max_emotion > 0.75 → mindestens Pfad C
+    # Biologisch: Amygdala-Uebernahme bei hoher Erregung
+    # Ein Mensch der gerade emotional aufgewuehlt ist,
+    # verarbeitet auch "Willst du Kaffee?" auf Ebene C
+    if state and pfad in ('A_MINIMAL', 'B_SOZIAL'):
+        drives = state.get('drives', {})
+        max_emotion = max(
+            (v for v in drives.values() if isinstance(v, (int, float))),
+            default=0,
+        )
+        if max_emotion > 0.75:
+            alter_pfad = pfad
+            pfad = 'C_EMOTIONAL'
+            print(
+                f'[thalamus] {egon_id}: Pfad hochgestuft {alter_pfad} '
+                f'-> C_EMOTIONAL (max_emotion={max_emotion:.2f} > 0.75)'
+            )
+            try:
+                from engine.kalibrierung import log_decision
+                log_decision(egon_id, 'thalamus', 'emotion_floor_upgrade', {
+                    'alter_pfad': alter_pfad, 'neuer_pfad': 'C_EMOTIONAL',
+                    'max_emotion': round(max_emotion, 3), 'schwelle': 0.75,
+                })
+            except Exception:
+                pass
+
+    # 6. State updaten (mit Routing fuer naechstes Budget-Priming)
+    update_thalamus_state(
+        egon_id, pfad, relevanz,
+        routing=gate_output.get('routing'),
+    )
 
     print(
         f'[thalamus] {egon_id}: Pfad={pfad} Relevanz={relevanz:.2f} '
         f'Routing={gate_output.get("routing", {})}'
     )
+
+    try:
+        from engine.neuroplastizitaet import ne_emit
+        ne_emit(egon_id, 'SIGNAL', 'thalamus', gate_output.get('routing', {}).get('emotional') and 'amygdala' or 'praefrontal',
+                label=f'Gate: {pfad}', intensitaet=relevanz, animation='flow')
+    except Exception:
+        pass
 
     return {
         'pfad': pfad,

@@ -23,16 +23,27 @@ from engine.organ_reader import read_yaml_organ, write_yaml_organ
 from llm.router import llm_chat
 
 
-# Decay-Raten pro Klasse (pro Stunde)
+# Decay-Raten pro Klasse (pro Stunde) — v2 + v3 Schluessel
 DECAY_RATES = {
+    # v2 Schluessel
     'flash': 0.1,       # Minuten bis Stunden
     'fast': 0.002083,   # ~0.05/Tag (Stunden bis Tage)
     'slow': 0.000833,   # ~0.02/Tag (Tage bis Wochen)
     'glacial': 0.000208, # ~0.005/Tag (Wochen bis Monate, DPM-Trauer)
+    # v3 Schluessel (gleiche Raten)
+    'blitz': 0.1,
+    'schnell': 0.002083,
+    'langsam': 0.000833,
+    'glazial': 0.000208,
 }
 
 MIN_EMOTION_INTENSITY = 0.1
 MAX_ACTIVE_EMOTIONS = 5
+
+
+def _is_v3_state(state: dict) -> bool:
+    """Prueft ob ein State-Dict im v3-Format ist."""
+    return 'ueberleben' in state or 'empfindungen' in state or 'lebenskraft' in state
 
 
 # ================================================================
@@ -87,7 +98,6 @@ async def update_emotion_after_chat(egon_id: str, user_msg: str, egon_response: 
             'role': 'user',
             'content': f'User: {user_msg[:150]}\nEGON: {egon_response[:150]}',
         }],
-        tier='1',
     )
     if 'NEIN' in check['content'].upper():
         return  # Smalltalk ignorieren
@@ -101,7 +111,6 @@ async def update_emotion_after_chat(egon_id: str, user_msg: str, egon_response: 
             'role': 'user',
             'content': f'User: {user_msg[:200]}\n{egon_name}: {egon_response[:200]}',
         }],
-        tier='1',
     )
 
     content = result['content'].strip()
@@ -119,30 +128,59 @@ async def update_emotion_after_chat(egon_id: str, user_msg: str, egon_response: 
         if 'type' not in emotion or 'intensity' not in emotion:
             return
 
-        # state.yaml laden
+        # state.yaml / innenwelt.yaml laden
         state = read_yaml_organ(egon_id, 'core', 'state.yaml')
         if not state:
             return
 
-        # Express Layer: Active Emotions
-        express = state.setdefault('express', {})
-        emotions = express.setdefault('active_emotions', [])
+        v3 = _is_v3_state(state)
 
-        # Neue Emotion hinzufuegen
-        new_emotion = {
-            'type': emotion.get('type', 'unknown'),
-            'intensity': min(1.0, max(0.1, float(emotion.get('intensity', 0.5)))),
-            'cause': emotion.get('cause', ''),
-            'onset': datetime.now().strftime('%Y-%m-%d'),
-            'decay_class': emotion.get('decay_class', 'fast'),
-            'verbal_anchor': emotion.get('verbal_anchor', ''),
+        # Express / Empfindungen Layer: Aktive Emotionen
+        if v3:
+            express = state.setdefault('empfindungen', {})
+            emotions = express.setdefault('aktive_gefuehle', [])
+        else:
+            express = state.setdefault('express', {})
+            emotions = express.setdefault('active_emotions', [])
+
+        # v3 Verblassklassen-Mapping
+        decay_v3 = {
+            'flash': 'blitz', 'fast': 'schnell',
+            'slow': 'langsam', 'glacial': 'glazial',
         }
+
+        # Neue Emotion hinzufuegen (Format je nach State-Version)
+        intensity_val = min(1.0, max(0.1, float(emotion.get('intensity', 0.5))))
+        decay_raw = emotion.get('decay_class', 'fast')
+
+        if v3:
+            new_emotion = {
+                'art': emotion.get('type', 'unbekannt'),
+                'staerke': intensity_val,
+                'ursache': emotion.get('cause', ''),
+                'beginn': datetime.now().strftime('%Y-%m-%d'),
+                'verblassklasse': decay_v3.get(decay_raw, decay_raw),
+                'anker': emotion.get('verbal_anchor', ''),
+            }
+        else:
+            new_emotion = {
+                'type': emotion.get('type', 'unknown'),
+                'intensity': intensity_val,
+                'cause': emotion.get('cause', ''),
+                'onset': datetime.now().strftime('%Y-%m-%d'),
+                'decay_class': decay_raw,
+                'verbal_anchor': emotion.get('verbal_anchor', ''),
+            }
 
         emotions.append(new_emotion)
 
         # Max 5 aktive Emotionen (nach Intensitaet sortiert)
-        emotions.sort(key=lambda e: e.get('intensity', 0), reverse=True)
-        express['active_emotions'] = emotions[:MAX_ACTIVE_EMOTIONS]
+        int_key = 'staerke' if v3 else 'intensity'
+        emotions.sort(key=lambda e: e.get(int_key, 0), reverse=True)
+        if v3:
+            express['aktive_gefuehle'] = emotions[:MAX_ACTIVE_EMOTIONS]
+        else:
+            express['active_emotions'] = emotions[:MAX_ACTIVE_EMOTIONS]
 
         # Schreibe zurueck
         write_yaml_organ(egon_id, 'core', 'state.yaml', state)
@@ -159,35 +197,41 @@ def decay_emotions(egon_id: str, hours_elapsed: float = 24.0):
     """Wendet Decay auf alle aktiven Emotionen an.
 
     Wird im Pulse aufgerufen (taglich = 24 Stunden).
-
-    Decay-Klassen:
-      flash:   ~0.1/Stunde  → weg in Stunden
-      fast:    ~0.05/Tag    → weg in Tagen
-      slow:    ~0.02/Tag    → weg in Wochen
-      glacial: ~0.005/Tag   → weg in Monaten (DPM-Trauer)
+    Unterstuetzt v2 (decay_class/intensity) und v3 (verblassklasse/staerke).
     """
     state = read_yaml_organ(egon_id, 'core', 'state.yaml')
     if not state:
         return
 
-    express = state.get('express', {})
-    emotions = express.get('active_emotions', [])
+    v3 = _is_v3_state(state)
+
+    if v3:
+        express = state.get('empfindungen', {})
+        emotions = express.get('aktive_gefuehle', [])
+    else:
+        express = state.get('express', {})
+        emotions = express.get('active_emotions', [])
+
+    decay_key = 'verblassklasse' if v3 else 'decay_class'
+    int_key = 'staerke' if v3 else 'intensity'
+    default_decay = 'schnell' if v3 else 'fast'
 
     surviving = []
     for em in emotions:
-        decay_class = em.get('decay_class', 'fast')
-        rate = DECAY_RATES.get(decay_class, DECAY_RATES['fast'])
-        intensity = em.get('intensity', 0)
+        decay_class = em.get(decay_key, default_decay)
+        rate = DECAY_RATES.get(decay_class, DECAY_RATES.get('fast', 0.002083))
+        intensity = em.get(int_key, 0)
 
-        # Decay anwenden
         new_intensity = intensity - (rate * hours_elapsed)
 
         if new_intensity >= MIN_EMOTION_INTENSITY:
-            em['intensity'] = round(new_intensity, 3)
+            em[int_key] = round(new_intensity, 3)
             surviving.append(em)
-        # Else: Emotion ist verblasst
 
-    express['active_emotions'] = surviving
+    if v3:
+        express['aktive_gefuehle'] = surviving
+    else:
+        express['active_emotions'] = surviving
     write_yaml_organ(egon_id, 'core', 'state.yaml', state)
 
 
@@ -196,56 +240,58 @@ def decay_emotions(egon_id: str, hours_elapsed: float = 24.0):
 # ================================================================
 
 def update_drives_after_chat(egon_id: str, user_msg: str, egon_response: str):
-    """Passt Drives basierend auf dem Gespraechsinhalt an.
+    """Passt Drives/Lebenskraft basierend auf dem Gespraechsinhalt an.
 
-    Einfache Keyword-basierte Heuristik (kein LLM-Call noetig):
-      - Fragen → SEEKING steigt
-      - Hilfe/Fuersorge → CARE steigt
-      - Humor/Witz → PLAY steigt
-      - Bedrohung/Unsicherheit → FEAR steigt
-      - Konflikt → RAGE steigt
-      - Verlust → GRIEF steigt
+    Unterstuetzt v2 (drives: SEEKING/CARE/...) und v3 (lebenskraft: neugier/fuersorge/...).
     """
     state = read_yaml_organ(egon_id, 'core', 'state.yaml')
     if not state:
         return
 
-    drives = state.get('drives', {})
+    v3 = _is_v3_state(state)
+    drives_key = 'lebenskraft' if v3 else 'drives'
+    drives = state.get(drives_key, {})
     combined = (user_msg + ' ' + egon_response).lower()
 
-    # Keyword-basierte Adjustierung (±0.05 pro Match)
-    adjustments = {
-        'SEEKING': (['warum', 'wieso', 'wie', 'was ist', 'erklaer', 'zeig', 'lerne'], 0.05),
-        'LEARNING': (['skill', 'lernen', 'tutorial', 'ueben', 'kurs', 'bibliothek', 'skills.sh'], 0.05),
-        'CARE': (['danke', 'hilf', 'brauch', 'bitte', 'sorge', 'traurig'], 0.05),
-        'PLAY': (['haha', 'witz', 'lustig', 'spass', 'lol', 'witzig', ':)'], 0.05),
-        'FEAR': (['angst', 'unsicher', 'bedroh', 'verlier', 'gefahr'], 0.03),
-        'RAGE': (['unfair', 'wuetend', 'nervt', 'ungerecht', 'scheiss'], 0.03),
-        'GRIEF': (['verlust', 'vermiss', 'trauer', 'abschied', 'weg ist'], 0.03),
-    }
+    # Keyword-basierte Adjustierung — v2 UND v3 Drive-Namen
+    # Format: (v2_key, v3_key, keywords, delta)
+    adjustments = [
+        ('SEEKING', 'neugier',     ['warum', 'wieso', 'wie', 'was ist', 'erklaer', 'zeig', 'lerne'], 0.05),
+        ('LEARNING', 'lerndrang',  ['skill', 'lernen', 'tutorial', 'ueben', 'kurs', 'bibliothek', 'skills.sh'], 0.05),
+        ('CARE', 'fuersorge',      ['danke', 'hilf', 'brauch', 'bitte', 'sorge', 'traurig'], 0.05),
+        ('PLAY', 'spieltrieb',     ['haha', 'witz', 'lustig', 'spass', 'lol', 'witzig', ':)'], 0.05),
+        ('FEAR', 'furcht',         ['angst', 'unsicher', 'bedroh', 'verlier', 'gefahr'], 0.03),
+        ('RAGE', 'zorn',           ['unfair', 'wuetend', 'nervt', 'ungerecht', 'scheiss'], 0.03),
+        ('GRIEF', 'trauer',        ['verlust', 'vermiss', 'trauer', 'abschied', 'weg ist'], 0.03),
+    ]
 
     changed = False
-    for drive, (keywords, delta) in adjustments.items():
+    for v2_key, v3_key, keywords, delta in adjustments:
         if any(kw in combined for kw in keywords):
-            current = drives.get(drive, 0.5)
+            key = v3_key if v3 else v2_key
+            current = drives.get(key, 0.5)
             new_val = min(1.0, current + delta)
-            drives[drive] = round(new_val, 2)
+            drives[key] = round(new_val, 2)
             changed = True
 
     # Natural Regression: Alle Drives tendieren langsam zu Baseline
-    baseline = {
+    baseline_v2 = {
         'SEEKING': 0.5, 'ACTION': 0.5, 'LEARNING': 0.4, 'CARE': 0.5,
         'PLAY': 0.3, 'FEAR': 0.1, 'RAGE': 0.0, 'GRIEF': 0.0, 'LUST': 0.2,
     }
+    baseline_v3 = {
+        'neugier': 0.5, 'tatendrang': 0.5, 'lerndrang': 0.4, 'fuersorge': 0.5,
+        'spieltrieb': 0.3, 'furcht': 0.1, 'zorn': 0.0, 'trauer': 0.0, 'sehnsucht': 0.2,
+    }
+    baseline = baseline_v3 if v3 else baseline_v2
     for drive, base in baseline.items():
         current = drives.get(drive, base)
         if current != base:
-            # Langsame Regression: 5% naeher an Baseline pro Interaktion
             drives[drive] = round(current + (base - current) * 0.05, 2)
             changed = True
 
     if changed:
-        state['drives'] = drives
+        state[drives_key] = drives
         write_yaml_organ(egon_id, 'core', 'state.yaml', state)
 
 
@@ -254,49 +300,65 @@ def update_drives_after_chat(egon_id: str, user_msg: str, egon_response: str):
 # ================================================================
 
 def update_survive_thrive(egon_id: str, hours_since_last_interaction: float = 0):
-    """Aktualisiert die Survive/Thrive Schichten.
+    """Aktualisiert die Survive/Thrive (Ueberleben/Entfaltung) Schichten.
 
-    Wird im Pulse aufgerufen.
+    Wird im Pulse aufgerufen. Unterstuetzt v2 und v3 State-Formate.
     """
     state = read_yaml_organ(egon_id, 'core', 'state.yaml')
     if not state:
         return
 
-    survive = state.get('survive', {})
-    thrive = state.get('thrive', {})
+    v3 = _is_v3_state(state)
+    val_key = 'wert' if v3 else 'value'
 
-    # Energy: sinkt bei langer Inaktivitaet, steigt bei Interaktion
-    energy = survive.get('energy', {})
+    # Survive / Ueberleben
+    survive_key = 'ueberleben' if v3 else 'survive'
+    survive = state.get(survive_key, {})
+
+    energy_key = 'lebenskraft' if v3 else 'energy'
+    energy = survive.get(energy_key, {})
     if hours_since_last_interaction > 48:
-        energy['value'] = max(0.2, energy.get('value', 0.5) - 0.05)
+        energy[val_key] = max(0.2, energy.get(val_key, 0.5) - 0.05)
         energy['verbal'] = 'Schon lange nichts passiert. Werde muede.'
     elif hours_since_last_interaction < 2:
-        energy['value'] = min(0.9, energy.get('value', 0.5) + 0.05)
+        energy[val_key] = min(0.9, energy.get(val_key, 0.5) + 0.05)
         energy['verbal'] = 'Aktiv. Gut drauf.'
+    survive[energy_key] = energy
+
+    # Thrive / Entfaltung
+    thrive_key = 'entfaltung' if v3 else 'thrive'
+    thrive = state.get(thrive_key, {})
 
     # Mood: Durchschnitt der aktiven Emotions-Intensitaeten
-    express = state.get('express', {})
-    emotions = express.get('active_emotions', [])
+    if v3:
+        express = state.get('empfindungen', {})
+        emotions = express.get('aktive_gefuehle', [])
+    else:
+        express = state.get('express', {})
+        emotions = express.get('active_emotions', [])
+
+    type_key = 'art' if v3 else 'type'
+    int_key = 'staerke' if v3 else 'intensity'
+
     if emotions:
-        # Positive Emotionen erhoehen Mood, negative senken
         positive_types = {'joy', 'trust', 'pride', 'gratitude', 'warmth', 'excitement', 'relief', 'curiosity'}
         negative_types = {'fear', 'anger', 'sadness', 'disgust', 'shame', 'frustration', 'loneliness', 'anxiety'}
 
         mood_delta = 0
         for em in emotions:
-            etype = em.get('type', '')
-            intensity = em.get('intensity', 0)
+            etype = em.get(type_key, '')
+            intensity = em.get(int_key, 0)
             if etype in positive_types:
                 mood_delta += intensity * 0.1
             elif etype in negative_types:
                 mood_delta -= intensity * 0.1
 
-        mood = thrive.get('mood', {})
-        current_mood = mood.get('value', 0.5)
+        mood_field = 'grundstimmung' if v3 else 'mood'
+        mood = thrive.get(mood_field, {})
+        current_mood = mood.get(val_key, 0.5)
         new_mood = max(0.1, min(0.9, current_mood + mood_delta))
-        mood['value'] = round(new_mood, 2)
+        mood[val_key] = round(new_mood, 2)
 
-        # Verbal Anchor fuer Mood
         if new_mood >= 0.7:
             mood['verbal'] = 'Mir geht es gut. Wirklich.'
         elif new_mood >= 0.5:
@@ -305,21 +367,33 @@ def update_survive_thrive(egon_id: str, hours_since_last_interaction: float = 0)
             mood['verbal'] = 'Nicht mein bester Tag.'
         else:
             mood['verbal'] = 'Mir geht es nicht gut.'
-        thrive['mood'] = mood
+        thrive[mood_field] = mood
 
-    # Emotional Gravity: Update Interpretation Bias
-    gravity = state.get('emotional_gravity', {})
-    mood_val = thrive.get('mood', {}).get('value', 0.5)
-    trust_val = thrive.get('trust_owner', {}).get('value', 0.5)
-
-    if mood_val > 0.6 and trust_val > 0.6:
-        gravity['interpretation_bias'] = 'positive'
-    elif mood_val < 0.4 or trust_val < 0.3:
-        gravity['interpretation_bias'] = 'negative'
+    # Emotional Gravity / Schwerkraft
+    if v3:
+        empf = state.get('empfindungen', {})
+        gravity = empf.get('schwerkraft', {})
     else:
-        gravity['interpretation_bias'] = 'neutral'
+        gravity = state.get('emotional_gravity', {})
 
-    state['emotional_gravity'] = gravity
-    state['survive'] = survive
-    state['thrive'] = thrive
+    trust_field = 'vertrauen' if v3 else 'trust_owner'
+    mood_field = 'grundstimmung' if v3 else 'mood'
+    mood_val = thrive.get(mood_field, {}).get(val_key, 0.5)
+    trust_val = thrive.get(trust_field, {}).get(val_key, 0.5)
+
+    bias_key = 'deutungstendenz' if v3 else 'interpretation_bias'
+    if mood_val > 0.6 and trust_val > 0.6:
+        gravity[bias_key] = 'positive'
+    elif mood_val < 0.4 or trust_val < 0.3:
+        gravity[bias_key] = 'negative'
+    else:
+        gravity[bias_key] = 'neutral'
+
+    if v3:
+        empf = state.setdefault('empfindungen', {})
+        empf['schwerkraft'] = gravity
+    else:
+        state['emotional_gravity'] = gravity
+    state[survive_key] = survive
+    state[thrive_key] = thrive
     write_yaml_organ(egon_id, 'core', 'state.yaml', state)

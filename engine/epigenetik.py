@@ -205,7 +205,6 @@ async def extrahiere_praegungen(
                     system=system,
                 ),
                 messages=[{'role': 'user', 'content': 'Destilliere die Praegung.'}],
-                tier='2',
                 egon_id=egon_id,
             )
 
@@ -279,7 +278,28 @@ def kombiniere_praegungen(
 
     Keine Duplikate. Staerkere dominieren.
     Bei Ueberschneidung: +0.05 Bonus, quelle_elternteil='beide'.
+
+    Patch 10 Transgenerationale Filter:
+    - Nur Praegungen mit status 'verinnerlicht' werden weitergegeben
+    - 'ueberwunden', 'geerbt' (nicht verinnerlicht), 'ruhend' → NICHT vererbt
+    - Eigene Praegungen (nicht geerbte) werden immer weitergegeben
     """
+    # Transgenerationale Filter: Geerbte Praegungen muessen verinnerlicht sein
+    def _ist_vererbbar(p: dict) -> bool:
+        status = p.get('status', 'eigen')
+        quelle = p.get('quelle', 'eigen')
+        # Eigene Praegungen: Immer vererbbar
+        if quelle == 'eigen' or status == 'eigen':
+            return True
+        # Geerbte: Nur wenn verinnerlicht
+        if status == 'verinnerlicht':
+            return True
+        # ueberwunden, geerbt (nicht verinnerlicht), ruhend → NICHT vererben
+        return False
+
+    praeg_mutter = [p for p in praeg_mutter if _ist_vererbbar(p)]
+    praeg_vater = [p for p in praeg_vater if _ist_vererbbar(p)]
+
     for p in praeg_mutter:
         p['quelle_elternteil'] = 'mutter'
     for p in praeg_vater:
@@ -367,13 +387,29 @@ def berechne_attachment_modifikator(
     care_b = drives_b.get('CARE', 0.3) if isinstance(drives_b.get('CARE'), (int, float)) else 0.3
     care_avg = (care_a + care_b) / 2
 
+    # Patch 10: Konflikt-Malus — elterliche Konflikte reduzieren Grundsicherheit
+    # -0.08 pro Konflikt im letzten Zyklus, max -0.30
+    konflikt_malus = 0.0
+    if bonds_a:
+        for bond in bonds_a.get('bonds', []):
+            if bond.get('id') == parent_b_id or bond.get('name', '') == parent_b_id:
+                konflikte = bond.get('konflikte_letzter_zyklus', 0)
+                if not isinstance(konflikte, (int, float)):
+                    konflikte = 0
+                konflikt_malus = min(konflikte * 0.08, 0.30)
+                break
+
     # Berechnung
     attachment = (
         bond_staerke * 0.40
         + stabilitaet * 0.25
         + care_avg * 0.20
         + 0.15  # Basis-Sicherheit
-    )
+    ) - konflikt_malus
+
+    if konflikt_malus > 0:
+        print(f'[epigenetik] Konflikt-Malus: {konflikt_malus:.2f} '
+              f'({parent_a_id} x {parent_b_id})')
 
     return round(max(0.05, min(1.0, attachment)), 3)
 
@@ -549,6 +585,12 @@ def praegung_update(egon_id: str, episode: dict) -> list[dict]:
         epi['praegungen'] = praegungen
         state['epigenetik'] = epi
         write_yaml_organ(egon_id, 'core', 'state.yaml', state)
+
+        try:
+            from engine.neuroplastizitaet import ne_emit
+            ne_emit(egon_id, 'STRUKTUR_NEU', 'amygdala', 'hippocampus', label='Prägung aktualisiert', intensitaet=0.6, animation='flash')
+        except Exception:
+            pass
 
     return updates
 
