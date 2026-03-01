@@ -101,6 +101,12 @@ _DRIVE_V3_TO_V2 = {
 }
 _DRIVE_V2_TO_V3 = {v: k for k, v in _DRIVE_V3_TO_V2.items()}
 
+# Reverse-Mappings fuer Write-Back (v2 → v3)
+_SURVIVE_V2_TO_V3 = {}  # wird unten befuellt
+_THRIVE_V2_TO_V3 = {}   # wird unten befuellt
+_EMOTION_V2_TO_V3 = {}  # wird unten befuellt
+_DECAY_V2_TO_V3 = {}    # wird unten befuellt
+
 # Survive-Mapping: v3 → v2
 _SURVIVE_MAP = {
     'lebenskraft': 'energy', 'geborgenheit': 'safety', 'innerer_zusammenhalt': 'coherence',
@@ -122,6 +128,13 @@ _EMOTION_FIELD_MAP = {
 _DECAY_V3_TO_V2 = {
     'blitz': 'flash', 'schnell': 'fast', 'langsam': 'slow', 'glazial': 'glacial',
 }
+
+
+# Reverse-Mappings befuellen (nach Definition der Forward-Mappings)
+_SURVIVE_V2_TO_V3.update({v: k for k, v in _SURVIVE_MAP.items()})
+_THRIVE_V2_TO_V3.update({v: k for k, v in _THRIVE_MAP.items()})
+_EMOTION_V2_TO_V3.update({v: k for k, v in _EMOTION_FIELD_MAP.items()})
+_DECAY_V2_TO_V3.update({v: k for k, v in _DECAY_V3_TO_V2.items()})
 
 
 def _normalize_v3_state(state: dict) -> dict:
@@ -243,6 +256,119 @@ def _normalize_v3_state(state: dict) -> dict:
             state['self_assessment'] = {'verbal': sb.get('verbal', '')}
         elif isinstance(sb, str):
             state['self_assessment'] = {'verbal': sb}
+
+    return state
+
+
+def _strip_v2_aliases(state: dict) -> dict:
+    """Entfernt v2-Alias-Keys und schreibt Aenderungen zurueck in v3-Keys.
+
+    Wird vor dem Schreiben aufgerufen, damit NUR v3-Keys in der Datei landen.
+    Die Engine modifiziert v2-Keys (drives, survive, thrive, express) —
+    diese Aenderungen muessen zurueck in die v3-Struktur fliessen.
+
+    WICHTIG: Arbeitet auf einer KOPIE des State — das Original bleibt intakt,
+    damit Engine-Code nach dem Write weiter mit v2-Keys arbeiten kann.
+    """
+    import copy
+    state = copy.deepcopy(state)
+
+    is_v3 = ('ueberleben' in state or 'empfindungen' in state
+             or 'lebenskraft' in state or 'entfaltung' in state)
+    if not is_v3:
+        return state
+
+    # --- drives → lebenskraft ---
+    if 'drives' in state:
+        drives = state['drives']
+        lk = state.setdefault('lebenskraft', {})
+        if isinstance(drives, dict) and isinstance(lk, dict):
+            for v2_key, v3_key in _DRIVE_V2_TO_V3.items():
+                if v2_key in drives:
+                    lk[v3_key] = drives[v2_key]
+        del state['drives']
+
+    # --- survive → ueberleben ---
+    if 'survive' in state:
+        survive = state['survive']
+        ub = state.setdefault('ueberleben', {})
+        if isinstance(survive, dict) and isinstance(ub, dict):
+            for v2_key, v3_key in _SURVIVE_V2_TO_V3.items():
+                if v2_key in survive:
+                    sub = survive[v2_key]
+                    if isinstance(sub, dict):
+                        ub.setdefault(v3_key, {})
+                        ub[v3_key]['wert'] = sub.get('value', 0.5)
+                        if 'verbal' in sub:
+                            ub[v3_key]['verbal'] = sub['verbal']
+        del state['survive']
+
+    # --- thrive → entfaltung ---
+    if 'thrive' in state:
+        thrive = state['thrive']
+        ent = state.setdefault('entfaltung', {})
+        if isinstance(thrive, dict) and isinstance(ent, dict):
+            for v2_key, v3_key in _THRIVE_V2_TO_V3.items():
+                if v2_key in thrive:
+                    sub = thrive[v2_key]
+                    if isinstance(sub, dict):
+                        ent.setdefault(v3_key, {})
+                        ent[v3_key]['wert'] = sub.get('value', 0.5)
+                        if 'verbal' in sub:
+                            ent[v3_key]['verbal'] = sub['verbal']
+        del state['thrive']
+
+    # --- express → empfindungen ---
+    if 'express' in state:
+        express = state['express']
+        emp = state.setdefault('empfindungen', {})
+        if isinstance(express, dict) and isinstance(emp, dict):
+            emotions = express.get('active_emotions', [])
+            if isinstance(emotions, list):
+                gefuehle = []
+                for emo in emotions:
+                    if isinstance(emo, dict):
+                        g = {}
+                        for v2_f, v3_f in _EMOTION_V2_TO_V3.items():
+                            if v2_f in emo:
+                                val = emo[v2_f]
+                                if v2_f == 'decay_class' and val in _DECAY_V2_TO_V3:
+                                    val = _DECAY_V2_TO_V3[val]
+                                g[v3_f] = val
+                        # Felder die nicht im Mapping sind beibehalten
+                        for k, v in emo.items():
+                            if k not in _EMOTION_V2_TO_V3 and k not in g:
+                                g[k] = v
+                        gefuehle.append(g)
+                emp['aktive_gefuehle'] = gefuehle
+        del state['express']
+
+    # --- emotional_gravity → empfindungen.schwerkraft ---
+    if 'emotional_gravity' in state:
+        eg = state['emotional_gravity']
+        emp = state.setdefault('empfindungen', {})
+        if isinstance(eg, dict) and isinstance(emp, dict):
+            emp['schwerkraft'] = {
+                'grundstimmung': eg.get('baseline_mood', 0.5),
+                'deutungstendenz': eg.get('bias', 'neutral'),
+            }
+        del state['emotional_gravity']
+
+    # --- dna_profile → dna_profil ---
+    if 'dna_profile' in state:
+        state['dna_profil'] = state.pop('dna_profile')
+
+    # --- self_assessment → selbstbild ---
+    if 'self_assessment' in state:
+        sa = state.pop('self_assessment')
+        if isinstance(sa, dict):
+            sb = state.get('selbstbild')
+            if isinstance(sb, dict):
+                sb['verbal'] = sa.get('verbal', sb.get('verbal', ''))
+            elif isinstance(sb, str):
+                state['selbstbild'] = sa.get('verbal', sb)
+            else:
+                state['selbstbild'] = sa
 
     return state
 
@@ -451,6 +577,10 @@ def write_yaml_organ(egon_id: str, layer: str, filename: str, data: dict) -> Non
                     return
         except ImportError:
             pass
+
+    # v3: Strip v2-Alias-Keys vor dem Schreiben (arbeitet auf Kopie)
+    if _is_state_file(layer, filename) and _is_v3(egon_id):
+        data = _strip_v2_aliases(data)
 
     # Atomarer Write via Temp-Datei + Rename
     temp_path = path.with_suffix('.yaml.tmp')

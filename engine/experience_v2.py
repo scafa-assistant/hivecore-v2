@@ -959,7 +959,7 @@ def synaptische_skalierung(egon_id: str, pulse_count: int = 1) -> dict:
     # Emotionen unter Mindest-Schwelle entfernen
     # Intelligentes Entfernen: Nur wenn Intensitaet UND Alter beides niedrig
     min_schwelle = 0.08
-    state['express']['active_emotions'] = [
+    state.setdefault('express', {})['active_emotions'] = [
         e for e in emotions
         if e.get('intensity', 0) >= min_schwelle
     ]

@@ -24,6 +24,7 @@ from api.voice import router as voice_router
 from api.lobby import router as lobby_router
 from api.brain import router as brain_router
 from api.groupchat import router as groupchat_router
+from api.admin import router as admin_router
 from scheduler import scheduler
 from config import EGON_DATA_DIR, WEB3AUTH_CLIENT_ID
 
@@ -35,6 +36,7 @@ from config import EGON_DATA_DIR, WEB3AUTH_CLIENT_ID
 def _discover_egons() -> list[str]:
     """Findet alle EGON-IDs im egons/ Verzeichnis.
 
+    v3-EGONs haben ein kern/ Unterverzeichnis.
     v2-EGONs haben ein core/ Unterverzeichnis.
     v1-EGONs haben eine soul.md Datei.
     Symlinks werden bevorzugt (adam_001 -> adam → nur adam_001 listen).
@@ -60,8 +62,8 @@ def _discover_egons() -> list[str]:
         # (z.B. 'adam' ueberspringen weil 'adam_001 -> adam' existiert)
         if not d.is_symlink() and d.name in symlink_targets:
             continue
-        # v2: core/ vorhanden ODER v1: soul.md vorhanden
-        if (d / 'core').exists() or (d / 'soul.md').exists():
+        # v3: kern/ ODER v2: core/ ODER v1: soul.md
+        if (d / 'kern').exists() or (d / 'core').exists() or (d / 'soul.md').exists():
             found.add(d.name)
 
     return sorted(found)
@@ -69,7 +71,10 @@ def _discover_egons() -> list[str]:
 
 def _ensure_workspace(egon_id: str):
     """Erstelle Workspace-Ordner fuer einen EGON falls nicht vorhanden."""
-    base = Path(EGON_DATA_DIR) / egon_id / 'workspace'
+    egon_base = Path(EGON_DATA_DIR) / egon_id
+    # v3: werkraum/, v2: workspace/
+    ws_name = 'werkraum' if (egon_base / 'kern').exists() else 'workspace'
+    base = egon_base / ws_name
     for subdir in ['projects', 'www', 'files', 'tmp']:
         (base / subdir).mkdir(parents=True, exist_ok=True)
 
@@ -114,6 +119,7 @@ app.include_router(voice_router, prefix='/api')
 app.include_router(lobby_router, prefix='/api')
 app.include_router(brain_router, prefix='/api')
 app.include_router(groupchat_router, prefix='/api')
+app.include_router(admin_router, prefix='/api')
 
 # Static Files: APK Download
 Path('static').mkdir(parents=True, exist_ok=True)

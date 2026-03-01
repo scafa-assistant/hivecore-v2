@@ -49,7 +49,7 @@ def _read_iv_mode():
     # Neues 3-Modi-File
     mode_file = os.path.join(base_dir, '.iv_experiment_mode')
     if os.path.isfile(mode_file):
-        with open(mode_file) as f:
+        with open(mode_file, encoding='utf-8') as f:
             mode = f.read().strip().lower()
             if mode in ('none', 'observed', 'private'):
                 return mode

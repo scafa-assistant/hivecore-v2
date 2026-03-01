@@ -396,8 +396,12 @@ def auto_repair(state_dict, fehler_liste):
 
         # --- Fehlende Drives (ganzes dict) ---
         elif fehler == 'FEHLT: drives':
-            state_dict['drives'] = dict(defaults)
-            reparaturen.append('REPARIERT: drives komplett aus DNA-Baseline')
+            # v3: Nicht reparieren wenn lebenskraft vorhanden (Normalisierung fehlt)
+            if 'lebenskraft' in state_dict:
+                reparaturen.append('SKIP: drives fehlt aber lebenskraft vorhanden (v3)')
+            else:
+                state_dict['drives'] = dict(defaults)
+                reparaturen.append('REPARIERT: drives komplett aus DNA-Baseline')
 
         # --- Drive-Werte ausserhalb Range → Clamping ---
         elif fehler.startswith('RANGE: drives.'):
@@ -456,35 +460,49 @@ def auto_repair(state_dict, fehler_liste):
 
         # --- Fehlende Survive/Thrive als ganzes dict ---
         elif fehler == 'FEHLT: survive':
-            state_dict['survive'] = {
-                'energy':    {'value': 0.50, 'verbal': 'neutral'},
-                'safety':    {'value': 0.60, 'verbal': 'stabil'},
-                'coherence': {'value': 0.50, 'verbal': 'neutral'},
-            }
-            reparaturen.append('REPARIERT: survive komplett aus Defaults')
+            if 'ueberleben' in state_dict:
+                reparaturen.append('SKIP: survive fehlt aber ueberleben vorhanden (v3)')
+            else:
+                state_dict['survive'] = {
+                    'energy':    {'value': 0.50, 'verbal': 'neutral'},
+                    'safety':    {'value': 0.60, 'verbal': 'stabil'},
+                    'coherence': {'value': 0.50, 'verbal': 'neutral'},
+                }
+                reparaturen.append('REPARIERT: survive komplett aus Defaults')
 
         elif fehler == 'FEHLT: thrive':
-            state_dict['thrive'] = {
-                'belonging':   {'value': 0.40, 'verbal': 'suchend'},
-                'trust_owner': {'value': 0.50, 'verbal': 'neutral'},
-                'mood':        {'value': 0.50, 'verbal': 'neutral'},
-                'purpose':     {'value': 0.50, 'verbal': 'unklar'},
-            }
-            reparaturen.append('REPARIERT: thrive komplett aus Defaults')
+            if 'entfaltung' in state_dict:
+                reparaturen.append('SKIP: thrive fehlt aber entfaltung vorhanden (v3)')
+            else:
+                state_dict['thrive'] = {
+                    'belonging':   {'value': 0.40, 'verbal': 'suchend'},
+                    'trust_owner': {'value': 0.50, 'verbal': 'neutral'},
+                    'mood':        {'value': 0.50, 'verbal': 'neutral'},
+                    'purpose':     {'value': 0.50, 'verbal': 'unklar'},
+                }
+                reparaturen.append('REPARIERT: thrive komplett aus Defaults')
 
         # --- Fehlende Express → leere Emotionsliste ---
         elif fehler == 'FEHLT: express':
-            state_dict['express'] = {'active_emotions': []}
-            reparaturen.append('REPARIERT: express = leere Emotionsliste')
+            if 'empfindungen' in state_dict:
+                reparaturen.append('SKIP: express fehlt aber empfindungen vorhanden (v3)')
+            else:
+                state_dict['express'] = {'active_emotions': []}
+                reparaturen.append('REPARIERT: express = leere Emotionsliste')
 
         elif 'active_emotions' in fehler and 'FEHLT' in fehler:
             state_dict.setdefault('express', {})['active_emotions'] = []
             reparaturen.append('REPARIERT: express.active_emotions = []')
 
-        # --- Fehlender dna_profile → DEFAULT ---
+        # --- Fehlender dna_profile → DEFAULT (oder v3-Alias) ---
         elif fehler == 'FEHLT: dna_profile':
-            state_dict['dna_profile'] = 'DEFAULT'
-            reparaturen.append('REPARIERT: dna_profile = DEFAULT')
+            if 'dna_profil' in state_dict:
+                state_dict['dna_profile'] = state_dict['dna_profil']
+                reparaturen.append(
+                    f'REPARIERT: dna_profile = dna_profil ({state_dict["dna_profil"]})')
+            else:
+                state_dict['dna_profile'] = 'DEFAULT'
+                reparaturen.append('REPARIERT: dna_profile = DEFAULT')
 
         # --- Fehlender geschlecht → kann nicht repariert werden ---
         # (bleibt in der Fehlerliste)

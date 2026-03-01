@@ -297,6 +297,36 @@ def count_interactions(date: Optional[str] = None) -> dict:
     return counts
 
 
+def log_heartbeat(egon_id: str, drives: Optional[dict] = None,
+                  emotions: Optional[list] = None,
+                  phase: str = 'unknown') -> None:
+    """Loggt einen Heartbeat — auch wenn der EGON schweigt.
+
+    Wird vom Scheduler aufgerufen. Schweigen IST ein Datenpunkt.
+    """
+    record = {
+        'timestamp': datetime.now(timezone.utc).isoformat(),
+        'egon_id': egon_id,
+        'conversation_type': 'heartbeat',
+        'phase': phase,
+    }
+
+    if drives:
+        record['drives'] = {k: round(v, 3) if isinstance(v, (int, float)) else v
+                            for k, v in drives.items()}
+    if emotions:
+        record['emotions'] = emotions[:3]
+
+    today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+    log_file = _LOG_DIR / f'{today}.jsonl'
+
+    try:
+        with open(log_file, 'a', encoding='utf-8') as f:
+            f.write(json.dumps(record, ensure_ascii=False, separators=(',', ':')) + '\n')
+    except Exception as e:
+        print(f'[interaction_log] Heartbeat-FEHLER: {e}')
+
+
 def read_interactions(date: str, egon_id: Optional[str] = None,
                       limit: int = 100) -> list[dict]:
     """Liest Interaktionen fuer ein Datum (optional gefiltert nach EGON)."""

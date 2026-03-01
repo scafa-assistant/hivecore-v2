@@ -459,6 +459,28 @@ async def chat(req: ChatRequest):
     message = req.message
     conversation_type = req.conversation_type
 
+    # Kill Switch Check
+    try:
+        from engine.organ_reader import read_yaml_organ as _read_ks
+        _ks_state = _read_ks(egon_id, 'core', 'state.yaml')
+        if _ks_state and _ks_state.get('deaktiviert'):
+            raise HTTPException(status_code=503, detail=f'EGON {egon_id} ist deaktiviert.')
+    except HTTPException:
+        raise
+    except Exception:
+        pass
+
+    # Rate Limit Check
+    try:
+        from engine.rate_limiter import check_rate_limit, increment
+        if not check_rate_limit(egon_id, 'chat'):
+            raise HTTPException(status_code=429, detail=f'Rate limit erreicht fuer {egon_id}.')
+        increment(egon_id, 'chat')
+    except HTTPException:
+        raise
+    except Exception:
+        pass
+
     # 0. Interaction Log starten
     ilog.begin_interaction(egon_id, message, user_name=req.user_name if hasattr(req, 'user_name') else 'owner',
                            conversation_type=conversation_type)
